@@ -21,6 +21,6 @@ class Zoo:
                 continue
             with open(os.path.join(codes_dir, codeymlfname), 'r') as f:
                 logger.info(f"Adding code from YAML file ‘{codeymlfname}’ ...")
-                self.collection.add_code( code.Code( yaml.load(f, Loader=yaml.CLoader) ) )
+                self.collection.add_code( code.Code( yaml.safe_load(f) ) )
 
         self.collection.finish()

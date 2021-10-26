@@ -18,11 +18,7 @@
   <span class="na">(no parents to show)</span>
 {% endif %}
 {% for parent in code.relations.parents %}
-  <span class="code-parent-1-code">{{ parent.code | code_ref }}</span>
-  {% if parent.detail %}
-      <span class="code-parent-1-detail">({{parent.detail}})</span>
-  {% endif %}
-  {{ ", " if not loop.last else "" }}
+  <span class="code-parent-1-code">{{ parent.code | code_ref }}</span>{% if parent.detail %} <span class="code-parent-1-detail">({{parent.detail}})</span>{% endif %}{{ ", " if not loop.last else "" }}
 {% endfor %}
 </dd>
 
@@ -30,11 +26,7 @@
 <dt>Parent Of</dt>
 <dd class="code-parent-of">
 {% for child in code.relations.parent_of %}
-  <span class="code-parent-of-1-code">{{ child.code | code_ref }}</span>
-  {% if child.detail %}
-    <span class="code-parent-of-1-detail">({{child.detail}})</span>
-  {% endif %}
-  {{ ", " if not loop.last else "" }}
+  <span class="code-parent-of-1-code">{{ child.code | code_ref }}</span>{% if child.detail %} <span class="code-parent-of-1-detail">({{child.detail}})</span>{% endif %}{{ ", " if not loop.last else "" }}
 {% endfor %}
 </dd>
 {% endif %}
@@ -45,11 +37,7 @@
   <span class="na">(no cousins to show)</span>
 {% endif %}
 {% for cousin in code.relations.cousins %}
-  <span class="code-cousin-1-code">{{ cousin.code | code_ref }}</span>
-  {% if cousin.detail %}
-      <span class="code-cousin-1-detail">({{cousin.detail}})</span>
-  {% endif %}
-  {{ ", " if not loop.last else "" }}
+  <span class="code-cousin-1-code">{{ cousin.code | code_ref }}</span>{% if cousin.detail %} <span class="code-cousin-1-detail">({{cousin.detail}})</span>{% endif %}{{ ", " if not loop.last else "" }}
 {% endfor %}
 </dd>
 
@@ -57,11 +45,7 @@
 <dt>Cousin Of</dt>
 <dd class="code-cousin-of">
 {% for cousin in code.relations.cousin_of %}
-  <span class="code-cousin-of-1-code">{{ cousin.code | code_ref }}</span>
-  {% if cousin.detail %}
-    <span class="code-cousin-of-1-detail">({{cousin.detail}})</span>
-  {% endif %}
-  {{ ", " if not loop.last else "" }}
+  <span class="code-cousin-of-1-code">{{ cousin.code | code_ref }}</span>{% if cousin.detail %} <span class="code-cousin-of-1-detail">({{cousin.detail}})</span>{% endif %}{{ ", " if not loop.last else "" }}
 {% endfor %}
 {% endif %}
 </dl>
