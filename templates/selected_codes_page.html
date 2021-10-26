@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>Error correction zoo</title>
+  <link type="text/css" rel="stylesheet" href="main.css" />
+  <script type="text/javascript" async
+	  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+  </script>
+</head>
+<body>
+<div id="wrap">
+  <div id="header">
+    <h1>Error correction zoo: qubits into qubits</h1>
+  </div>
+  <div id="main">
+
+{% for code in code_list %}
+
+  {% include 'code.html' %}
+
+{% endfor %}
+
+  </div>
+</div>
+</body>
+</html>

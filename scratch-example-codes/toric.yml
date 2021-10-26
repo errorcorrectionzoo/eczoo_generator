@@ -1,0 +1,35 @@
+# UTF-8 unicode encoding
+
+code_id: toric
+
+physical: qubits
+
+logical: qubits
+
+name: 'Toric code'
+
+description: 'Stabilizer code with Star and Plaquette operators on a 2D
+    lattice on the surface of a torus'
+
+decoder: 'Minimum-weight \href{https://some.com/page}{perfect} matching
+    \cite{ABCD_YYYY_journalorconf_xyz}, etc.'
+
+features:
+
+  fault_tolerance: 'Threshold: \(\sim 10\%\)'
+  
+
+relations:
+
+  parents:
+
+    - code_id: 'CSS'
+      detail: 'Plaquette (\(Z\)) and Star (\(X\)) stabilizers'
+
+    - code_id: 'qu_LDPC'
+      detail:
+
+  cousins:
+    
+    - code_id: 'XZZX_toric'
+      detail: 'Hadamard every other qubit (for square lattice) ....'

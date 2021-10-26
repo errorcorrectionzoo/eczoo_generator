@@ -1,0 +1,13 @@
+# UTF-8 unicode encoding
+
+code_id: qu_LDPC
+
+physical: qubits
+
+logical: qubits
+
+name: 'Quantum LDPC code'
+
+description: 'Quantum low density parity check codes'
+
+decoder: '... ...'

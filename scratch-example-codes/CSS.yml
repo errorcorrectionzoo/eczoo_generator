@@ -1,0 +1,21 @@
+# UTF-8 unicode encoding
+
+code_id: CSS
+
+physical: qubits
+
+logical: qubits
+
+name: 'CSS code'
+
+description: 'formed by two classical codes yada yada.'
+
+decoder: '...'
+
+features:
+  
+
+relations:
+  parents:
+    - code_id: stabilizer
+      detail: 'All stabilizers are either only-X or only-Z'

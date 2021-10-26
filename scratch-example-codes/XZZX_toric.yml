@@ -1,0 +1,25 @@
+# UTF-8 unicode encoding
+
+code_id: XZZX_toric
+
+physical: qubits
+
+logical: qubits
+
+name: 'XZZX code'
+
+description: 'bla bla bla'
+
+decoder: 'hahaha'
+
+features:
+
+  biased_noise: 'Can protect against biased noise ... ...'
+  
+
+relations:
+
+  parents:
+    
+    - code_id: 'CSS'
+      detail: 'Plaquette (\(Z\)) and Star (\(X\)) stabilizers'
