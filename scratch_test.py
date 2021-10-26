@@ -27,7 +27,9 @@ jenv = jinja2.Environment(
 
 
 def code_ref(code):
-    return markupsafe.Markup( f'''<a href="#{code.code_id}">{code.name}</a>''' )
+    return markupsafe.Markup(
+        f'''<a href="#{markupsafe.escape(code.code_id)}">{markupsafe.escape(code.name)}</a>'''
+    )
 
 jenv.filters['code_ref'] = code_ref
 
