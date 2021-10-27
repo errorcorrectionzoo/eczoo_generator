@@ -8,14 +8,15 @@ logical: qubits
 
 name: 'XZZX code'
 
-description: 'bla bla bla'
+description: 'bla bla bla introduced in \cite{arxiv:2009.07851}'
 
 decoder: 'hahaha'
 
 features:
 
-  biased_noise: 'Can protect against biased footnote{The noise is
-      biased in this and that sense} noise ... ...'
+  biased_noise: 'Can protect against biased \footnote{The noise is
+      biased in this and that sense as might or might not be explained in
+      this simple footnote with an equation \(a+b=c\).} noise ... ...'
   
 
 relations:

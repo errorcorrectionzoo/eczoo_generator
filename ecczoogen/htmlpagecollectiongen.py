@@ -132,7 +132,7 @@ class RefContextForHtmlConverter(htmlfromminilatex.HtmlRefContext):
         code_href = self.htmlpagecollection.get_code_href(code_id)
         return code, code_href
 
-    def add_footnote(self, footnotetext_html):
+    def add_footnote(self, footnote_text_html):
         # return (footnotelabel_html, footnotehref)
         footnote = HtmlFootnote(footnote_text_html=footnote_text_html)
         foot_no, foot_label_html = self.page_notes.add_footnote(footnote)

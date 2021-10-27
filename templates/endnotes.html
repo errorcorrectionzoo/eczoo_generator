@@ -5,13 +5,14 @@ Expected context variables:
 - `page_footnotes` -> a `ecczoogen.htmlpagecollection.HtmlPageNotes` object
 
 ################################################################################}
+
 {% if page_footnotes.footnotes or page_footnotes.citations %}
    <div id="endnotes">
 {% if page_footnotes.footnotes %}
     <dl id="footnotes">
 {% for footnote in page_footnotes.footnotes %}
       <dt id="fn-{{footnote.no}}">{{footnote.label_html}}</dt>
-      <dd>{{fntext_html}}</dd>
+      <dd>{{footnote.footnote_text_html}}</dd>
 {% endfor %}    
     </dl>
 {% endif %}

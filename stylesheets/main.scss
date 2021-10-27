@@ -42,7 +42,7 @@ dt {
 }
 dd {
     grid-column-start: 2;
-    margin-left: 35px;
+    margin-left: 25px;
 }
 
 
@@ -181,6 +181,12 @@ dd.code-name {
 
 #endnotes dt {
     font-style: normal;
+    min-width: 2.5em;
+    text-align: right;
+}
+
+#endnotes dd {
+    margin-left: 5px;
 }
 
 
