@@ -24,12 +24,6 @@ class CodeCollection:
         # register the collection on the Code object
         code.collection = self
 
-    def get_code(self, code_id):
-        try:
-            return self.code_collection[code_id]
-        except:
-            raise InvalidCodeReference("Unknown code ID: ‘{}’".format(code_id))
-
     def finish(self):
         r"""
         Call this method when you finished constructing the code collection and you
@@ -76,3 +70,17 @@ class CodeCollection:
                                                    detail=relinfo.get('detail', None))
                     getattr(related_code.relations, rel_type+'_of') .append( rel_data_other )
             
+
+
+    def get_code(self, code_id):
+        try:
+            return self.code_collection[code_id]
+        except:
+            raise InvalidCodeReference("Unknown code ID: ‘{}’".format(code_id))
+
+    def get_code_ids_by_physical_logial(self, physical, logical):
+        return [
+            code_id
+            for code_id, code in self.code_collection.items()
+            if code.fields.get('physical') == physical and code.fields.get('logical') == logical
+        ]

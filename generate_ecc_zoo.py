@@ -68,44 +68,35 @@ logger.info("Setting up ecc list pages ...")
 # Set up the pages of the site
 #
 
+
+# TODO: in the future, we could automatically generate all the different
+#       combinations of physical/logical spaces.
+
+
 #
-# A page for non-CSS codes
+# A page for qubits->qubits codes
 #
 htmlpgcoll.create_page(
     htmlpagecollectiongen.HtmlPage(
-        name='qu_nonCSS_codes',
+        name='qubits_to_qubits',
         info={
-            'page_title': 'A selection of non-CSS codes'
+            'page_title': 'Encoding qubits into qubits'
         },
-        code_id_list=('stabilizer', 'qu_LDPC', 'XZZX_toric'),
+        code_id_list=zoo.collection.get_code_ids_by_physical_logial('qubits', 'qubits'),
         template_name='page_code_list.html'
     )
 )
 
 #
-# A page for CSS codes
+# A page for bits->bits codes
 #
 htmlpgcoll.create_page(
     htmlpagecollectiongen.HtmlPage(
-        name='qu_CSS_codes',
+        name='bits_to_bits',
         info={
-            'page_title': 'A selection of CSS codes'
+            'page_title': 'Encoding bits into bits'
         },
-        code_id_list=('toric', 'CSS'),
-        template_name='page_code_list.html'
-    )
-)
-
-#
-# A page for classical codes
-#
-htmlpgcoll.create_page(
-    htmlpagecollectiongen.HtmlPage(
-        name='class_codes',
-        info={
-            'page_title': 'Some classical codes'
-        },
-        code_id_list=('class_linear',),
+        code_id_list=zoo.collection.get_code_ids_by_physical_logial('bits', 'bits'),
         template_name='page_code_list.html'
     )
 )
