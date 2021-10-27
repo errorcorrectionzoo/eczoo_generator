@@ -1,0 +1,14 @@
+{% if not use_relations %}
+<span class="na">(none)</span>
+{% else %}
+<ul class="code-relations-list code-{{use_relation_type}}-list">
+{% for rel in use_relations %}
+  <li><span class="code-{{use_relation_type}}-1-code">{{ rel.code | code_ref }}</span>
+  {%- if rel.detail %}
+    <span class="code-{{use_relation_type}}-1-detail">({{rel.detail}})</span>
+  {%- endif -%}
+  {# {{- ", " if not loop.last else "" }} #}
+  </li>
+{% endfor %}
+</ul>
+{% endif %}

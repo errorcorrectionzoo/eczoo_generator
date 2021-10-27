@@ -1,0 +1,18 @@
+# UTF-8 unicode encoding
+
+code_id: class_linear
+
+physical: bits
+
+logical: bits
+
+name: 'Classical linear code'
+
+description: 'Bla bla parity check matrix and so on'
+
+encoding: ''
+
+protection: 'Detects errors here and there'
+
+decoder: '...'
+

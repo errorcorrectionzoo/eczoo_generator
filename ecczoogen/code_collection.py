@@ -28,7 +28,7 @@ class CodeCollection:
         try:
             return self.code_collection[code_id]
         except:
-            raise InvalidCodeReference("Invalid code reference: ‘{}’".format(code_id))
+            raise InvalidCodeReference("Unknown code ID: ‘{}’".format(code_id))
 
     def finish(self):
         r"""
@@ -39,21 +39,21 @@ class CodeCollection:
         #
         # Iterate over each code and inspect its relations to other codes.
         #
-        for code_id, code in self.code_collection.items():
+        for code_id, codeobj in self.code_collection.items():
 
-            code.relations.parents = []
-            code.relations.cousins = []
+            codeobj.relations.parents = []
+            codeobj.relations.cousins = []
 
-            code_data_relations = code.data.get('relations', {})
+            code_data_relations = codeobj._info.get('relations', {})
             if not code_data_relations:
                 continue
 
             # do the same thing for each relation type (parent, cousin):
             for rel_type in ('parent', 'cousin'):
 
-                rels_fld = getattr(code.relations, rel_type+'s')
+                rels_fld = getattr(codeobj.relations, rel_type+'s')
 
-                # iterate over e.g. code.data.relations.parents
+                # iterate over e.g. codeobj._info.relations.parents
 
                 code_data_relations_reltypelist = code_data_relations.get(rel_type+'s', [])
                 if not code_data_relations_reltypelist:
@@ -66,17 +66,13 @@ class CodeCollection:
 
                     related_code = self.get_code(relinfo['code_id'])
 
-                    rel_data = {
-                        'code': related_code,
-                        'detail': relinfo.get('detail', None)
-                    }
+                    rel_data = code.Relation(code=related_code,
+                                             detail=relinfo.get('detail', None))
                     rels_fld.append(rel_data)
 
                     # add to the other code's OTHER.relations.parent_of to include this code
 
-                    rel_data_other = {
-                        'code': code,
-                        'detail': relinfo.get('detail', None)
-                    }
+                    rel_data_other = code.Relation(code=codeobj,
+                                                   detail=relinfo.get('detail', None))
                     getattr(related_code.relations, rel_type+'_of') .append( rel_data_other )
             

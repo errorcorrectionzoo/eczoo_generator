@@ -9,14 +9,14 @@ logical: qubits
 name: 'Toric code'
 
 description: 'Stabilizer code with Star and Plaquette operators on a 2D
-    lattice on the surface of a torus'
+    lattice on the surface of a torus \cite{doi:10.1070/RM1997v052n06ABEH002155}'
 
 decoder: 'Minimum-weight \href{https://some.com/page}{perfect} matching
-    \cite{ABCD_YYYY_journalorconf_xyz}, etc.'
+    \cite{ABCD_YYYY_journalorconf_xyz}, etc.\footnote{Test footnote.}'
 
 features:
 
-  fault_tolerance: 'Threshold: \(\sim 10\%\)'
+  fault_tolerance: 'Fault-tolerant threshold around \(\sim 10\%\)'
   
 
 relations:

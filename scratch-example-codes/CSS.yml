@@ -6,9 +6,13 @@ physical: qubits
 
 logical: qubits
 
-name: 'CSS code'
+name: 'Calderbank-Shor-Steane (CSS) code'
 
-description: 'formed by two classical codes yada yada.'
+description: '\([[n,k,d]]\) code based on two classical linear codes, an \([n,k_1,d_1]\) code \(C_1\) and \([n,k_2,d_2]\) code \(C_2\) with \(C_1^\perp \subseteq C_2\), such that \(k=k_1+k_2-n\) and \(d=\min\{d_1,d_2\}\).'
+
+encoding: ''
+
+protection: 'Detects errors on \(d-1\) qubits, corrects errors on \((d-1)/2\) qubits.'
 
 decoder: '...'
 
@@ -18,4 +22,7 @@ features:
 relations:
   parents:
     - code_id: stabilizer
-      detail: 'All stabilizers are either only-X or only-Z'
+      detail: 'All stabilizers are either only-\(X\) or only-\(Z\)'
+  cousins:
+    - code_id: class_linear
+      detail: 'Construction uses two classical linear codes'

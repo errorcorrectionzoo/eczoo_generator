@@ -21,5 +21,5 @@ relations:
 
   parents:
     
-    - code_id: 'CSS'
-      detail: 'Plaquette (\(Z\)) and Star (\(X\)) stabilizers'
+    - code_id: 'stabilizer'
+      detail: 'Plaquette and Star stabilizers'

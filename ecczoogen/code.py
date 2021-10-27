@@ -3,13 +3,22 @@ logger = logging.getLogger(__name__)
 
 
 class Code:
-    def __init__(self, data):
+    def __init__(self, info):
         super().__init__()
         # todo: validate data
-        self.code_id = data['code_id']
-        self.data = data
+        self.code_id = info['code_id']
+        self._info = info
 
-        self.name = self.data['name']
+        # parse data structure into fields
+        self.name = self._info['name']
+        self.fields = {k: self._info[k]
+                       for k in self._info.keys()
+                       if k not in ('name', 'relations', 'features')}
+        if not self._info.get('features'):
+            self.features = {}
+        else:
+            self.features = {k: self._info['features'][k]
+                             for k in self._info.get('features').keys()}
         
         # these fields only get set once we are assigned to a CodeCollection
         self.collection = None
@@ -21,6 +30,12 @@ class Code:
     def __repr__(self):
         return "Code(code_id={!r})".format(self.code_id)
 
+
+class Relation:
+    def __init__(self, code, detail):
+        super().__init__()
+        self.code = code
+        self.detail = detail
 
 
 class CodeRelations:

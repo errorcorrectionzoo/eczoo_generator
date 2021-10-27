@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-  <title>Error correction zoo</title>
+  <title>{{page_title}} [error correction zoo]</title>
   <link type="text/css" rel="stylesheet" href="main.css" />
   <script type="text/javascript" async
 	  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
@@ -12,8 +12,8 @@
 <div id="wrap">
 
   <div id="header">
-    <h1>Error correction zoo: {{code_list_title}}</h1>
-  </div>
+    <h1>{{page_title}}</h1>
+  </div><!-- #header -->
 
   <div id="main">
 
@@ -23,7 +23,51 @@
 
 {% endfor %}
 
-  </div>
+{% if page_footnotes.footnotes or page_footnotes.citations %}
+   <div id="endnotes">
+{% if page_footnotes.footnotes %}
+    <dl id="footnotes">
+{% for footnote in page_footnotes.footnotes %}
+      <dt id="fn-{{footnote.no}}">{{footnote.label_html}}</dt>
+      <dd>{{fntext_html}}</dd>
+{% endfor %}    
+    </dl>
+{% endif %}
+{% if page_footnotes.citations %}
+    <dl id="citations">
+{% for citation in page_footnotes.citations %}
+      <!-- Citation: {{citation.citation_key}} -->
+      <dt id="cite-{{citation.no}}">{{citation.label_html}}</dt>
+      <dd>
+        {% if citation.arxivid %}
+          <a href="https://arxiv.org/abs/{{citation.arxivid}}" target="_blank" class="arxiv-link">arXiv:{{citation.arxivid}}</a>
+        {% endif %}
+        {% if citation.doi %}
+          <a href="https://doi.org/{{citation.doi}}" target="_blank" class="doi-link">doi:{{citation.doi}}</a>
+        {% endif %}
+        {{citation.citation_text_html}}
+      </dd>
+{% endfor %}    
+    </dl>
+{% endif %}
+   </div>
+{% endif %}
+
+  </div><!-- #main -->
+
+
+  <div id="sidebar">
+    <div class="sidebarbox">
+      <h1>Navigation</h1>
+      <ul class="navlinks">
+{% for page_name, page in nav_pages.items() %}
+        <li><a href="{{ page.name+page.ext | prebaseurl }}">{{page.info.page_title}}</a></li>
+{% endfor %}
+      </ul>
+      <h1>Additional resources</h1>
+      <h1>Code tables</h1>
+    </div>
+  </div><!-- #sidebar -->
 
 </div>
 </body>
