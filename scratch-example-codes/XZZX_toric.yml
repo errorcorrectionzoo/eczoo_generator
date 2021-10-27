@@ -14,7 +14,8 @@ decoder: 'hahaha'
 
 features:
 
-  biased_noise: 'Can protect against biased noise ... ...'
+  biased_noise: 'Can protect against biased footnote{The noise is
+      biased in this and that sense} noise ... ...'
   
 
 relations:

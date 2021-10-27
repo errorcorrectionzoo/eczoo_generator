@@ -1,3 +1,14 @@
+{###############################################################################
+
+Expected context variables:
+
+- `code` -> a WRAPPED `ecczoogen.code.Code` object, with relations field
+            populated (i.e., it must have been added to a
+            `ecczoogen.code_collection.CodeCollection` which was subsequently
+            finalized with its `finished()` method.)
+
+################################################################################}
+
 <dl class="ecc-code" id="ecc_{{code.code_id}}">
 
 <dt>Name</dt>
@@ -57,47 +68,5 @@
 </dd>
 {% endif %}
 
-
-
-<!--
-{% if code.relations.parent_of %}
-<dt>Parent Of</dt>
-<dd class="code-parent-of">
-{% for rel in code.relations.parent_of %}
-  <span class="code-parent-of-1-code">{{ rel.code | code_ref }}</span>
-  {% if rel.detail %}
-    <span class="code-parent-of-1-detail">({{rel.detail}})</span>
-  {% endif %}
-  {{ ", " if not loop.last else "" }}
-{% endfor %}
-</dd>
-{% endif %}
-
-<dt>Cousin(s)</dt>
-<dd class="code-cousins">
-{% if not code.relations.cousins %}
-  <span class="na">(no cousins to show)</span>
-{% endif %}
-{% for cousin in code.relations.cousins %}
-  <span class="code-cousin-1-code">{{ cousin.code | code_ref }}</span>
-  {% if cousin.detail %}
-    <span class="code-cousin-1-detail">({{cousin.detail}})</span>
-  {% endif %}
-  {{ ", " if not loop.last else "" }}
-{% endfor %}
-</dd>
-
-{% if code.relations.cousin_of %}
-<dt>Cousin Of</dt>
-<dd class="code-cousin-of">
-{% for cousin in code.relations.cousin_of %}
-  <span class="code-cousin-of-1-code">{{ cousin.code | code_ref }}</span>
-  {% if cousin.detail %}
-    <span class="code-cousin-of-1-detail">({{cousin.detail}})</span>
-  {% endif %}
-  {{ ", " if not loop.last else "" }}
-{% endfor %}
-{% endif %}
--->
 
 </dl>

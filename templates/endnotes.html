@@ -1,28 +1,10 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-  <title>{{page_title}} [error correction zoo]</title>
-  <link type="text/css" rel="stylesheet" href="main.css" />
-  <script type="text/javascript" async
-	  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
-  </script>
-</head>
-<body>
-<div id="wrap">
+{###############################################################################
 
-  <div id="header">
-    <h1>{{page_title}}</h1>
-  </div><!-- #header -->
+Expected context variables:
 
-  <div id="main">
+- `page_footnotes` -> a `ecczoogen.htmlpagecollection.HtmlPageNotes` object
 
-{% for code in code_list %}
-
-  {% include 'code.html' %}
-
-{% endfor %}
-
+################################################################################}
 {% if page_footnotes.footnotes or page_footnotes.citations %}
    <div id="endnotes">
 {% if page_footnotes.footnotes %}
@@ -52,23 +34,3 @@
 {% endif %}
    </div>
 {% endif %}
-
-  </div><!-- #main -->
-
-
-  <div id="sidebar">
-    <div class="sidebarbox">
-      <h1>Navigation</h1>
-      <ul class="navlinks">
-{% for page_name, page in nav_pages.items() %}
-        <li><a href="{{ page.name+page.ext | prebaseurl }}">{{page.info.page_title}}</a></li>
-{% endfor %}
-      </ul>
-      <h1>Additional resources</h1>
-      <h1>Code tables</h1>
-    </div>
-  </div><!-- #sidebar -->
-
-</div>
-</body>
-</html>

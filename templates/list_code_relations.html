@@ -1,3 +1,16 @@
+{###############################################################################
+
+Expected context variables:
+
+- `use_relations`: A list of `ecczoogen.code.Relation` objects
+
+- `use_relation_type`: What type of relation the given relation objects are,
+  e.g., 'parents', 'parent-of', 'cousins', 'cousin-of'.  This information is
+  used for setting relevant CSS classes.
+
+################################################################################}
+
+
 {% if not use_relations %}
 <span class="na">(none)</span>
 {% else %}

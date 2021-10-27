@@ -155,7 +155,7 @@ class RefContextForHtmlConverter(htmlfromminilatex.HtmlRefContext):
 
 # ------------------------------------------------------------------------------
 
-class _HtmlPageNotes:
+class HtmlPageNotes:
     def __init__(self, htmlpagecollection):
         self.foot_no = 0 # last attributed footnote number
         self.footnotes = []
@@ -276,7 +276,7 @@ f'''<a href="{page_url_html}">{code_name_html}</a>'''
             output_page_fname = os.path.join(output_dir, page_name+htmlpage.ext)
             logger.info(f"Generating page ‘{output_page_fname}’ ...")
 
-            page_footnotes = _HtmlPageNotes(self)
+            page_footnotes = HtmlPageNotes(self)
 
             tohtml_refcontext = RefContextForHtmlConverter(self, page_footnotes)
             tohtmlconverter = htmlfromminilatex.ToHtmlConverter(tohtml_refcontext)
