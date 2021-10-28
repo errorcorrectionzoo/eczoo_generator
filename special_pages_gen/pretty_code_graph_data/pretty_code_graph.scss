@@ -42,18 +42,25 @@
         color: rgba(0,0,0,0.8);
     }
 
+    .spacer {
+        display: inline-block;
+        width: 1em;
+    }
     .code-link {
-        margin-top: 10px;
+        display: inline-block;
+        margin-top: 5px;
+        font-style: italic;
+        font-size: 0.95em;
     }
 
-    a {
+    a.link-button {
         display: block;
-        margin: 3px 0px 0px;
+        margin: 10px 0px 0px;
         padding: 3px;
         text-align: center;
         background-color: mix($page-link-color, white, 5%);
     }
-    a:hover {
+    a.link-button:hover {
         background-color: mix($page-link-color, white, 10%);
         //text-shadow: mix($page-link-color, white, 20%) 2px 1px 5px;
     }

@@ -38,6 +38,7 @@ class PagePrettyCodeGraph:
 
             'extra_js': [
                 'https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.20.0/cytoscape.min.js',
+                # inclusion is done in the HTML page, see pretty_code_graph.html
                 #'https://unpkg.com/@popperjs/core@2',
                 #'https://unpkg.com/tippy.js@6',
                 self.jinja2env.prefix_base_url('pretty_code_graph_assets/pretty_code_graph.js'),

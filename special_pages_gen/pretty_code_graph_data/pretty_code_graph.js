@@ -91,7 +91,7 @@ pretty_code_graph_setup = function()
         "<div data-popper-arrow class=\"tooltip-arrow\"></div>"
         + "<div id=\"code-graph-tooltip-contents\"></div>"
         + "<a href=\"javascript:pretty_code_graph_close_tooltip();\" "
-           + "class=\"close-tooltip\">close</a>"
+           + "class=\"close-tooltip link-button\">close</a>"
     ;
     tooltip_element.style.display = 'none';
     document.body.appendChild(tooltip_element);
@@ -154,7 +154,7 @@ pretty_code_graph_setup = function()
             tooltip_contents_element.innerHTML =
                 "<span class=\"code-name\">" + node_data.label + "</span>"
                 + "<span class=\"code-description\">" + node_data._description + "</span>"
-                + "<a class=\"code-link\" href=\"" + node_data._code_href + "\">go to code</a>"
+                + "<span class=\"spacer\"> </span><a class=\"code-link\" href=\"" + node_data._code_href + "\">go to code →</a>"
             ;
 
             //
