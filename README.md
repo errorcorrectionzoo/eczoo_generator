@@ -14,7 +14,8 @@ To generate the site, you need to set up your environment first.
    Python](https://python-poetry.org/docs/#installation)
 
 3. Install the python virtual environment and package dependencies.  All of that
-   is done automatically by `poetry`:
+   is done automatically by running `poetry install` inside the directory of your
+   local clone of this repo:
    
        > poetry install
        
