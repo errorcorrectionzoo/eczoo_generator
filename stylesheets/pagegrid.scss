@@ -66,6 +66,16 @@ body {
     padding: 0px;
     margin: 0px;
 
+    #main {
+        grid-row-start: 2;
+        grid-row-end: 5;
+    }
+
+    #footer {
+        margin-left: $page-sidebar-margin;
+        grid-column: 2;
+    }
+
     // collapse sidebar on narrow screen
     @media (max-width: $page-main-width) {
         #sidebar {
@@ -75,6 +85,11 @@ body {
         }
         #main {
             height: 80vh;
+            grid-row-end: 3;
+        }
+        #footer {
+            margin-left: 0px;
+            grid-column: 1;
         }
     }
 }

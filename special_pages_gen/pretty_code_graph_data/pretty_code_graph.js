@@ -165,12 +165,13 @@ pretty_code_graph_setup = function()
             };
             var pos = node.renderedPosition();
             virtualElement.getBoundingClientRect =
-                generateGetBoundingClientRect(base_pos.x + pos.x, base_pos.y + pos.y);
+                generateGetBoundingClientRect(base_pos.x + pos.x - window.pageXOffset,
+                                              base_pos.y + pos.y - window.pageYOffset);
             codegraph.popper_obj.update();
             window.pretty_code_graph_show_tooltip();
         } else {
             // tap on an edge or on the background -- hide pop-up
-            window.pretty_code_graph_hide_tooltip();
+            window.pretty_code_graph_close_tooltip();
         }
     });
 
