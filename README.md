@@ -39,3 +39,21 @@ manipulation in the repo with the code data doesn't affect the zoo generation
 code.)
 
 
+## Viewing the website
+
+Don't open the outputted HTML file directly in your browser! It won't be able to
+find the dependent files.  Instead, run the command:
+
+    > cd out
+    > poetry run python -m http.server
+    
+The command should display something like `Serving HTTP on :: port 8000
+(http://[::]:8000/) ...`.  Enter the given address in your browser to view the
+generated site (or [try to click this link](http://localhost:8000/) after you've
+started the python http server).
+
+(Refer to the [http.server
+documentation](https://docs.python.org/3/library/http.server.html#http-server-cli)
+if you'd like to run your local server on a different port or on different
+network interfaces.)
+
