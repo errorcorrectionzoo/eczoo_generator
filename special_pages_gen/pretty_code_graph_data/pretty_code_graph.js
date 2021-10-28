@@ -51,7 +51,6 @@ pretty_code_graph_setup = function()
                 style: {
                     'width': 1,
                     'opacity': 0.5,
-                    'target-arrow-color': '#00307f',
                     'target-arrow-shape': 'triangle',
                     'curve-style': 'bezier',
                     'label': 'data(label)',
@@ -63,6 +62,7 @@ pretty_code_graph_setup = function()
                 style: {
                     'width': 1,
                     'line-color': '#00307f',
+                    'target-arrow-color': '#00307f',
                     'color': '#00307f'
                 }
             },
@@ -72,6 +72,7 @@ pretty_code_graph_setup = function()
                     'width': 1,
                     'line-style': 'dotted',
                     'line-color': '#00883f',
+                    'target-arrow-color': '#00883f',
                     'color': '#00883f'
                 }
             }
