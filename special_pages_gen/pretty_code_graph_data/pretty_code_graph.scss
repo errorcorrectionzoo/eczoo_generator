@@ -1,0 +1,110 @@
+// import our global variables
+@import 'variables.scss';
+
+
+
+//#cy-code-graph {
+#main {
+    //width: 100%;
+    width: auto;
+    height: 100%;
+    overflow: scroll;
+
+    background-color: rgba(255,127,0, 0.15);
+}
+
+#code-graph-tooltip
+{
+    position: absolute;
+    min-width: 200px;
+    //min-height: 100px;
+    max-width: 500px;
+    background-color: white;
+    padding: 8px;
+
+    font-family: $base-font-family;
+    font-size: $base-font-size;
+
+    box-shadow: 10px 7px 10px rgba(0,0,0,0.3);
+
+    .code-name {
+        display: inline-block;
+        padding: 3px;
+        margin-right: 1em;
+        font-weight: 500;
+    }
+
+    .code-description {
+        display: inline;
+        padding-bottom: 3px;
+        font-style: italic;
+        font-size: 0.9em;
+        color: rgba(0,0,0,0.8);
+    }
+
+    .code-link {
+        margin-top: 10px;
+    }
+
+    a {
+        display: block;
+        margin: 3px 0px 0px;
+        padding: 3px;
+        text-align: center;
+        background-color: mix($page-link-color, white, 5%);
+    }
+    a:hover {
+        background-color: mix($page-link-color, white, 10%);
+        //text-shadow: mix($page-link-color, white, 20%) 2px 1px 5px;
+    }
+}
+
+
+#code-graph-tooltip {
+
+    .tooltip-arrow::before {
+        position: absolute;
+        width: 8px;
+        height: 8px;
+        //background: inherit;
+    }
+
+    .tooltip-arrow {
+        visibility: hidden;
+    }
+
+    .tooltip-arrow::before {
+        visibility: visible;
+        //content: '•';
+        //content: '▴';
+        content: '';
+        background-image: url(prebaseurl('static/icons/tooltip-pointer.svg'));
+        //background-color: red;
+        //transform: rotate(45deg);
+        //transform-origin: 50% 50%;
+    }
+
+}
+
+#code-graph-tooltip[data-popper-placement^='top'] {
+    >.tooltip-arrow {
+        bottom: 0px;
+    }
+    >.tooltip-arrow::before {
+        transform: rotate(180deg);
+    }
+}
+
+#code-graph-tooltip[data-popper-placement^='bottom'] {
+    > .tooltip-arrow {
+        top: -8px;
+    }
+}
+
+// #code-graph-tooltip[data-popper-placement^='left'] > .tooltip-arrow {
+//   right: -4px;
+// }
+
+// #code-graph-tooltip[data-popper-placement^='right'] > .tooltip-arrow {
+//   left: -4px;
+// }

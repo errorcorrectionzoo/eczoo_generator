@@ -9,7 +9,7 @@
       <h1>Codes</h1>
       <ul class="navlinks">
 {% for page in nav_pages %}
-        <li><a href="{{ page.name+page.ext | prebaseurl }}">{{page.info.page_title}}</a></li>
+        <li><a href="{{ page.path() | prebaseurl }}">{{page.info.page_title}}</a></li>
 {% endfor %}
       </ul>
       <h1>Additional resources</h1>

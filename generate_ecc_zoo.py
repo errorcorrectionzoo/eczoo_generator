@@ -53,13 +53,34 @@ logger.info("Setting up the jinja2 template environment ...")
 jinja2env = j2_helpers.ExtendedJinja2Environment(
     # my stuff:
     dirs=Dirs,
-    base_url='',
+    base_url='/',
     # Jinja2 stuff:
     loader=jinja2.FileSystemLoader(Dirs.templates_dir),
     autoescape=jinja2.select_autoescape(['html', 'xml']),
     trim_blocks=True,
     lstrip_blocks=True,
 )
+
+
+
+
+################################################################################
+
+#
+# Copy static assets that the site might need
+# Compile special pages (like the pretty code graph)
+#
+
+logger.info("Copying static assets ...")
+
+static_asset_exts = ('.html', '.css', '.js', '.svg', '.png', '.jpg', '.jpeg')
+
+jinja2env.copy_tree(
+    source_dir=Dirs.static_assets_dir,
+    target_dir='static/',
+    only_exts=static_asset_exts,
+)
+
 
 
 ################################################################################
@@ -116,7 +137,6 @@ htmlpgcoll.create_page(
 )
 
 
-
 ################################################################################
 
 #
@@ -150,13 +170,6 @@ for root_scss, root_css in root_scss_list:
         fn_source=root_scss,
         fn_output=os.path.join(output_css_prefix, root_css)
     )
-    # css = sass.compile(
-    #     filename=os.path.join(Dirs.stylesheets_dir, root_scss),
-    #     output_style='expanded',
-    #     #output_style='compressed',
-    # )
-    # with open(os.path.join(output_css_dir, root_css), 'w') as f:
-    #     f.write(css)
 
 
 ################################################################################
@@ -175,24 +188,31 @@ for fn in os.listdir(Dirs.global_pages_dir):
             context=global_context
         )
 
-
-
 ################################################################################
 
-logger.info("Copying static assets ...")
+logger.info("Compiling special pages ...")
 
 #
-# Copy static assets that the site might need
+# Compile special pages (like the pretty code graph)
 #
 
-static_asset_exts = ('.html', '.css', '.js', '.svg', '.png', '.jpg', '.jpeg')
+from special_pages_gen.pretty_code_graph import PagePrettyCodeGraph
 
-jinja2env.copy_tree(
-    source_dir=Dirs.static_assets_dir,
-    target_dir='static/',
-    only_exts=static_asset_exts,
-)
+special_pages = [ PagePrettyCodeGraph, ]
 
+for SpecialPageClass in special_pages:
+
+    logger.info("Compiling special pages ...")
+
+    pg = SpecialPageClass(
+        dirs=Dirs,
+        jinja2env=jinja2env,
+        zoo=zoo,
+        htmlpagescollection=htmlpgcoll,
+        global_context=global_context,
+    )
+
+    pg.generate()
 
 
 ################################################################################

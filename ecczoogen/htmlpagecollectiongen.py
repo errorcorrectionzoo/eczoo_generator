@@ -89,6 +89,8 @@ class HtmlPage:
         self.ext = ext
         self.link_to_codes_here = link_to_codes_here
 
+    def path(self):
+        return self.name + self.ext
 
 
 # ------------------------------------------------------------------------------
@@ -247,8 +249,8 @@ class HtmlPageCollection:
             logger.error(f"Referenced code with ID ‘{code_id}’ is not included in any page",
                          exc_info=True)
             raise
-        page_ext = self.pages[page_name].ext
-        return f'{self.base_url}{page_name}{page_ext}#ecc_{code_id}'
+        page_path = self.pages[page_name].path()
+        return f'{self.base_url}{page_path}#ecc_{code_id}'
 
     def format_footnote_label_html(self, foot_no):
         return '({:d})'.format(foot_no)
@@ -273,7 +275,7 @@ f'''<a href="{page_url_html}">{code_name_html}</a>'''
         # generate all pages
         for page_name, htmlpage in self.pages.items():
 
-            output_page_fname = os.path.join(output_dir, page_name+htmlpage.ext)
+            output_page_fname = os.path.join(output_dir, htmlpage.path())
             logger.info(f"Generating page ‘{output_page_fname}’ ...")
 
             page_footnotes = HtmlPageNotes(self)
