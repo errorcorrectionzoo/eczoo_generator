@@ -63,6 +63,13 @@ dd {
     margin-bottom: $page-header-gap;
 }
 
+// remove bleed for full-width pages
+#bodycontents.app-full-width  #header {
+    margin-left: 0px;
+    margin-right: 0px;
+    padding-left: 3px;
+    padding-right: 3px;
+}
 
 
 

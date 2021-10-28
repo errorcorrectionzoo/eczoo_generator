@@ -1,9 +1,13 @@
 
   <nav id="sidebar">
     <div class="sidebarbox">
-      <h1>Navigation</h1>
+      <h1>Pages</h1>
       <ul class="navlinks">
         <li><a href="{{ 'index.html' | prebaseurl }}">Home</a></li>
+        <li><a href="{{ 'pretty_code_graph.html' | prebaseurl }}">Code graph</a></li>
+      </ul>
+      <h1>Codes</h1>
+      <ul class="navlinks">
 {% for page in nav_pages %}
         <li><a href="{{ page.name+page.ext | prebaseurl }}">{{page.info.page_title}}</a></li>
 {% endfor %}

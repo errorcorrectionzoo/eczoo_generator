@@ -11,7 +11,7 @@ sys.path.insert(0, '.')
 import ecczoogen
 ecczoogen.setup_logging(level=logging.DEBUG)
 
-from ecczoogen import zoo, htmlpagecollectiongen
+from ecczoogen import zoo, htmlpagecollectiongen, j2_helpers
 
 logger = logging.getLogger()
 
@@ -19,13 +19,16 @@ logger = logging.getLogger()
 # Fixed paths
 #
 
-codes_dir = os.path.join(os.path.dirname(__file__), 'scratch-example-codes')
+class Dirs:
+    codes_dir = os.path.join(os.path.dirname(__file__), 'scratch-example-codes')
 
-templates_dir = os.path.join(os.path.dirname(__file__), 'templates')
-stylesheets_dir = os.path.join(os.path.dirname(__file__), 'stylesheets')
-static_pages_dir =os.path.join(os.path.dirname(__file__), 'static_pages')
+    templates_dir = os.path.join(os.path.dirname(__file__), 'templates')
+    stylesheets_dir = os.path.join(os.path.dirname(__file__), 'stylesheets')
+    global_pages_dir =os.path.join(os.path.dirname(__file__), 'global_pages')
 
-output_dir = os.path.join(os.path.dirname(__file__), 'out')
+    static_assets_dir =os.path.join(os.path.dirname(__file__), 'static_assets')
+
+    output_dir = os.path.join(os.path.dirname(__file__), 'out')
 
 
 ################################################################################
@@ -36,7 +39,7 @@ logger.info("Building the zoo ...")
 # Build the Code Collection --> create a `ecczoogen.zoo` object
 #
 
-zoo = zoo.Zoo(codes_dir=codes_dir)
+zoo = zoo.Zoo(codes_dir=Dirs.codes_dir)
 
 
 ################################################################################
@@ -47,17 +50,28 @@ logger.info("Setting up the jinja2 template environment ...")
 # Set up an environment for generating the HTML pages with our HTML templates
 #
 
-jinja2env = jinja2.Environment(
-    loader=jinja2.FileSystemLoader(templates_dir),
+jinja2env = j2_helpers.ExtendedJinja2Environment(
+    # my stuff:
+    dirs=Dirs,
+    base_url='',
+    # Jinja2 stuff:
+    loader=jinja2.FileSystemLoader(Dirs.templates_dir),
     autoescape=jinja2.select_autoescape(['html', 'xml']),
     trim_blocks=True,
     lstrip_blocks=True,
 )
 
+
+################################################################################
+
+#
+# Our HtmlPageCollection that will handle generating the pages for codes
+#
+
 htmlpgcoll = htmlpagecollectiongen.HtmlPageCollection(
     zoo,
     jinja2env,
-    base_url=''
+    base_url=jinja2env.base_url
 )
 
 ################################################################################
@@ -82,7 +96,7 @@ htmlpgcoll.create_page(
         info={
             'page_title': 'Encoding qubits into qubits'
         },
-        code_id_list=zoo.collection.get_code_ids_by_physical_logial('qubits', 'qubits'),
+        code_id_list=zoo.get_code_ids_by_physical_logial('qubits', 'qubits'),
         template_name='page_code_list.html'
     )
 )
@@ -96,7 +110,7 @@ htmlpgcoll.create_page(
         info={
             'page_title': 'Encoding bits into bits'
         },
-        code_id_list=zoo.collection.get_code_ids_by_physical_logial('bits', 'bits'),
+        code_id_list=zoo.get_code_ids_by_physical_logial('bits', 'bits'),
         template_name='page_code_list.html'
     )
 )
@@ -116,52 +130,84 @@ global_context = {
 
 ################################################################################
 
-logger.info("Compiling stylesheets and static pages ...")
+logger.info("Compiling stylesheets ...")
 
 #
 # Compile the stylesheet(s)
 #
 
-import sass
-
-output_css_dir = os.path.join(output_dir, 'css')
-os.makedirs(output_css_dir, exist_ok=True)
+output_css_prefix = 'css'
+os.makedirs(os.path.join(Dirs.output_dir, output_css_prefix), exist_ok=True)
 
 root_scss_list = [
     ('main.scss', 'main.css'),
 ]
 
 for root_scss, root_css in root_scss_list:
-    logger.info(f"Compiling ‘{root_scss}’ -> ‘{root_css}’")
-    css = sass.compile(
-        filename=os.path.join(stylesheets_dir, root_scss),
-        output_style='expanded',
-        #output_style='compressed',
-    )
-    with open(os.path.join(output_css_dir, root_css), 'w') as f:
-        f.write(css)
 
-#
-# Compile any static pages, like the index.html page
-#
-for fn in os.listdir(static_pages_dir):
-    if fn.endswith(".html"):
-        with open(os.path.join(static_pages_dir, fn)) as f:
-            pg_source = f.read()
-        pg_template = jinja2env.from_string(pg_source)
-        with open(os.path.join(output_dir, fn), 'w') as fw:
-            fw.write( pg_template.render(global_context) )
+    jinja2env.compile_sass(
+        source_dir=Dirs.stylesheets_dir,
+        fn_source=root_scss,
+        fn_output=os.path.join(output_css_prefix, root_css)
+    )
+    # css = sass.compile(
+    #     filename=os.path.join(Dirs.stylesheets_dir, root_scss),
+    #     output_style='expanded',
+    #     #output_style='compressed',
+    # )
+    # with open(os.path.join(output_css_dir, root_css), 'w') as f:
+    #     f.write(css)
+
 
 ################################################################################
 
+logger.info("Compiling global pages ...")
 
 #
-# generate!
+# Compile any global pages, like the index.html or contributions.html page
 #
+for fn in os.listdir(Dirs.global_pages_dir):
+    if fn.endswith(".html"):
+        jinja2env.compile_single_template(
+            source_dir=Dirs.global_pages_dir,
+            fn_template=fn,
+            fn_output=fn,
+            context=global_context
+        )
+
+
+
+################################################################################
+
+logger.info("Copying static assets ...")
+
+#
+# Copy static assets that the site might need
+#
+
+static_asset_exts = ('.html', '.css', '.js', '.svg', '.png', '.jpg', '.jpeg')
+
+jinja2env.copy_tree(
+    source_dir=Dirs.static_assets_dir,
+    target_dir='static/',
+    only_exts=static_asset_exts,
+)
+
+
+
+################################################################################
+
+#
+# generate the pages with the codes
+#
+
 htmlpgcoll.generate(
-    output_dir=output_dir,
+    output_dir=Dirs.output_dir,
     additional_context=global_context
 )
 
+
+
+################################################################################
 
 logger.info("Done!")

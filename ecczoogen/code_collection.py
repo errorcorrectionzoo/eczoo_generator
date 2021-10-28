@@ -72,6 +72,10 @@ class CodeCollection:
             
 
 
+
+    def all_codes(self):
+        return self.code_collection
+
     def get_code(self, code_id):
         try:
             return self.code_collection[code_id]

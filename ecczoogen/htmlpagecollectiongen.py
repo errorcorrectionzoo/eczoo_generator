@@ -128,7 +128,7 @@ class RefContextForHtmlConverter(htmlfromminilatex.HtmlRefContext):
 
     def get_code_and_href(self, code_id):
         # return (code object, codehref)
-        code = self.htmlpagecollection.zoo.code_collection.get_code(code_id)
+        code = self.htmlpagecollection.zoo.get_code(code_id)
         code_href = self.htmlpagecollection.get_code_href(code_id)
         return code, code_href
 
@@ -236,7 +236,7 @@ class HtmlPageCollection:
     def finished(self):
         # check if there are any codes that aren't included in any page, and
         # emit a warning.
-        for code_id in self.zoo.code_collection:
+        for code_id in self.zoo.all_codes():
             if code_id not in self.page_for_code_ids:
                 logger.warning(f"Code ‘{code_id}’ is not included in any page")
                 
@@ -289,7 +289,7 @@ f'''<a href="{page_url_html}">{code_name_html}</a>'''
                         repr(codeobj)
                     )
                     for code_id in htmlpage.code_id_list
-                    for codeobj in [ self.zoo.collection.get_code(code_id) ]
+                    for codeobj in [ self.zoo.get_code(code_id) ]
                 ],
                 page_footnotes=page_footnotes,
                 **htmlpage.info,
