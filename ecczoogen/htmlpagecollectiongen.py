@@ -75,12 +75,17 @@ class _HtmlDictObjectWrapper(_HtmlObjectWrapper):
 
 
 class HtmlPage:
-    def __init__(self, name, *,
-                 info,
-                 code_id_list,
-                 template_name,
-                 ext='.html',
-                 link_to_codes_here=True):
+    def __init__(
+            self,
+            name,
+            *,
+            info,
+            code_id_list,
+            template_name,
+            ext='.html',
+            link_to_codes_here=True,
+            list_in_sidebar=True
+    ):
         super().__init__()
         self.name = name
         self.info = info
@@ -88,6 +93,7 @@ class HtmlPage:
         self.template_name = template_name
         self.ext = ext
         self.link_to_codes_here = link_to_codes_here
+        self.list_in_sidebar = list_in_sidebar
 
     def path(self):
         return self.name + self.ext
@@ -235,6 +241,7 @@ class HtmlPageCollection:
                     )
                 self.page_for_code_ids[code_id] = htmlpage.name
     
+
     def finished(self):
         # check if there are any codes that aren't included in any page, and
         # emit a warning.

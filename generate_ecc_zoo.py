@@ -117,39 +117,65 @@ htmlpgcoll = htmlpagecollectiongen.HtmlPageCollection(
 logger.info("Setting up ecc list pages ...")
 
 #
-# Set up the pages of the site
+# Set up the code pages of the site
 #
 
+for code_id, code in zoo.all_codes().items():
 
-# TODO: in the future, we could automatically generate all the different
-#       combinations of physical/logical spaces.
-
-
-#
-# A page for qubits->qubits codes
-#
-htmlpgcoll.create_page(
-    htmlpagecollectiongen.HtmlPage(
-        name='qubits_to_qubits',
+    page = htmlpagecollectiongen.HtmlPage(
+        name='code_'+code_id,
         info={
-            'page_title': 'Encoding qubits into qubits'
+            'page_title': code.name
         },
-        code_id_list=zoo.get_code_ids_by_physical_logial('qubits', 'qubits'),
-        template_name='page_code_list.html'
+        code_id_list=[code_id],
+        template_name='page_code_list.html',
+        list_in_sidebar=False
     )
-)
+
+    htmlpgcoll.create_page( page )
+
 
 #
-# A page for bits->bits codes
+# Codes by type of encoding (X into X)
 #
+
+root_codes = [
+    ('qubits_into_qubits', 'Encoding qubits into qubits'),
+    ('qudits_into_qudits', 'Encoding qudits into qudits'),
+    ('oscillators_into_oscillators', 'Encoding oscillators into oscillators'),
+    ('qudits_into_oscillators', 'Encoding qudits into oscillators'),
+    ('q-ary_digits_into_q-ary_digits', 'Encoding q-ary digits into q-ary digits'),
+    ('bits_into_bits', 'Encoding bits into bits'),
+]
+
+for root_code_id, title in root_codes:
+
+    code_id_list = zoo.get_code_family_tree(root_code_id)
+
+    page = htmlpagecollectiongen.HtmlPage(
+        name=root_code_id,
+        info={
+            'page_title': title
+        },
+        code_id_list=code_id_list,
+        template_name='page_code_list.html',
+        link_to_codes_here=False
+    )
+
+    htmlpgcoll.create_page( page )
+
+
+# Code index page
+
 htmlpgcoll.create_page(
     htmlpagecollectiongen.HtmlPage(
-        name='bits_to_bits',
+        name='all',
         info={
-            'page_title': 'Encoding bits into bits'
+            'page_title': 'Index of all codes',
         },
-        code_id_list=zoo.get_code_ids_by_physical_logial('bits', 'bits'),
-        template_name='page_code_list.html'
+        code_id_list=zoo.all_codes().keys(),
+        template_name='page_code_list.html',
+        link_to_codes_here=False,
     )
 )
 

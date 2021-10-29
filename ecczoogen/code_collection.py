@@ -88,3 +88,26 @@ class CodeCollection:
             for code_id, code in self.code_collection.items()
             if code.fields.get('physical') == physical and code.fields.get('logical') == logical
         ]
+
+    def get_code_family_tree(self, parent_code_id):
+
+        logger.debug(f"getting code family tree for ‘{parent_code_id}’ ...")
+
+        parent_code = self.get_code(parent_code_id)
+        
+        all_child_ids = [ parent_code_id ]
+
+        def _visit_code(c):
+            children = c.relations.parent_of
+            for child_rel in children:
+                child = child_rel.code
+                if child.code_id not in all_child_ids:
+                    all_child_ids.append(child.code_id)
+            for child_rel in children:
+                _visit_code(child_rel.code)
+
+        _visit_code(parent_code)
+
+        logger.debug(f"code family tree for ‘{parent_code_id}’ -> ‘{all_child_ids}’")
+
+        return all_child_ids

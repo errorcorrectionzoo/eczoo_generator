@@ -10,7 +10,9 @@
       <h1>Codes</h1>
       <ul class="navlinks">
 {% for page in nav_pages %}
+{% if page.list_in_sidebar %}
         <li><a href="{{ page.path() | prebaseurl }}">{{page.info.page_title}}</a></li>
+{% endif %}
 {% endfor %}
       </ul>
       <h1>Additional resources</h1>
