@@ -22,16 +22,19 @@ class ExtendedJinja2Environment(jinja2.Environment):
 
     def copy_file(self, *, source_dir, fn_source, fn_target):
         
-        logger.info(f"Copying ‘{fn_source}’ → ‘{fn_target}’")
-        shutil.copy2(os.path.join(source_dir, fn_source),
-                     os.path.join(self.dirs.output_dir, fn_target))
+        full_src_path = os.path.join(source_dir, fn_source)
+        logger.debug(f"Copying file "
+                     f"‘{os.path.relpath(full_src_path, start=self.dirs.root_dir)}’ "
+                     f"→ ‘{os.path.relpath(fn_target, start=self.dirs.output_dir)}’")
+        shutil.copy2(full_src_path, os.path.join(self.dirs.output_dir, fn_target))
 
     def copy_tree(self, *, source_dir, target_dir, only_exts=None):
         
         def do_copy(fn_src, fn_dest):
             if only_exts and not fn_src.endswith( only_exts ):
                 return
-            logger.info(f"Copying ‘{fn_src}’ → ‘{fn_dest}’")
+            logger.debug(f"Copying ‘{os.path.relpath(fn_src, start=self.dirs.root_dir)}’ "
+                         f"→ ‘{os.path.relpath(fn_dest, start=self.dirs.output_dir)}’")
             shutil.copy(fn_src, fn_dest)
 
         shutil.copytree(source_dir, os.path.join(self.dirs.output_dir, target_dir),
@@ -44,10 +47,14 @@ class ExtendedJinja2Environment(jinja2.Environment):
 
     def compile_sass(self, *, source_dir, fn_source, fn_output):
 
-        logger.info(f"Compiling CSS ‘{fn_source}’ -> ‘{fn_output}’")
+        full_src_path = os.path.join(source_dir, fn_source)
+
+        logger.debug(f"Compiling SASS → CSS "
+                     f"‘{os.path.relpath(full_src_path, start=self.dirs.root_dir)}’ "
+                     f"→ ‘{fn_output}’")
 
         css_source = sass.compile(
-            filename=os.path.join(source_dir, fn_source),
+            filename=full_src_path,
 
             output_style='expanded',
             #output_style='compressed',
@@ -64,9 +71,12 @@ class ExtendedJinja2Environment(jinja2.Environment):
     def compile_single_template(self, *, source_dir, fn_template, fn_output,
                                 context={}):
 
-        logger.info(f"Compiling template ‘{fn_template}’ -> ‘{fn_output}’")
+        full_src_path = os.path.join(source_dir, fn_template)
+        logger.debug(f"Compiling template "
+                     f"‘{os.path.relpath(full_src_path, start=self.dirs.root_dir)}’ "
+                     f"→ ‘{fn_output}’")
 
-        with open(os.path.join(source_dir, fn_template)) as f:
+        with open(full_src_path) as f:
             pg_source = f.read()
 
         pg_template = self.from_string(pg_source)

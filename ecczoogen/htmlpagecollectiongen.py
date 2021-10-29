@@ -276,7 +276,7 @@ f'''<a href="{page_url_html}">{code_name_html}</a>'''
         for page_name, htmlpage in self.pages.items():
 
             output_page_fname = os.path.join(output_dir, htmlpage.path())
-            logger.info(f"Generating page ‘{output_page_fname}’ ...")
+            logger.info(f"Generating page ‘{htmlpage.path()}’")
 
             page_footnotes = HtmlPageNotes(self)
 

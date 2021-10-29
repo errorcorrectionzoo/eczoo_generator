@@ -9,26 +9,43 @@ import logging
 
 sys.path.insert(0, '.')
 import ecczoogen
-ecczoogen.setup_logging(level=logging.DEBUG)
+ecczoogen.setup_logging(level=logging.INFO)
 
 from ecczoogen import zoo, htmlpagecollectiongen, j2_helpers
 
 logger = logging.getLogger()
 
+
+#
+# Support argument "--verbose"
+#
+import argparse
+args_parser = argparse.ArgumentParser()
+args_parser.add_argument("--verbose", action='store_true', default=False,
+                         help="Print out more information")
+args = args_parser.parse_args()
+if args.verbose:
+    logger.setLevel(logging.DEBUG)
+
+
 #
 # Fixed paths
 #
 
+_root_dir = os.path.dirname(__file__)
+
 class Dirs:
-    codes_dir = os.path.join(os.path.dirname(__file__), 'scratch-example-codes')
+    root_dir = _root_dir
 
-    templates_dir = os.path.join(os.path.dirname(__file__), 'templates')
-    stylesheets_dir = os.path.join(os.path.dirname(__file__), 'stylesheets')
-    global_pages_dir =os.path.join(os.path.dirname(__file__), 'global_pages')
+    codes_dir = os.path.join(_root_dir, 'scratch-example-codes')
 
-    static_assets_dir =os.path.join(os.path.dirname(__file__), 'static_assets')
+    templates_dir = os.path.join(_root_dir, 'templates')
+    stylesheets_dir = os.path.join(_root_dir, 'stylesheets')
+    global_pages_dir = os.path.join(_root_dir, 'global_pages')
 
-    output_dir = os.path.join(os.path.dirname(__file__), 'out')
+    static_assets_dir = os.path.join(_root_dir, 'static_assets')
+
+    output_dir = os.path.join(_root_dir, 'out')
 
 
 ################################################################################
@@ -202,7 +219,7 @@ special_pages = [ PagePrettyCodeGraph, ]
 
 for SpecialPageClass in special_pages:
 
-    logger.info("Compiling special pages ...")
+    logger.info(f"Compiling special page ‘{SpecialPageClass.__name__}’")
 
     pg = SpecialPageClass(
         dirs=Dirs,
@@ -216,6 +233,8 @@ for SpecialPageClass in special_pages:
 
 
 ################################################################################
+
+logger.info("Generating code pages ...")
 
 #
 # generate the pages with the codes
