@@ -44,8 +44,7 @@ code.)
 Don't open the outputted HTML file directly in your browser! It won't be able to
 find the dependent files.  Instead, run the command:
 
-    > cd out
-    > poetry run python -m http.server
+    > poetry run python -m http.server -d out
     
 The command should display something like `Serving HTTP on :: port 8000
 (http://[::]:8000/) ...`.  Enter the given address in your browser to view the
