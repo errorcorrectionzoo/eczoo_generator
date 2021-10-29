@@ -79,19 +79,21 @@ class HtmlPage:
             self,
             name,
             *,
-            info,
-            code_id_list,
             template_name,
+            info={},
             ext='.html',
+            code_id_list,
+            context={},
             link_to_codes_here=True,
             list_in_sidebar=True
     ):
         super().__init__()
         self.name = name
-        self.info = info
         self.code_id_list = code_id_list
         self.template_name = template_name
+        self.info = info
         self.ext = ext
+        self.context = context
         self.link_to_codes_here = link_to_codes_here
         self.list_in_sidebar = list_in_sidebar
 
@@ -123,7 +125,7 @@ class HtmlCitation:
 
 
 _rx_cite_arxiv = re.compile(r'^arxiv:(?P<arxivid>[-a-zA-Z/_.+0-9]+)$', flags=re.IGNORECASE)
-_rx_cite_doi = re.compile(r'^doi:(?P<doi>.*)$')
+_rx_cite_doi = re.compile(r'^doi:(?P<doi>.*)$', flags=re.IGNORECASE)
 
 
 # ------------------------------------------------------------------------------
@@ -207,17 +209,19 @@ class HtmlPageNotes:
 
 
 class HtmlPageCollection:
-    def __init__(self, zoo, jinja2env, *, base_url='/'):
+    def __init__(self, zoo, site_generation_environment):
         super().__init__()
         self.zoo = zoo
-        self.jinja2env = jinja2env
+        self.site_generation_environment = site_generation_environment
+
+        self.jinja2env = self.site_generation_environment.jinja2env
 
         self.pages = {}
         self.page_for_code_ids = {}
-        self.base_url = base_url
 
         # extend the jinja2 env to include our filter(s)
-        self.jinja2env.filters['prebaseurl'] = lambda x: self.base_url + x
+        self.jinja2env.filters['prebaseurl'] = \
+            lambda x: self.site_generation_environment.prefix_base_url(x)
 
         self.jinja2env.filters['code_ref'] = self._jfilter_code_ref
         self.jinja2env.filters['code_ref_href'] = self._jfilter_code_ref_href
@@ -257,7 +261,8 @@ class HtmlPageCollection:
                          exc_info=True)
             raise
         page_path = self.pages[page_name].path()
-        return f'{self.base_url}{page_path}#ecc_{code_id}'
+        full_page_path = self.site_generation_environment.prefix_base_url(page_path)
+        return f'{full_page_path}#ecc_{code_id}'
 
     def format_footnote_label_html(self, foot_no):
         return '({:d})'.format(foot_no)
@@ -282,8 +287,8 @@ f'''<a href="{page_url_html}">{code_name_html}</a>'''
         # generate all the family pages
         for page_name, htmlpage in self.pages.items():
 
-            output_page_fname = os.path.join(output_dir, htmlpage.path())
-            logger.info(f"Generating page ‘{htmlpage.path()}’")
+            output_page_fname = htmlpage.path()
+            logger.info(f"Generating page ‘{output_page_fname}’")
 
             page_footnotes = HtmlPageNotes(self)
 
@@ -302,10 +307,19 @@ f'''<a href="{page_url_html}">{code_name_html}</a>'''
                 ],
                 page_footnotes=page_footnotes,
                 **htmlpage.info,
+                **{k: _HtmlObjectWrapper(v, tohtmlconverter, repr(v))
+                   for (k, v) in (htmlpage.context.items() if htmlpage.context else {})},
                 **additional_context
             )
 
-            template = self.jinja2env.get_template(htmlpage.template_name)
-            with open(output_page_fname, 'w') as f:
-                f.write(template.render(context))
+
+            self.site_generation_environment.compile_template(
+                fn_template=htmlpage.template_name,
+                fn_output=output_page_fname,
+                context=context
+            )
+
+            # template = self.jinja2env.get_template(htmlpage.template_name)
+            # with open(os.path.join(self.dirs.output_dir, output_page_fname), 'w') as f:
+            #     f.write(template.render(context))
 

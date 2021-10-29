@@ -11,7 +11,7 @@ sys.path.insert(0, '.')
 import ecczoogen
 ecczoogen.setup_logging(level=logging.INFO)
 
-from ecczoogen import zoo, htmlpagecollectiongen, j2_helpers
+from ecczoogen import zoo, htmlpagecollectiongen, sitegenerationenvironment
 
 logger = logging.getLogger()
 
@@ -40,8 +40,10 @@ class Dirs:
     codes_dir = os.path.join(_root_dir, '..', 'eczoo_data', 'codes')
 
     templates_dir = os.path.join(_root_dir, 'templates')
+    pages_dir = os.path.join(_root_dir, 'templates', 'pages')
+
     stylesheets_dir = os.path.join(_root_dir, 'stylesheets')
-    global_pages_dir = os.path.join(_root_dir, 'global_pages')
+    javascripts_dir = os.path.join(_root_dir, 'javascripts')
 
     static_assets_dir = os.path.join(_root_dir, 'static_assets')
 
@@ -67,17 +69,18 @@ logger.info("Setting up the jinja2 template environment ...")
 # Set up an environment for generating the HTML pages with our HTML templates
 #
 
-jinja2env = j2_helpers.ExtendedJinja2Environment(
+site_gen_env = sitegenerationenvironment.SiteGenerationEnvironment(
+    # Jinja2 stuff:
+    jinja2env=jinja2.Environment(
+        loader=jinja2.FileSystemLoader(Dirs.templates_dir),
+        autoescape=jinja2.select_autoescape(['html', 'xml']),
+        trim_blocks=True,
+        lstrip_blocks=True,
+    ),
     # my stuff:
     dirs=Dirs,
     base_url='/',
-    # Jinja2 stuff:
-    loader=jinja2.FileSystemLoader(Dirs.templates_dir),
-    autoescape=jinja2.select_autoescape(['html', 'xml']),
-    trim_blocks=True,
-    lstrip_blocks=True,
 )
-
 
 
 
@@ -92,12 +95,11 @@ logger.info("Copying static assets ...")
 
 static_asset_exts = ('.html', '.css', '.js', '.svg', '.png', '.jpg', '.jpeg')
 
-jinja2env.copy_tree(
+site_gen_env.copy_tree(
     source_dir=Dirs.static_assets_dir,
     target_dir='static/',
     only_exts=static_asset_exts,
 )
-
 
 
 ################################################################################
@@ -108,8 +110,7 @@ jinja2env.copy_tree(
 
 htmlpgcoll = htmlpagecollectiongen.HtmlPageCollection(
     zoo,
-    jinja2env,
-    base_url=jinja2env.base_url
+    site_gen_env,
 )
 
 ################################################################################
@@ -122,14 +123,18 @@ logger.info("Setting up ecc list pages ...")
 
 for code_id, code in zoo.all_codes().items():
 
+    # page for this specific code
     page = htmlpagecollectiongen.HtmlPage(
-        name='code_'+code_id,
+        name=f'code_{code_id}',
         info={
-            'page_title': code.name
+            'page_title': code.name,
         },
         code_id_list=[code_id],
-        template_name='page_code_list.html',
-        list_in_sidebar=False
+        context={
+            'code': code,
+        },
+        template_name='dyn_pages/code_page.html',
+        list_in_sidebar=False,
     )
 
     htmlpgcoll.create_page( page )
@@ -155,10 +160,10 @@ for root_code_id, title in root_codes:
     page = htmlpagecollectiongen.HtmlPage(
         name=root_code_id,
         info={
-            'page_title': title
+            'page_title': title,
         },
         code_id_list=code_id_list,
-        template_name='page_code_list.html',
+        template_name='dyn_pages/code_list.html',
         link_to_codes_here=False
     )
 
@@ -174,7 +179,7 @@ htmlpgcoll.create_page(
             'page_title': 'Index of all codes',
         },
         code_id_list=zoo.all_codes().keys(),
-        template_name='page_code_list.html',
+        template_name='dyn_pages/code_list.html',
         link_to_codes_here=False,
     )
 )
@@ -189,6 +194,31 @@ htmlpgcoll.create_page(
 global_context = {
     'nav_pages': htmlpgcoll.pages.values()
 }
+
+
+################################################################################
+
+#
+# Copy our javascripts in
+#
+
+logger.info("Inculding javascripts ...")
+
+output_js_prefix = 'js'
+os.makedirs(os.path.join(Dirs.output_dir, output_js_prefix), exist_ok=True)
+
+root_js_list = [
+    ('misc.js', 'misc.js'),
+]
+
+for root_js, root_js_out in root_js_list:
+
+    site_gen_env.copy_file(
+        source_dir=Dirs.javascripts_dir,
+        fn_source=root_js,
+        fn_target=os.path.join(output_js_prefix, root_js_out)
+    )
+
 
 
 ################################################################################
@@ -208,7 +238,7 @@ root_scss_list = [
 
 for root_scss, root_css in root_scss_list:
 
-    jinja2env.compile_sass(
+    site_gen_env.compile_sass(
         source_dir=Dirs.stylesheets_dir,
         fn_source=root_scss,
         fn_output=os.path.join(output_css_prefix, root_css)
@@ -222,11 +252,11 @@ logger.info("Compiling global pages ...")
 #
 # Compile any global pages, like the index.html or contributions.html page
 #
-for fn in os.listdir(Dirs.global_pages_dir):
+for fn in os.listdir(Dirs.pages_dir):
     if fn.endswith(".html"):
-        jinja2env.compile_single_template(
-            source_dir=Dirs.global_pages_dir,
-            fn_template=fn,
+        fn_template = os.path.relpath(os.path.join(Dirs.pages_dir, fn), Dirs.templates_dir)
+        site_gen_env.compile_template(
+            fn_template=fn_template,
             fn_output=fn,
             context=global_context
         )
@@ -249,7 +279,7 @@ for SpecialPageClass in special_pages:
 
     pg = SpecialPageClass(
         dirs=Dirs,
-        jinja2env=jinja2env,
+        site_gen_env=site_gen_env,
         zoo=zoo,
         htmlpagescollection=htmlpgcoll,
         global_context=global_context,

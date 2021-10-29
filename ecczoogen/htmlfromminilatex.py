@@ -146,7 +146,9 @@ class ToHtmlConverter:
                 s += self.html_wrap_in_tag(
                     'a',
                     citelabel_html,
-                    attrs={'href': htmlescape(citehref)},
+                    attrs={
+                        'href': htmlescape(citehref),
+                    },
                     class_='cite',
                 )
             logger.debug(f"Citation: ‘{citekeylist}’ → ‘{s}’")
@@ -160,7 +162,9 @@ class ToHtmlConverter:
             return self.html_wrap_in_tag(
                 'a',
                 fnlabel_html,
-                attrs={'href': htmlescape(fnhref)},
+                attrs={
+                    'href': htmlescape(fnhref),
+                },
                 class_='footnote',
             )
 

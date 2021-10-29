@@ -1,0 +1,13 @@
+{% extends 'layout/base_page.html' %}
+
+{% block contents %}
+
+{% for code in code_list %}
+
+  {% include 'pieces/code_info_short.html' %}
+
+{% endfor %}
+
+{% include 'pieces/endnotes.html' %}
+
+{% endblock contents %}

@@ -9,7 +9,7 @@ Expected context variables:
 
 ################################################################################}
 
-<dl class="ecc-code" id="ecc_{{code.code_id}}">
+<dl class="ecc-code ecc-code-page" id="ecc_{{code.code_id}}">
 
 <dt>Name</dt>
 <dd class="code-name">{{code.name}}
@@ -36,35 +36,39 @@ Expected context variables:
 </dd>
 {% endif %}
 
+{% if code.relations.parents %}
 <dt>Parent(s)</dt>
 <dd class="code-parents">
 {% set use_relation_type = 'parents' %}
 {% set use_relations = code.relations.parents %}
-{% include 'list_code_relations.html' %}
+{% include 'pieces/list_code_relations.html' %}
 </dd>
+{% endif %}
 
 {% if code.relations.parent_of %}
 <dt>Parent of</dt>
 <dd class="code-parent-of">
 {% set use_relation_type = 'parent-of' %}
 {% set use_relations = code.relations.parent_of %}
-{% include 'list_code_relations.html' %}
+{% include 'pieces/list_code_relations.html' %}
 </dd>
 {% endif %}
 
+{% if code.relations.cousins %}
 <dt>Cousin(s)</dt>
 <dd class="code-cousins">
 {% set use_relation_type = 'cousins' %}
 {% set use_relations = code.relations.cousins %}
-{% include 'list_code_relations.html' %}
+{% include 'pieces/list_code_relations.html' %}
 </dd>
+{% endif %}
 
 {% if code.relations.cousin_of %}
 <dt>Cousin of</dt>
 <dd class="code-cousin-of">
 {% set use_relation_type = 'cousin-of' %}
 {% set use_relations = code.relations.cousin_of %}
-{% include 'list_code_relations.html' %}
+{% include 'pieces/list_code_relations.html' %}
 </dd>
 {% endif %}
 

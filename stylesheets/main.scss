@@ -109,15 +109,19 @@ dd {
 
 ////////////////////////////////////////////////////////////////////////////////
 //
-// main section & the list of codes
+// main section & code info
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-dl.ecc-code {
+.ecc-code {
     margin: 0px 0px 20px;
     padding: 3px;
     border: dotted 1px gray;
 }
+.ecc-code.ecc-code-page {
+    border: none 0px;
+}
+
 
 .ecc-code > dt {
     min-width: 120px;
@@ -127,6 +131,7 @@ dl.ecc-code {
 .ecc-code > dd
 {
     padding: 2px 0px;
+    margin-bottom: 10px;
 }
 
 .na {
@@ -166,6 +171,27 @@ dd.code-name {
 }
 
 
+////////////////////////////////////////////////////////////////////////////////
+//
+// code info short version
+//
+////////////////////////////////////////////////////////////////////////////////
+
+.short-code-name {
+    font-weight: bold;
+    display: block;
+    margin-bottom: 5px;
+}
+.short-code-description {
+    font-style: italic;
+    display: block;
+    margin-bottom: 10px;
+}
+.short-code-info {
+    font-style: italic;
+    display: block;
+    margin-bottom: 10px;
+}
 
 
 
@@ -197,6 +223,26 @@ dd.code-name {
 }
 
 
+#endnotes {
+    dt, dd {
+        transition: background-color 0.5s;
+    }
+}
+
+$visual-highlight-color: rgba(255,255,0,1.0);
+
+@mixin visual-highlight {
+    background-color: $visual-highlight-color;
+    box-shadow: $visual-highlight-color 0px 0px 10px;
+    //transition: background-color 0s;
+}
+
+.visual-highlight {
+    @include visual-highlight;
+}
+.visual-highlight + dd {
+    @include visual-highlight;
+}
 
 
 

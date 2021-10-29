@@ -4,9 +4,14 @@
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <title>{{page_title}} [error correction zoo]</title>
+  <title>{% block block_page_title %}{{page_title}}{% endblock %} [error correction zoo]</title>
 
   <link type="text/css" rel="stylesheet" href="{{ 'css/main.css' | prebaseurl }}" />
+
+  <script type="text/javascript" async
+	  src="{{ 'js/misc.js' | prebaseurl }}">
+  </script>
+
   <script type="text/javascript" async
 	  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
   </script>
@@ -27,7 +32,23 @@
   >
 
   <header id="header">
-    <h1>{{page_title}}</h1>
+    <h1>{{ self.block_page_title() }}</h1>
   </header><!-- #header -->
 
   <main id="main">
+{% block contents %}
+<p style="color: #7f0000; font-size: 50px">(fill page contents here)</p>
+{% endblock contents %}
+  </main><!-- #main -->
+
+{% include 'layout/sidebar.html' %}
+
+  <footer id="footer">
+    <div class="footer-stuff">
+      Imprint, etc.
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>

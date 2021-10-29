@@ -22,7 +22,12 @@ class Code:
         
         # these fields only get set once we are assigned to a CodeCollection
         self.collection = None
+
+        # these fields only get set after we are assigned to a CodeCollection
+        # and after the code collection is finalized.
         self.relations = CodeRelations()
+        self.generation_level = None
+
 
     def __str__(self):
         return self.name

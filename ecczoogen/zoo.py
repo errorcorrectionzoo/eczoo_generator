@@ -42,6 +42,9 @@ class Zoo:
     def all_codes(self, *args, **kwargs):
         return self._collection.all_codes(*args, **kwargs)
 
+    def root_codes(self, *args, **kwargs):
+        return self._collection.root_codes(*args, **kwargs)
+
     def get_code(self, *args, **kwargs):
         return self._collection.get_code(*args, **kwargs)
 

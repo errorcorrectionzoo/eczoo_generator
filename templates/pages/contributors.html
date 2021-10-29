@@ -1,6 +1,7 @@
-{% set page_title = 'Error Correction Zoo — Contributors' %}
+{% extends 'layout/base_page.html' %}
+{% block block_page_title %}Error Correction Zoo — Contributors{% endblock %}
 
-{% include 'html_top.html' %}
+{% block contents %}
 
 <h1>Thank you.</h1>
 
@@ -16,5 +17,4 @@
 <li><a href="https://example.com/some/personal/web/page" target="_blank">John Doe</a></li>
 </ul>
 
-
-{% include 'html_bottom.html' %}
+{% endblock contents %}
