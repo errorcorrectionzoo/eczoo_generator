@@ -272,7 +272,7 @@ f'''<a href="{page_url_html}">{code_name_html}</a>'''
 
     def generate(self, *, output_dir, additional_context={}):
 
-        # generate all pages
+        # generate all the family pages
         for page_name, htmlpage in self.pages.items():
 
             output_page_fname = os.path.join(output_dir, htmlpage.path())
@@ -298,6 +298,7 @@ f'''<a href="{page_url_html}">{code_name_html}</a>'''
                 **additional_context
             )
 
+            template = self.jinja2env.get_template(htmlpage.template_name)
             with open(output_page_fname, 'w') as f:
-                f.write(self.jinja2env.get_template(htmlpage.template_name).render(context))
+                f.write(template.render(context))
 

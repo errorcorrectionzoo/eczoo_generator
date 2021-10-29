@@ -37,7 +37,7 @@ _root_dir = os.path.dirname(__file__)
 class Dirs:
     root_dir = _root_dir
 
-    codes_dir = os.path.join(_root_dir, 'scratch-example-codes')
+    codes_dir = os.path.join(_root_dir, '..', 'errorcorrectionzoo_data', 'codes')
 
     templates_dir = os.path.join(_root_dir, 'templates')
     stylesheets_dir = os.path.join(_root_dir, 'stylesheets')
@@ -234,11 +234,11 @@ for SpecialPageClass in special_pages:
 
 ################################################################################
 
-logger.info("Generating code pages ...")
-
 #
 # generate the pages with the codes
 #
+
+logger.info("Generating code pages ...")
 
 htmlpgcoll.generate(
     output_dir=Dirs.output_dir,
