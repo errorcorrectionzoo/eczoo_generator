@@ -144,13 +144,17 @@ for code_id, code in zoo.all_codes().items():
 # Codes by type of encoding (X into X)
 #
 
+# root_codes = [
+#     ('qubits_into_qubits', 'Encoding qubits into qubits'),
+#     ('qudits_into_qudits', 'Encoding qudits into qudits'),
+#     ('oscillators_into_oscillators', 'Encoding oscillators into oscillators'),
+#     ('qudits_into_oscillators', 'Encoding qudits into oscillators'),
+#     ('q-ary_digits_into_q-ary_digits', 'Encoding q-ary digits into q-ary digits'),
+#     ('bits_into_bits', 'Encoding bits into bits'),
+# ]
 root_codes = [
-    ('qubits_into_qubits', 'Encoding qubits into qubits'),
-    ('qudits_into_qudits', 'Encoding qudits into qudits'),
-    ('oscillators_into_oscillators', 'Encoding oscillators into oscillators'),
-    ('qudits_into_oscillators', 'Encoding qudits into oscillators'),
-    ('q-ary_digits_into_q-ary_digits', 'Encoding q-ary digits into q-ary digits'),
-    ('bits_into_bits', 'Encoding bits into bits'),
+    (code_id, code.name)
+    for (code_id, code) in zoo.root_codes().items()
 ]
 
 for root_code_id, title in root_codes:

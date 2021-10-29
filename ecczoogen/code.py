@@ -5,20 +5,53 @@ logger = logging.getLogger(__name__)
 class Code:
     def __init__(self, info):
         super().__init__()
-        # todo: validate data
-        self.code_id = info['code_id']
+
         self._info = info
 
-        # parse data structure into fields
-        self.name = self._info['name']
-        self.fields = {k: self._info[k]
-                       for k in self._info.keys()
-                       if k not in ('name', 'relations', 'features')}
-        if not self._info.get('features'):
-            self.features = {}
-        else:
-            self.features = {k: self._info['features'][k]
-                             for k in self._info.get('features').keys()}
+        # parse the data structure.
+        try:
+            kw = dict(info)
+
+            self.code_id = kw.pop('code_id')
+
+            self.name = kw.pop('name')
+            self.description = kw.pop('description')
+
+            self.protection = kw.pop('protection', None)
+
+            self.decoder = kw.pop('decoder', None)
+
+            self.features = {
+                k: v
+                for (k,v) in kw.pop('features', {}).items() # a dictionary
+            }
+
+            self.realizations = kw.pop('realizations', None)
+
+            
+            self.notes = kw.pop('notes', None) # free text
+
+            rel_info = dict( kw.pop('relations', {}) )
+            self.relations_info = {
+                'parents': rel_info.pop('parents', {}),
+                'cousins': rel_info.pop('cousins', {}),
+            }
+            if rel_info:
+                raise ValueError(f"Additional unexpected keys "
+                                 f"{list(rel_info.keys())} in YML under ‘relations:’ for "
+                                 f"code ‘{self.code_id}’")
+
+            if kw:
+                raise ValueError(f"Additional unexpected keys "
+                                 f"{list(kw.keys())} in YML for code ‘{self.code_id}’")
+
+        except KeyError as e:
+            logger.error(f"Missing key for code {self.code_id}: {e}")
+            raise
+        except Exception as e:
+            logger.error(f"Error parsing data structure for code {self.code_id}: {e}")
+            raise
+
         
         # these fields only get set once we are assigned to a CodeCollection
         self.collection = None
@@ -27,7 +60,6 @@ class Code:
         # and after the code collection is finalized.
         self.relations = CodeRelations()
         self.generation_level = None
-
 
     def __str__(self):
         return self.name

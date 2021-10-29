@@ -91,7 +91,7 @@ class PagePrettyCodeGraph:
 
         for code_id, code in all_codes_dict.items():
 
-            short_description = code.fields.get('description')
+            short_description = code.description
             if short_description and len(short_description) > 200:
                 short_description = short_description[:200-3]+'...',
 

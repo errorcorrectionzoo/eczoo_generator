@@ -16,13 +16,15 @@ Expected context variables:
   <a class="code-self-permalink" href="{{code|code_ref_href}}">&#167;</a></dd>
 
 <dt>Description</dt>
-<dd class="code-description">{{code.fields.description}}</dd>
-
-<dt>Encoding</dt>
-<dd class="code-encoding">{{code.fields.encoding}}</dd>
+<dd class="code-description">{{code.description}}</dd>
 
 <dt>Protection</dt>
-<dd class="code-protection">{{code.fields.protection}}</dd>
+<dd class="code-protection">{{code.protection}}</dd>
+
+{% if code.decoder %}
+<dt>Decoder</dt>
+<dd class="code-decoder">{{code.decoder}}</dd>
+{% endif %}
 
 {% if code.features %}
 <dt>Notable Features</dt>
@@ -34,6 +36,16 @@ Expected context variables:
 {% endfor %}
   </dl>
 </dd>
+{% endif %}
+
+{% if code.notes %}
+<dt>Notes</dt>
+<dd class="code-notes">{{code.notes}}</dd>
+{% endif %}
+
+{% if code.realizations %}
+<dt>Realizations</dt>
+<dd class="code-realizations">{{code.realizations}}</dd>
 {% endif %}
 
 {% if code.relations.parents %}

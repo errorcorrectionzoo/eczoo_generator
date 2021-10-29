@@ -18,14 +18,25 @@ class Zoo:
 
         for (dirpath, dirnames, filenames) in os.walk(codes_dir, followlinks=True):
             show_dirpath = os.path.relpath(dirpath)
+
             logger.info(f"Scanning for code YAML files (.yml) in ‘{show_dirpath}’ ...")
+
             for filename in filenames:
                 fullfname = os.path.join(dirpath, filename)
                 if not fullfname.endswith('.yml'):
                     continue
+
                 logger.debug(f"Loading code file ‘{filename}’ ...")
                 with open(os.path.join(codes_dir, fullfname), 'r') as f:
-                    self._collection.add_code( code.Code( yaml.safe_load(f) ) )
+                    try:
+                        code_info = yaml.safe_load(f)
+                    except Exception as e:
+                        logger.error(f"Failed to parse YAML file ‘{filename}’: {e}")
+                        raise
+
+                codeobj = code.Code( code_info )
+
+                self._collection.add_code( codeobj )
 
         logger.info(f"Finalizing code collection ...")
 
