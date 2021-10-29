@@ -37,7 +37,7 @@ _root_dir = os.path.dirname(__file__)
 class Dirs:
     root_dir = _root_dir
 
-    codes_dir = os.path.join(_root_dir, '..', 'errorcorrectionzoo_data', 'codes')
+    codes_dir = os.path.join(_root_dir, '..', 'eczoo_data', 'codes')
 
     templates_dir = os.path.join(_root_dir, 'templates')
     stylesheets_dir = os.path.join(_root_dir, 'stylesheets')
@@ -45,7 +45,7 @@ class Dirs:
 
     static_assets_dir = os.path.join(_root_dir, 'static_assets')
 
-    output_dir = os.path.join(_root_dir, 'out')
+    output_dir = os.path.join(_root_dir, '..', 'eczoo_website')
 
 
 ################################################################################
