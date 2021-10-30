@@ -7,9 +7,5 @@ $id: "https://errorcorrectionzoo.org/schemas/ecc_features"
 
 type: object
 
-
-items:
-  type: object
-  required: ['code_id']
-  additionalProperties: false
-
+# todo, we should codify the exact properties and values that can be set under
+# within the `features:` tree.
