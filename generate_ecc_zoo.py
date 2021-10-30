@@ -155,7 +155,7 @@ for code_id, code in zoo.all_codes().items():
         info={
             'page_title': code.name,
         },
-        code_id_list=[code_id],
+        code_id_list=[ code_id ],
         context={
             'code': code,
         },
@@ -185,14 +185,17 @@ root_codes = [
 
 for root_code_id, title in root_codes:
 
-    code_id_list = zoo.get_code_family_tree(root_code_id)
+    code_list = zoo.get_code_family_tree(root_code_id)
 
     page = htmlpagecollectiongen.HtmlPage(
         name=root_code_id,
         info={
             'page_title': title,
         },
-        code_id_list=code_id_list,
+        code_id_list=[
+            code.code_id
+            for code in sorted(code_list, key=lambda code: code.family_generation_level)
+        ],
         template_name='dyn_pages/code_list.html',
         link_to_codes_here=False
     )
@@ -208,7 +211,10 @@ htmlpgcoll.create_page(
         info={
             'page_title': 'Index of all codes',
         },
-        code_id_list=zoo.all_codes().keys(),
+        code_id_list=[
+            code.code_id
+            for code in sorted(zoo.all_codes().values(), key=lambda code: code.name)
+        ],
         template_name='dyn_pages/code_list.html',
         link_to_codes_here=False,
     )

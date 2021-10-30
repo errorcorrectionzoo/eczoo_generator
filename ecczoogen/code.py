@@ -67,7 +67,8 @@ class Code:
         # these fields only get set after we are assigned to a CodeCollection
         # and after the code collection is finalized.
         self.relations = CodeRelations()
-        self.generation_level = None
+        self.family_generation_level = None
+        self.family_root_code = None
 
     def __str__(self):
         return self.name

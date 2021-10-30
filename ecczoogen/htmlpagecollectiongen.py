@@ -330,13 +330,10 @@ f'''<a href="{page_url_html}">{code_name_html}</a>'''
                         tohtmlconverter,
                         repr(codeobj)
                     )
-                    for codeobj in sorted(
-                            [
-                                self.zoo.get_code(code_id)
-                                for code_id in htmlpage.code_id_list
-                            ],
-                            key=lambda code: code.generation_level
-                    )
+                    for codeobj in [
+                            self.zoo.get_code(code_id)
+                            for code_id in htmlpage.code_id_list
+                    ]
                 ],
                 page_footnotes=page_footnotes,
                 **htmlpage.info,

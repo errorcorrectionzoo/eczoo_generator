@@ -12,9 +12,14 @@ $page-header-gap: 10px;
 $page-footer-gap: 10px;
 
 
-$base-font-family: "Helvetica Neue", "Arial", sans-serif;
-$base-font-size: 14px;
+// $base-font-family: "Helvetica Neue", "Arial", sans-serif;
+// $base-font-size: 15px;
+// $base-font-family: "Helvetica", "Arial", sans-serif;
+// $base-font-size: 14px;
 
+$base-font-family: "Source Sans Pro", sans-serif;
+$base-font-size: 16px;
+// font "Source Sans Pro" is @import'ed from google fonts in main.scss.
 
 $page-link-color: rgba(50,50,200,1.0);
 $page-link-highlight-color: rgba(80,80,255,1.0);

@@ -1,6 +1,14 @@
 
 @import 'variables.scss';
 
+//
+// Import fonts here, not in variables.scss, because we might include
+// variables.scss in other SCSS files.
+//
+// import "Source Sans Pro" from google fonts ->
+@import url('https://fonts.googleapis.com/css2?family=Source+Sans+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&display=swap');
+
+
 @import 'pagegrid.scss';
 
 
@@ -13,6 +21,7 @@
 body, html {
     font-family: $base-font-family;
     font-size: $base-font-size;
+    line-height: 1.3em;
 }
 
 a, a:link, a:hover, a:active, a:visited {
@@ -27,6 +36,7 @@ a:hover {
 h1 {
     font-size: 30px;
     font-weight: 350;
+    line-height: 1.6em;
 }
 
 // definition lists with "terms" (<dt>) on the left and "definitions" (<dd>) on
@@ -84,7 +94,8 @@ dd {
     min-width: $page-sidebar-width;
 }
 #sidebar h1 {
-    font-size: 1.1em;
+    //font-size: 1.1em;
+    font-size: 1em;
     font-weight: bold;
     margin-bottom: 0.5em;
 }
@@ -142,6 +153,7 @@ dd {
 .code-relations-list {
     list-style: none;
     padding: 0px;
+    margin: 0px;
 }
 
 

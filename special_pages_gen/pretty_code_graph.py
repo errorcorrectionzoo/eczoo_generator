@@ -34,7 +34,7 @@ class PagePrettyCodeGraph:
 
         # page template
         context = {
-            'page_title': 'Code Graph [error correction zoo]',
+            'page_title': 'Error correction zoo code graph',
             'page_app_full_width': True,
 
             'extra_js': [
@@ -82,6 +82,7 @@ class PagePrettyCodeGraph:
     def _gen_js_code(self, output_data_js_fname):
 
         all_codes_dict = self.zoo.all_codes()
+        root_codes_dict = self.zoo.root_codes()
 
         nodes = []
         edges = []
@@ -89,11 +90,26 @@ class PagePrettyCodeGraph:
         parent_rel_counter = 0
         cousin_rel_counter = 0
 
+        root_codes_x_positions = {
+            root_code_id: 100*j
+            for (j, root_code_id) in enumerate(root_codes_dict.keys())
+        }
+        xpos_rnd_shift = lambda: random.randint(-40, 40)
+        ypos_rnd_shift = lambda: random.randint(-30, 30)
+
         for code_id, code in all_codes_dict.items():
 
             short_description = code.description
             if short_description and len(short_description) > 200:
                 short_description = short_description[:200-3]+'...',
+
+            position = {}
+            if code.family_root_code is not None:
+                root_code_id = code.family_root_code.code_id
+            else:
+                root_code_id = code_id
+            position['x'] = root_codes_x_positions[root_code_id] + xpos_rnd_shift()
+            position['y'] = 100*code.family_generation_level + ypos_rnd_shift()
 
             nodes.append(
                 {
@@ -103,8 +119,9 @@ class PagePrettyCodeGraph:
 
                         '_description': short_description,
                         '_code_href': self.htmlpagescollection.get_code_href(code_id),
-                        '_generation_level': code.generation_level,
+                        '_family_generation_level': code.family_generation_level,
                     },
+                    'position': dict(position),
                     # 'position': {
                     #     'x': random.randint(250,750),
                     #     'y': random.randint(200,400),

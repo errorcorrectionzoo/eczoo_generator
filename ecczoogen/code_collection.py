@@ -83,25 +83,32 @@ class CodeCollection:
         )
         # start with the top-level code objects
         for code_id, codeobj in self._root_codes.items():
-            codeobj.generation_level = 0
-            self._visit_code_computing_generation(codeobj, 0)
+            codeobj.family_generation_level = 0
+            codeobj.family_root_code = None
+            self._visit_code_computing_generation(codeobj, 0, codeobj)
 
         #
         # finish() done.
         #
         
 
-    def _visit_code_computing_generation(self, cur_code, cur_generation_level):
+    def _visit_code_computing_generation(self, cur_code, cur_generation_level, root_code):
+
         for child_rel in cur_code.relations.parent_of:
             child_code = child_rel.code
-            if (child_code.generation_level is not None
-                and child_code.generation_level > cur_generation_level + 1):
-                # code is actually of a higher generation via some other parent
-                child_code.generation_level = cur_generation_level + 1
-            else:
-                child_code.generation_level = cur_generation_level + 1
+            if ( (child_code.family_generation_level is None)
+                 or (child_code.family_generation_level > cur_generation_level + 1) ):
+                # code might actually be of a lower generation via some other
+                # parent; if that's the case, move the child from the other
+                # family tree as in the present tree it gets promoted higher in
+                # generation seniority
+                child_code.family_root_code = root_code
+                child_code.family_generation_level = cur_generation_level + 1
+
         for child_rel in cur_code.relations.parent_of:
-            self._visit_code_computing_generation(child_rel.code, cur_generation_level + 1)
+            self._visit_code_computing_generation(child_rel.code,
+                                                  cur_generation_level + 1,
+                                                  root_code)
 
 
     # methods for accessing codes:
@@ -131,19 +138,19 @@ class CodeCollection:
 
         parent_code = self.get_code(parent_code_id)
         
-        all_child_ids = [ parent_code_id ]
+        all_children = [ parent_code ]
 
         def _visit_code(c):
             children = c.relations.parent_of
             for child_rel in children:
                 child = child_rel.code
-                if child.code_id not in all_child_ids:
-                    all_child_ids.append(child.code_id)
+                if child.code_id not in all_children:
+                    all_children.append(child)
             for child_rel in children:
                 _visit_code(child_rel.code)
 
         _visit_code(parent_code)
 
-        logger.debug(f"code family tree for ‘{parent_code_id}’ -> ‘{all_child_ids}’")
+        logger.debug(f"code family tree for ‘{parent_code_id}’ -> ‘{all_children}’")
 
-        return all_child_ids
+        return all_children

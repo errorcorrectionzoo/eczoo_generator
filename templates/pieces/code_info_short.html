@@ -12,14 +12,15 @@ Expected context variables:
 <div class="ecc-code" id="ecc_{{code.code_id}}">
   <span class="short-code-name">{{code|code_ref}}</span>
   <span class="short-code-description">{{code.description}}</span>
-  <span class="short-code-info">{{code.protection}}</span>
+  <span class="short-code-info">Protection: {{code.protection}}</span>
   {% if code.relations.parents %}
   <span class="short-code-parents">
     Parents:
     {% for rel in code.relations.parents %}
       {{ rel.code | code_ref }}{#
-      #}{{ ', ' if not loop.last else '' }}
-    {% endfor %}
+      #}{{ ', ' if not loop.last else '' -}}
+    {% endfor -%}
+    .
   </span>
   {% endif %}
   {% if code.relations.parent_of %}
@@ -27,8 +28,9 @@ Expected context variables:
     Parent of:
     {% for rel in code.relations.parent_of %}
       {{ rel.code | code_ref }}{#
-      #}{{ ', ' if not loop.last else '' }}
-    {% endfor %}
+      #}{{ ', ' if not loop.last else '' -}}
+    {% endfor -%}
+    .
   </span>
   {% endif %}
   {% if code.relations.cousins %}
@@ -36,8 +38,9 @@ Expected context variables:
     Cousins:
     {% for rel in code.relations.cousins %}
       {{ rel.code | code_ref }}{#
-      #}{{ ', ' if not loop.last else '' }}
-    {% endfor %}
+      #}{{ ', ' if not loop.last else '' -}}
+    {% endfor -%}
+    .
   </span>
   {% endif %}
   {% if code.relations.cousin_of %}
@@ -45,8 +48,9 @@ Expected context variables:
     Cousin of:
     {% for rel in code.relations.cousin_of %}
       {{ rel.code | code_ref }}{#
-      #}{{ ', ' if not loop.last else '' }}
-    {% endfor %}
+      #}{{ ', ' if not loop.last else '' -}}
+    {% endfor -%}
+    .
   </span>
   {% endif %}
 </div>

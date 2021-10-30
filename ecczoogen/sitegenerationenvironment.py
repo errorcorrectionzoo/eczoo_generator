@@ -73,6 +73,7 @@ class SiteGenerationEnvironment:
             }
         )
         with open(os.path.join(self.dirs.output_dir, fn_output), 'w') as f:
+            f.write("/* Automatically generated file. Changes will be overwritten. */\n")
             f.write(css_source)
 
 
