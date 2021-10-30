@@ -8,6 +8,9 @@ class Code:
 
         self._info = info
 
+        # source file (the zoo sets this relative to the codes_dir folder)
+        self.code_src_filename = None
+
         # parse the data structure.
         try:
             kw = dict(info)
