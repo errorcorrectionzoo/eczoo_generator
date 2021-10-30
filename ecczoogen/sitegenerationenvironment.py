@@ -46,6 +46,13 @@ class SiteGenerationEnvironment:
         # only_exts=static_asset_exts,
 
 
+    def compile_tree(self, *, source_dir, target_dir, compile_function):
+
+        shutil.copytree(source_dir, os.path.join(self.dirs.output_dir, target_dir),
+                        copy_function=compile_function, dirs_exist_ok=True)
+
+
+
     def compile_sass(self, *, source_dir, fn_source, fn_output):
 
         full_src_path = os.path.join(source_dir, fn_source)

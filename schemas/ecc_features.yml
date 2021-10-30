@@ -1,0 +1,15 @@
+$schema: "http://json-schema.org/draft-06/schema"
+$id: "https://errorcorrectionzoo.org/schemas/ecc_features"
+
+#
+# the features: code object property
+#
+
+type: object
+
+
+items:
+  type: object
+  required: ['code_id']
+  additionalProperties: false
+

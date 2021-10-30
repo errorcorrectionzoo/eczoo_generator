@@ -7,14 +7,19 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-from . import code, code_collection
+from . import code, code_collection, schema_validator
 
 
 class Zoo:
-    def __init__(self, *, codes_dir):
+    def __init__(self, *, dirs):
         super().__init__()
 
+        codes_dir = dirs.codes_dir
+        schemas_dir = dirs.schemas_dir
+
         self._collection = code_collection.CodeCollection()
+
+        validator = schema_validator.SchemaValidator(schemas_dir=schemas_dir)
 
         for (dirpath, dirnames, filenames) in os.walk(codes_dir, followlinks=True):
             show_dirpath = os.path.relpath(dirpath)
@@ -33,6 +38,13 @@ class Zoo:
                     except Exception as e:
                         logger.error(f"Failed to parse YAML file ‘{filename}’: {e}")
                         raise
+
+                # validate the code data structure, to be sure
+                try:
+                    validator.validate(code_info, 'ecc')
+                except Exception as e:
+                    logger.error(f"Code data validation failed in YAML file ‘{filename}’: {e}")
+                    raise
 
                 codeobj = code.Code( code_info )
 

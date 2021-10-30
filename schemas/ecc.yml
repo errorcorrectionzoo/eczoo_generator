@@ -1,0 +1,63 @@
+$schema: "http://json-schema.org/draft-06/schema"
+$id: "https://errorcorrectionzoo.org/schemas/ecc"
+
+#
+# A <ECC> data structure is an object (key/value pairs) with the following
+# properties.
+#
+type: object
+additionalProperties: false
+required: ['code_id', 'name', 'description',]
+properties:
+
+  # every code must have a code_id.
+  code_id:
+    type: string
+
+  # every code must have a name.
+  name:
+    type: string
+
+  # every code must have a description.
+  description:
+    type: string
+
+
+  protection:
+    type: string
+
+  decoder:
+    type: string
+
+  realizations:
+    type: string
+
+  notes:
+    type: string
+
+
+  features:
+    $ref: '/schemas/ecc_features'
+
+
+  # references where to look up details about this code.  Currently there is
+  # only one type of reference, `introduced:`; where the code was initially
+  # introduced.
+  references:
+    type: object
+    properties:
+      introduced:
+        type: string
+
+  #
+  # Relations of the code to other codes:
+  #
+  relations:
+    type: object
+    additionalProperties: false
+    properties:
+      # List of code_ids that are a "parent" of the present code
+      parents:
+        $ref: '/schemas/relation_list'
+      cousins:
+        $ref: '/schemas/relation_list'

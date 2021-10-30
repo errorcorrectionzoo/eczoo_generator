@@ -3,6 +3,8 @@ import os.path
 import re
 import sys
 
+import yaml
+import json
 import jinja2
 
 import logging
@@ -11,7 +13,7 @@ sys.path.insert(0, '.')
 import ecczoogen
 ecczoogen.setup_logging(level=logging.INFO)
 
-from ecczoogen import zoo, htmlpagecollectiongen, sitegenerationenvironment
+from ecczoogen import zoo, htmlpagecollectiongen, sitegenerationenvironment, server
 
 logger = logging.getLogger()
 
@@ -23,10 +25,16 @@ import argparse
 args_parser = argparse.ArgumentParser()
 args_parser.add_argument("--verbose", action='store_true', default=False,
                          help="Print out more information")
+args_parser.add_argument("--run-server", action='store_true', default=False,
+                         help="Run the test server")
+args_parser.add_argument("--run-server-host", action='store',
+                         default='',
+                         help="Host interface on which to serve (e.g. localhost)")
+args_parser.add_argument("--run-server-port", action='store', default=8000, type=int,
+                         help="Port to listen on for the test server (e.g. 8000)")
 args = args_parser.parse_args()
 if args.verbose:
     logger.setLevel(logging.DEBUG)
-
 
 #
 # Fixed paths
@@ -42,12 +50,29 @@ class Dirs:
     templates_dir = os.path.join(_root_dir, 'templates')
     pages_dir = os.path.join(_root_dir, 'templates', 'pages')
 
+    schemas_dir = os.path.join(_root_dir, 'schemas')
+
     stylesheets_dir = os.path.join(_root_dir, 'stylesheets')
     javascripts_dir = os.path.join(_root_dir, 'javascripts')
 
     static_assets_dir = os.path.join(_root_dir, 'static_assets')
 
     output_dir = os.path.join(_root_dir, '..', 'eczoo_website')
+
+
+
+
+################################################################################
+
+#
+# If a server was requested, don't generate the site but simply serve the
+# existing output site.
+#
+
+if args.run_server:
+    server.serve(Dirs.output_dir, args.run_server_host, args.run_server_port)
+    sys.exit(0)
+
 
 
 ################################################################################
@@ -58,7 +83,7 @@ logger.info("Building the zoo ...")
 # Build the Code Collection --> create a `ecczoogen.zoo` object
 #
 
-zoo = zoo.Zoo(codes_dir=Dirs.codes_dir)
+zoo = zoo.Zoo(dirs=Dirs)
 
 
 ################################################################################
@@ -247,6 +272,46 @@ for root_scss, root_css in root_scss_list:
         fn_source=root_scss,
         fn_output=os.path.join(output_css_prefix, root_css)
     )
+
+
+################################################################################
+
+logger.info("Copying the data schemas (YAML → JSON) ...")
+
+#
+# Copy in the schemas
+#
+
+output_schemas_prefix = 'schemas'
+os.makedirs(os.path.join(Dirs.output_dir, output_schemas_prefix), exist_ok=True)
+
+_rx_yml = re.compile(r'\.ya?ml$', flags=re.IGNORECASE)
+def compile_yml_to_json(fn_source, fn_dest):
+
+    m = _rx_yml.search(fn_source)
+    if m is None:
+        # not a YAML file, skipping file
+        return
+
+    if os.path.isdir(fn_dest):
+        fn_dest = os.path.join(fn_dest, os.path.basename(fn_source))
+
+    fn_dest_json = _rx_yml.sub('.json', fn_dest)
+
+    logger.debug(f"Copying/compiling ‘{fn_source}’ → ‘{fn_dest_json}’")
+
+    with open(fn_source) as f:
+        data = yaml.safe_load(f)
+
+    with open(fn_dest_json, 'w') as fw:
+        json.dump(data, fw)
+
+
+site_gen_env.compile_tree(
+    source_dir=Dirs.schemas_dir,
+    target_dir=output_schemas_prefix,
+    compile_function=compile_yml_to_json
+)
 
 
 ################################################################################

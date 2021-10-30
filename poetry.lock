@@ -49,6 +49,14 @@ MarkupSafe = ">=2.0"
 i18n = ["Babel (>=2.7)"]
 
 [[package]]
+name = "jsonref"
+version = "0.2"
+description = "An implementation of JSON Reference for Python"
+category = "main"
+optional = false
+python-versions = "*"
+
+[[package]]
 name = "jsonschema"
 version = "4.1.2"
 description = "An implementation of JSON Schema validation for Python"
@@ -118,7 +126,7 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "cb3be6e5010520a7c0a93b31824848d630c1d06142c5fade960a914018757dd5"
+content-hash = "08ddba8da327d119d47f9b5ef76897472263095687c826ceea51898ba604c70c"
 
 [metadata.files]
 attrs = [
@@ -136,6 +144,10 @@ colorlog = [
 jinja2 = [
     {file = "Jinja2-3.0.2-py3-none-any.whl", hash = "sha256:8569982d3f0889eed11dd620c706d39b60c36d6d25843961f33f77fb6bc6b20c"},
     {file = "Jinja2-3.0.2.tar.gz", hash = "sha256:827a0e32839ab1600d4eb1c4c33ec5a8edfbc5cb42dafa13b81f182f97784b45"},
+]
+jsonref = [
+    {file = "jsonref-0.2-py3-none-any.whl", hash = "sha256:b1e82fa0b62e2c2796a13e5401fe51790b248f6d9bf9d7212a3e31a3501b291f"},
+    {file = "jsonref-0.2.tar.gz", hash = "sha256:f3c45b121cf6257eafabdc3a8008763aed1cd7da06dbabc59a9e4d2a5e4e6697"},
 ]
 jsonschema = [
     {file = "jsonschema-4.1.2-py3-none-any.whl", hash = "sha256:166870c8ab27bd712a8627e0598de4685bd8d199c4d7bd7cacc3d941ba0c6ca0"},

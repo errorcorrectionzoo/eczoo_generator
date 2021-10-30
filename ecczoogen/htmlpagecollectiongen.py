@@ -97,7 +97,15 @@ class HtmlPage:
         self.link_to_codes_here = link_to_codes_here
         self.list_in_sidebar = list_in_sidebar
 
+    # where to copy the file in the output files
+    def pathext(self):
+        return self.name + self.ext
+
+    # link path to expose in pages (w/o base_url)
     def path(self):
+        if self.ext == '.html':
+            # don't expose .html suffixes
+            return self.name
         return self.name + self.ext
 
 
@@ -306,7 +314,7 @@ f'''<a href="{page_url_html}">{code_name_html}</a>'''
         # generate all the family pages
         for page_name, htmlpage in self.pages.items():
 
-            output_page_fname = htmlpage.path()
+            output_page_fname = htmlpage.pathext()
             logger.info(f"Generating page ‘{output_page_fname}’")
 
             page_footnotes = HtmlPageNotes(self)

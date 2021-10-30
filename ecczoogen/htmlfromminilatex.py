@@ -74,8 +74,8 @@ class ToHtmlConverter:
         if node.nodeargd.argnlist is None:
             return []
         if arg_i >= len(node.nodeargd.argnlist):
-            logger.warning(f"Invalid argument #{arg_i} for macro ‘\\{node.macroname}’")
-            return []
+            logger.error(f"Invalid argument #{arg_i} for macro ‘\\{node.macroname}’")
+            raise ValueError(f"Invalid argument #{arg_i} for macro ‘\\{node.macroname}’")
         argnode = node.nodeargd.argnlist[arg_i]
         if argnode is None:
             return [None]
@@ -192,8 +192,8 @@ class ToHtmlConverter:
         raise ValueError(f"Unknown macro: ‘\\{mn.macroname}’")
 
     def environment_node_to_html(self, node):
-        logger.warning(f"Environments not supported! ‘{node.environmentname}’")
-        return ''
+        logger.error(f"Environments not supported! ‘{node.environmentname}’")
+        raise ValueError(f"LaTeX environments are not supported: ‘%{node.environmentname}’")
 
     def specials_node_to_html(self, node):
         raise ValueError(f"Unknown specials: ‘{mn.macroname}’")
@@ -207,8 +207,8 @@ class ToHtmlConverter:
             return htmlescape(node.chars)
 
         if node.isNodeType(latexwalker.LatexCommentNode):
-            logger.warning(f"Comment is ignored: ‘%{node.comment}’")
-            return ''
+            logger.error(f"Comment is ignored: ‘%{node.comment}’")
+            raise ValueError(f"Comment is ignored: ‘%{node.comment}’")
 
         if node.isNodeType(latexwalker.LatexGroupNode):
             return (
