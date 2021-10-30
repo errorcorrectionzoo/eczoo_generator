@@ -60,8 +60,8 @@ class Dirs:
     output_dir = os.path.join(_root_dir, '..', 'eczoo_website')
 
 
-if not os.path.exists(output_dir):
-    os.makedirs(output_dir)
+if not os.path.exists(Dirs.output_dir):
+    os.makedirs(Dirs.output_dir)
 
 
 
