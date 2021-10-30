@@ -21,6 +21,11 @@ class Zoo:
 
         validator = schema_validator.SchemaValidator(schemas_dir=schemas_dir)
 
+        logger.info("Building the zoo ...")
+
+        if not os.path.exists(codes_dir):
+            raise RuntimeError(f"Folder ‘{codes_dir}’ doesn't exist!")
+
         for (dirpath, dirnames, filenames) in os.walk(codes_dir, followlinks=True):
             show_dirpath = os.path.relpath(dirpath)
 

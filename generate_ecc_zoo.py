@@ -80,8 +80,6 @@ if args.run_server:
 
 ################################################################################
 
-logger.info("Building the zoo ...")
-
 #
 # Build the Code Collection --> create a `ecczoogen.zoo` object
 #
