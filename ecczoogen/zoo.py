@@ -41,14 +41,14 @@ class Zoo:
                     try:
                         code_info = yaml.safe_load(f)
                     except Exception as e:
-                        logger.error(f"Failed to parse YAML file ‘{filename}’: {e}")
+                        logger.error(f"Failed to parse YAML file ‘{filename}’:\n{e}\n\n")
                         raise
 
                 # validate the code data structure, to be sure
                 try:
                     validator.validate(code_info, 'ecc')
                 except Exception as e:
-                    logger.error(f"Code data validation failed in YAML file ‘{filename}’: {e}")
+                    logger.error(f"Code data validation failed in YAML file ‘{filename}’:\n{e}\n\n")
                     raise
 
                 codeobj = code.Code( code_info )
