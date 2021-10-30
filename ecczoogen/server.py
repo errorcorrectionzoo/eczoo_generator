@@ -49,8 +49,8 @@ def serve(website_dir, host, port):
         host, port = httpd.socket.getsockname()[:2]
         url_host = f'[{host}]' if ':' in host else host
         logger.info(
-            f"Serving HTTP on {host} port {port} "
-            f"→→→ http://{url_host}:{port}/ ←←← ..."
+            f"Serving HTTP on {host} port {port}  "
+            f"→→→| http://{url_host}:{port}/ |←←←"
         )
         try:
             httpd.serve_forever()
