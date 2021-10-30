@@ -16,8 +16,8 @@ _lw_context.add_context_category(
         macrospec.MacroSpec('textbackslash', ''),
         macrospec.MacroSpec('%', ''),
         macrospec.MacroSpec(' ', ''),
-        macrospec.MacroSpec('{', '{'),
-        macrospec.MacroSpec('}', '}'),
+        macrospec.MacroSpec('{', ''),
+        macrospec.MacroSpec('}', ''),
 
         macrospec.MacroSpec('emph', '{'),
         macrospec.MacroSpec('textit', '{'),
@@ -109,6 +109,10 @@ class ToHtmlConverter:
             return '%'
         if mn.macroname == ' ':
             return ' '
+        if mn.macroname == '{':
+            return '{'
+        if mn.macroname == '}':
+            return '}'
         if mn.macroname == 'textbackslash':
             return htmlescape('\\')
 
