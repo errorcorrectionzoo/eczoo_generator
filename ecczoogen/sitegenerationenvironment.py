@@ -80,6 +80,8 @@ class SiteGenerationEnvironment:
 
         logger.debug(f"Compiling template ‘{fn_template}’ → ‘{fn_output}’")
 
+        output_fname = os.path.join(self.dirs.output_dir, fn_output)
+
         try:
             pg_template = self.jinja2env.get_template(fn_template)
             rendered_output = pg_template.render(context)
@@ -87,7 +89,10 @@ class SiteGenerationEnvironment:
             logger.error(f"Error compiling template: {e}", exc_info=True)
             raise
 
-        with open(os.path.join(self.dirs.output_dir, fn_output), 'w') as fw:
+        # create any parent directories, as necessary
+        os.makedirs(os.path.dirname(output_fname), exist_ok=True)
+
+        with open(output_fname, 'w') as fw:
             fw.write( rendered_output )
 
 
@@ -99,6 +104,8 @@ class SiteGenerationEnvironment:
                      f"‘{os.path.relpath(full_src_path, start=self.dirs.root_dir)}’ "
                      f"→ ‘{fn_output}’")
 
+        output_fname = os.path.join(self.dirs.output_dir, fn_output)
+
         with open(full_src_path) as f:
             pg_source = f.read()
 
@@ -109,5 +116,8 @@ class SiteGenerationEnvironment:
             logger.error(f"Error compiling template: {e}", exc_info=True)
             raise
 
-        with open(os.path.join(self.dirs.output_dir, fn_output), 'w') as fw:
+        # create any parent directories, as necessary
+        os.makedirs(os.path.dirname(output_fname), exist_ok=True)
+
+        with open(output_fname, 'w') as fw:
             fw.write(rendered_output)

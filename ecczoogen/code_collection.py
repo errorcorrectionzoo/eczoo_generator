@@ -100,6 +100,8 @@ class CodeCollection:
                 child_code.generation_level = cur_generation_level + 1
             else:
                 child_code.generation_level = cur_generation_level + 1
+        for child_rel in cur_code.relations.parent_of:
+            self._visit_code_computing_generation(child_rel.code, cur_generation_level + 1)
 
 
     # methods for accessing codes:

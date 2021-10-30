@@ -148,22 +148,27 @@ dd {
 a.code-info-corner-icon {
     display: inline-block;
     float: right;
-    margin: -3px 0px;
+    margin: -3px 0px -3px 5px;
     padding: 3px 5px;
     opacity: 0.2;
     color: gray;
+
+    width: 8px;
+    height: 8px;
+    margin-top: 2px;
+    vertical-align: middle;
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
 }
 a.code-info-corner-icon:hover {
     opacity: 0.9;
 }
 
+a.code-self-permalink {
+    background-image: url(prebaseurl('static/icons/permalink-logo.svg'));
+}
 a.code-show-github {
-    width: 8px;
-    height: 8px;
-    margin-top: 2px;
-    vertical-align: middle;
     background-image: url(prebaseurl('static/icons/github-logo.svg'));
-    background-repeat: no-repeat;
 }
 
 
@@ -173,11 +178,22 @@ dd.code-name {
 
 .citation-label {
     font-size: 0.8em;
-    vertical-align: super;
+    // "vertical-align: super" shifts the entire baseline downwards, not nice
+    vertical-align: top;
 }
 .footnote-label {
     font-size: 0.8em;
-    vertical-align: super;
+    vertical-align: top;
+}
+
+.features-list {
+    > dt {
+        color: rgba(0,0,0,0.5);
+        font-size: 0.95em;
+    }
+    > dd {
+        margin-left: .5em;
+    }
 }
 
 

@@ -1,3 +1,4 @@
+import os
 import os.path
 import re
 
@@ -329,8 +330,13 @@ f'''<a href="{page_url_html}">{code_name_html}</a>'''
                         tohtmlconverter,
                         repr(codeobj)
                     )
-                    for code_id in htmlpage.code_id_list
-                    for codeobj in [ self.zoo.get_code(code_id) ]
+                    for codeobj in sorted(
+                            [
+                                self.zoo.get_code(code_id)
+                                for code_id in htmlpage.code_id_list
+                            ],
+                            key=lambda code: code.generation_level
+                    )
                 ],
                 page_footnotes=page_footnotes,
                 **htmlpage.info,

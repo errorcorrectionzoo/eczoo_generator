@@ -151,7 +151,7 @@ for code_id, code in zoo.all_codes().items():
 
     # page for this specific code
     page = htmlpagecollectiongen.HtmlPage(
-        name=f'code_{code_id}',
+        name=f'c/{code_id}',
         info={
             'page_title': code.name,
         },
