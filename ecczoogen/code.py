@@ -24,10 +24,7 @@ class Code:
 
             self.decoder = kw.pop('decoder', None)
 
-            self.references = {
-                k: v
-                for (k,v) in kw.pop('references', {}).items()
-            }
+            self.introduced = kw.pop('introduced', None)
 
             self.features = {
                 k: v

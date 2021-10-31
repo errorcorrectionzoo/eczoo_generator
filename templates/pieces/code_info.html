@@ -13,6 +13,7 @@ Expected context variables:
 
 <dt>Name</dt>
 <dd class="code-name">{{code.name}}
+  {% if code.introduced %}<span class="code-introduced">{{code.introduced}}</span>{% endif %}
   <a class="code-info-corner-icon code-self-permalink"
      href="{{code|code_ref_href}}">&nbsp;</a>
   <a class="code-info-corner-icon code-show-github"
@@ -47,15 +48,6 @@ Expected context variables:
 {% if code.notes %}
 <dt>Notes</dt>
 <dd class="code-notes">{{code.notes}}</dd>
-{% endif %}
-
-{% if code.references %}
-<dt>Important References</dt>
-<dd class="code-references">
-{% if code.references.introduced %}
-Introduced in {{code.references.introduced}}
-{% endif %}
-</dd>
 {% endif %}
 
 {% if code.realizations %}

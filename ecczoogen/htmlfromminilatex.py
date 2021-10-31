@@ -129,7 +129,12 @@ class ToHtmlConverter:
             tgt = self.get_nodearglist(mn, 0)
             if len(tgt) != 1:
                 raise ValueError("Invalid \\ref invocation: expected single argument")
-            code_id = tgt[0].chars
+            # argh, why so different handling than \cite?
+            reftarget = tgt[0].chars
+            if not reftarget.startswith("code:"):
+                raise ValueError(f"Invalid ref: ‘\\ref{{{reftarget}}}’.  Reference must be "
+                                 f"to a code, use key of the form ‘code:<code-id>’.")
+            code_id = reftarget[len('code:'):]
             code, code_href = self.refcontext.get_code_and_href(code_id)
             return self.html_wrap_in_tag(
                 'a',

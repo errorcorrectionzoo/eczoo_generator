@@ -134,18 +134,11 @@ class HtmlCitation:
 
     def is_same_citation_target(self, other):
         return self.citation_key.lower() == other.citation_key.lower()
-        # return (
-        #     ( (self.arxivid is None) == (other.arxivid is None) )
-        #     and ( (self.arxivid is None) or (self.arxivid == other.arxivid) )
-        #     and ( (self.doi is None) == (other.doi is None) )
-        #     and ( (self.doi is None) or (self.doi == other.doi) )
-        #     and ( (self.doi is None) == (other.doi is None) )
-        #     and ( (self.doi is None) or (self.doi == other.doi) )
-        # )
 
 
 _rx_cite_arxiv = re.compile(r'^arxiv:(?P<arxivid>[-a-zA-Z/_.+0-9]+)$', flags=re.IGNORECASE)
 _rx_cite_doi = re.compile(r'^doi:(?P<doi>.*)$', flags=re.IGNORECASE)
+_rx_cite_manual = re.compile(r'^manual:\{(?P<manual>.*)\}$', flags=re.IGNORECASE)
 
 
 # ------------------------------------------------------------------------------
