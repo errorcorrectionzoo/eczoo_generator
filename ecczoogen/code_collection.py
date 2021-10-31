@@ -1,3 +1,4 @@
+import itertools
 import logging
 logger = logging.getLogger(__name__)
 
@@ -31,6 +32,21 @@ class CodeCollection:
         want to establish all relations.  This will also compute additional
         properties on codes, such as their generation.
         """
+
+        #
+        # Check that all IDs are unique also with case-insensitive comparison
+        #
+        lc_code_ids = itertools.groupby( sorted(self._codes.keys(),
+                                                key=lambda x: x.lower()),
+                                         key=lambda x: x.lower() )
+        for lc_code_id, code_ids_iter in lc_code_ids:
+            code_ids = list(code_ids_iter)
+            if len(code_ids) > 1:
+                msg = ', '.join(f"‘{cid}’ (‘{self.get_code(cid).code_src_filename}’)"
+                                for cid in code_ids)
+                raise ValueError(f"Code IDs for {msg} need to differ more than only by case. "
+                                 f"Code IDs must be unique also for case-insensitive "
+                                 f"comparisons.")
 
         #
         # Iterate over each code and inspect its relations to other codes.
