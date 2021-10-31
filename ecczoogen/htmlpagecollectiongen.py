@@ -24,7 +24,7 @@ class _HtmlObjectWrapper:
             html_str = self.tohtmlconverter.to_html(value)
         except Exception as e:
             logger.error(f"Error converting ‘{whatobject}’ to HTML: {e}", exc_info=True)
-            raise #return '<exception in value>'
+            raise
         return markupsafe.Markup( html_str )
 
     def _wrap_obj(self, val, whatobject):
@@ -115,17 +115,18 @@ class HtmlPage:
 
 
 class HtmlFootnote:
-    def __init__(self, *, no=None, label_html=None, footnote_text_html=None):
+    def __init__(self, *, no=None, #label_html=None,
+                 footnote_text_html=None):
         self.no = no
-        self.label_html = label_html
+        #self.label_html = label_html
 
         self.footnote_text_html = footnote_text_html
 
 class HtmlCitation:
-    def __init__(self, *, no=None, label_html=None,
+    def __init__(self, *, no=None, #label_html=None,
                  citation_key=None, arxivid=None, doi=None, citation_text_html=''):
         self.no = no
-        self.label_html = label_html
+        #self.label_html = label_html
 
         self.citation_key = citation_key
         self.arxivid = arxivid
@@ -136,9 +137,10 @@ class HtmlCitation:
         return self.citation_key.lower() == other.citation_key.lower()
 
 
+_rx_ref_code = re.compile(r'^code:(?P<code_id>.*)$', flags=re.IGNORECASE)
+
 _rx_cite_arxiv = re.compile(r'^arxiv:(?P<arxivid>[-a-zA-Z/_.+0-9]+)$', flags=re.IGNORECASE)
 _rx_cite_doi = re.compile(r'^doi:(?P<doi>.*)$', flags=re.IGNORECASE)
-_rx_cite_manual = re.compile(r'^manual:\{(?P<manual>.*)\}$', flags=re.IGNORECASE)
 
 
 # ------------------------------------------------------------------------------
@@ -149,31 +151,61 @@ class RefContextForHtmlConverter(htmlfromminilatex.HtmlRefContext):
         self.htmlpagecollection = htmlpagecollection
         self.page_notes = page_notes
 
-    def get_code_and_href(self, code_id):
-        # return (code object, codehref)
+
+    def _get_ref_code(self, code_id):
         code = self.htmlpagecollection.zoo.get_code(code_id)
         code_href = self.htmlpagecollection.get_code_href(code_id)
-        return code, code_href
+        code_name_html = htmlfromminilatex.ToHtmlConverter(self).to_html(code.name)
+        return (code_name_html, code_href)
+        
+    def get_ref(self, refkey):
+        m = _rx_ref_code.match(refkey)
+        if m:
+            return self._get_ref_code(m.group('code_id'))
+        raise ValueError(f"Invalid ref: ‘{refkey}’.  Reference must be "
+                         f"to a code, use key of the form ‘code:<code-id>’.")
 
     def add_footnote(self, footnote_text_html):
         # return (footnotelabel_html, footnotehref)
         footnote = HtmlFootnote(footnote_text_html=footnote_text_html)
-        foot_no, foot_label_html = self.page_notes.add_footnote(footnote)
-        return (f'<span class="footnote-label">{foot_label_html}</span>', f'#fn-{foot_no}')
+        foot_no = self.page_notes.add_footnote(footnote)
+        foot_label_html = self.htmlpagecollection.format_footnote_label_html(self.foot_no)
+        return (foot_label_html, f'#fn-{foot_no}')
 
-    def add_citation(self, citation_key):
-        # return (citelabel_html, citehref)
+    def _get_citation_obj(self, citation_key, manual_citation_html=None):
         citation = HtmlCitation(citation_key=citation_key)
-        m = _rx_cite_arxiv.match(citation_key)
-        if m:
-            citation.arxivid = m.group('arxivid')
-        m = _rx_cite_doi.match(citation_key)
-        if m:
-            citation.doi = m.group('doi')
 
-        cite_no, cite_label_html = self.page_notes.add_citation(citation)
-        return (f'<span class="citation-label">{cite_label_html}</span>', f'#cite-{cite_no}')
-    
+        # manual:{...} is intercepted in htmlfromminilatex.py directly, because
+        # it needs to parse the group contents as mini-latex.
+
+        m_arxiv = _rx_cite_arxiv.match(citation_key)
+        if m_arxiv:
+            citation.arxivid = m_arxiv.group('arxivid')
+            return citation
+
+        m_doi = _rx_cite_doi.match(citation_key)
+        if m_doi:
+            citation.doi = m_doi.group('doi')
+            return citation
+
+        raise ValueError(f"Invalid citation key: ‘{citation_key}’.  "
+                         + "Expected arxiv:###, doi:### or manual:{###}")
+
+    def add_citation(self, citation_key, optional_cite_extra_html=None,
+                     manual_citation_html=None):
+        # return (citelabel_html, citehref)
+
+        if manual_citation_html is not None:
+            citation = HtmlCitation(citation_key=citation_key)
+            citation.citation_text_html = markupsafe.Markup(manual_citation_html)
+        else:
+            citation = self._get_citation_obj(citation_key)
+        cite_no = self.page_notes.add_citation(citation)
+        cite_label_html = \
+            self.htmlpagecollection.format_citation_label_html(cite_no,
+                                                               optional_cite_extra_html)
+        return (cite_label_html, f'#cite-{cite_no}')
+
 
 
 # ------------------------------------------------------------------------------
@@ -191,10 +223,10 @@ class HtmlPageNotes:
         self.foot_no += 1
 
         foot_no = self.foot_no
-        foot_label_html = self.htmlpagecollection.format_footnote_label_html(self.foot_no)
+        #foot_label_html = self.htmlpagecollection.format_footnote_label_html(self.foot_no)
 
         footnote.no = foot_no
-        footnote.label_html = foot_label_html
+        #footnote.label_html = foot_label_html
 
         self.footnotes.append( footnote )
         return (foot_no, foot_label_html)
@@ -204,20 +236,20 @@ class HtmlPageNotes:
         # see if citation is already there
         for c in self.citations:
             if c.is_same_citation_target(citation):
-                return (c.no, c.label_html)
+                return c.no #(c.no, c.label_html)
 
         # add it if not there already
 
         self.cite_no += 1
 
         cite_no = self.cite_no
-        cite_label_html = self.htmlpagecollection.format_citation_label_html(cite_no)
+        #cite_label_html = self.htmlpagecollection.format_citation_label_html(cite_no)
 
         citation.no = cite_no
-        citation.label_html = cite_label_html
+        #citation.label_html = cite_label_html
 
         self.citations.append( citation )
-        return (cite_no, cite_label_html)
+        return cite_no #(cite_no, cite_label_html)
 
 
 
@@ -286,10 +318,12 @@ class HtmlPageCollection:
         return f'{full_page_path}#ecc_{code_id}'
 
     def format_footnote_label_html(self, foot_no):
-        return '({:d})'.format(foot_no)
+        return markupsafe.Markup(f'({foot_no:d})')
 
-    def format_citation_label_html(self, cite_no):
-        return '[{:d}]'.format(cite_no)
+    def format_citation_label_html(self, cite_no, optional_cite_extra_html=None):
+        if optional_cite_extra_html is not None:
+            return markupsafe.Markup(f'[{cite_no:d}; {optional_cite_extra_html}]')
+        return markupsafe.Markup(f'[{cite_no:d}]')
 
 
     def _jfilter_code_ref(self, code):

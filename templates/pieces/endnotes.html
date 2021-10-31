@@ -11,7 +11,7 @@ Expected context variables:
 {% if page_footnotes.footnotes %}
     <dl id="footnotes">
 {% for footnote in page_footnotes.footnotes %}
-      <dt id="fn-{{footnote.no}}">{{footnote.label_html}}</dt>
+      <dt id="fn-{{footnote.no}}">{{footnote.no|format_footnote_label_html}}</dt>
       <dd>{{footnote.footnote_text_html}}</dd>
 {% endfor %}    
     </dl>
@@ -20,7 +20,7 @@ Expected context variables:
     <dl id="citations">
 {% for citation in page_footnotes.citations %}
       <!-- Citation: {{citation.citation_key}} -->
-      <dt id="cite-{{citation.no}}">{{citation.label_html}}</dt>
+      <dt id="cite-{{citation.no}}">{{citation.no|format_citation_label_html}}</dt>
       <dd>
         {% if citation.arxivid %}
           <a href="https://arxiv.org/abs/{{citation.arxivid}}" target="_blank" class="arxiv-link">arXiv:{{citation.arxivid}}</a>

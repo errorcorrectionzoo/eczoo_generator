@@ -31,6 +31,7 @@ _lw_context.add_context_category(
         macrospec.MacroSpec('cite', '[{'),
         macrospec.MacroSpec('footnote', '{'),
         macrospec.MacroSpec('href', '{{'),
+        macrospec.MacroSpec('hyperref', '[{'),
         macrospec.MacroSpec('url', '{'),
     ]
 )
@@ -41,13 +42,14 @@ class HtmlRefContext:
     def __init__(self):
         super().__init__()
 
-    def get_code_and_href(self, code_id):
-        # return (code object, codehref)
-        raise RuntimeError("Subclass must reimplement get_code_and_href()")
+    def get_ref(self, refkey):
+        # return (target_html, targethref)
+        raise RuntimeError("Subclass must reimplement get_ref()")
     def add_footnote(self, footnotetext):
         # return (footnotelabel_html, footnotehref)
         raise RuntimeError("Subclass must reimplement add_footnote()")
-    def add_citation(self, citation_key):
+    def add_citation(self, citation_key, optional_cite_extra_html=None,
+                     manual_citation_html=None):
         # return (citelabel_html, citehref)
         raise RuntimeError("Subclass must reimplement add_citation()")
 
@@ -128,31 +130,101 @@ class ToHtmlConverter:
         if mn.macroname == 'ref':
             tgt = self.get_nodearglist(mn, 0)
             if len(tgt) != 1:
-                raise ValueError("Invalid \\ref invocation: expected single argument")
-            # argh, why so different handling than \cite?
+                raise ValueError("Invalid \\ref invocation: expected single braced argument")
             reftarget = tgt[0].chars
-            if not reftarget.startswith("code:"):
-                raise ValueError(f"Invalid ref: ‘\\ref{{{reftarget}}}’.  Reference must be "
-                                 f"to a code, use key of the form ‘code:<code-id>’.")
-            code_id = reftarget[len('code:'):]
-            code, code_href = self.refcontext.get_code_and_href(code_id)
+            (target_html, target_href) = self.refcontext.get_ref(reftarget)
             return self.html_wrap_in_tag(
                 'a',
-                htmlescape(code.name),
-                attrs={'href': htmlescape(code_href)},
-                class_='code_ref',
+                target_html,
+                attrs={'href': htmlescape(target_href)},
+                class_='ref',
+            )
+
+        if mn.macroname == 'hyperref':
+            reftarget = self.nodearg_to_html(mn, 0)
+            disphtml = self.nodearg_to_html(mn, 1)
+            (target_html, target_href) = self.refcontext.get_ref(reftarget)
+            # ignore target_html
+            return self.html_wrap_in_tag(
+                'a',
+                disphtml,
+                attrs={'href': htmlescape(target_href)},
+                class_='ref',
             )
 
         if mn.macroname == 'cite':
-            xtra = self.nodearg_to_html(mn, 0)
-            citekeylist = self.nodearg_to_html(mn, 1)
-            
-            # there might be multiple citation keys separated by commas.
-            s = ''
-            for citekey in citekeylist.split(','):
-                citekey = citekey.strip()
+            optional_cite_extra_html_nodelist = self.get_nodearglist(mn, 0)
 
-                citelabel_html, citehref = self.refcontext.add_citation(citekey)
+            if optional_cite_extra_html_nodelist \
+               and len(optional_cite_extra_html_nodelist) \
+               and optional_cite_extra_html_nodelist[0]:
+                optional_cite_extra_html = \
+                    self.nodelist_to_html(optional_cite_extra_html_nodelist)
+            else:
+                optional_cite_extra_html = None
+
+            citekeylist_nodelist = self.get_nodearglist(mn, 1)
+
+            logger.debug(f"Parsing citation command: {citekeylist_nodelist=}")
+            logger.debug(f"  {optional_cite_extra_html_nodelist=}")
+
+            if not citekeylist_nodelist:
+                raise ValueError("Expected single {...} argument to ‘\\cite’") 
+
+            cite_key_split_nodelist = [ [] ]
+
+            # split arg into commas, but obey protected {...} groups.
+            #
+            # we first iterate through the node list and build the list of
+            # citation keys.  We keep everything in terms of nodes and node
+            # lists for now.
+            for n in citekeylist_nodelist:
+                logger.debug(f"{cite_key_split_nodelist=}")
+                if n.isNodeType(latexwalker.LatexCharsNode):
+                    parts = n.chars.split(',')
+                    if parts[0]:
+                        cite_key_split_nodelist[-1].append(parts[0])
+                    parts = parts[1:]
+                    if not parts:
+                        # string didn't contain any comma
+                        continue
+                    for p in parts:
+                        cite_key_split_nodelist.append( [p] )
+                    logger.debug(f"  now {cite_key_split_nodelist=}")
+                    continue
+
+                cite_key_split_nodelist[-1].append(n)
+                        
+            logger.debug(f"Citation keys are split: {cite_key_split_nodelist=}")
+
+            s = ''
+            for citekeynodes in cite_key_split_nodelist:
+
+                if not citekeynodes or citekeynodes == ['']:
+                    continue
+
+                citekey_verbatim = ''
+                manual_nodes = None
+                for n in citekeynodes:
+                    if isinstance(n, str):
+                        citekey_verbatim += n
+                    else:
+                        citekey_verbatim += n.latex_verbatim()
+
+                    if manual_nodes is None and citekey_verbatim.startswith('manual:'):
+                        manual_nodes = [ citekey_verbatim[len('manual:'):] ]
+                    elif manual_nodes is not None:
+                        manual_nodes.append(n)
+
+                if manual_nodes is not None:
+                    # we have a manually-provided citation text, parse it -> html
+                    manual_citation_html = self.nodelist_to_html(manual_nodes)
+                else:
+                    manual_citation_html = None
+
+                citelabel_html, citehref = \
+                    self.refcontext.add_citation(citekey_verbatim, optional_cite_extra_html,
+                                                 manual_citation_html)
 
                 s += self.html_wrap_in_tag(
                     'a',
@@ -162,7 +234,7 @@ class ToHtmlConverter:
                     },
                     class_='cite',
                 )
-            logger.debug(f"Citation: ‘{citekeylist}’ → ‘{s}’")
+            logger.debug(f"Citation: ‘{citekeylist_nodelist}’ → ‘{s}’")
             return s
 
         if mn.macroname == 'footnote':
@@ -214,6 +286,11 @@ class ToHtmlConverter:
         if node is None:
             return ''
 
+        # useful for some of our processing tools, c.f. e.g. \cite implementation above
+        if isinstance(node, str):
+            s = node
+            return htmlescape(s)
+
         if node.isNodeType(latexwalker.LatexCharsNode):
             return htmlescape(node.chars)
 
@@ -227,9 +304,10 @@ class ToHtmlConverter:
 
         if node.isNodeType(latexwalker.LatexGroupNode):
             return (
-                htmlescape(node.delimiters[0])
-                + self.nodelist_to_html(node.nodelist)
-                + htmlescape(node.delimiters[1])
+                #htmlescape(node.delimiters[0]) -- doesn't make sense to include {...}
+                #+
+                self.nodelist_to_html(node.nodelist)
+                #+ htmlescape(node.delimiters[1])
             )
 
         if node.isNodeType(latexwalker.LatexMacroNode):

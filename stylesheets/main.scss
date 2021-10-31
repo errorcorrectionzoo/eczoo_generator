@@ -192,12 +192,19 @@ dd.code-name {
     font-weight: bold;
 }
 
-.citation-label {
+.emph, .textit {
+    font-style: italic;
+}
+.textbf {
+    font-weight: bold;
+}
+
+.cite {
     font-size: 0.8em;
     // "vertical-align: super" shifts the entire baseline downwards, not nice
     vertical-align: top;
 }
-.footnote-label {
+.footnote {
     font-size: 0.8em;
     vertical-align: top;
 }
