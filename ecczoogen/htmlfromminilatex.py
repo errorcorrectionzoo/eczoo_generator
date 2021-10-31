@@ -213,8 +213,12 @@ class ToHtmlConverter:
             return htmlescape(node.chars)
 
         if node.isNodeType(latexwalker.LatexCommentNode):
-            logger.error(f"Comment is ignored: ‘%{node.comment}’")
-            raise ValueError(f"Comment is ignored: ‘%{node.comment}’")
+            logger.error(
+                f"You cannot use LaTeX comments (‘%{node.comment}’). "
+                f"To type a percent sign, use ‘\\%’"
+            )
+            raise ValueError(f"LaTeX comments not supported: ‘%{node.comment}’. "
+                             f"To type a percent sign, use ‘\\%’")
 
         if node.isNodeType(latexwalker.LatexGroupNode):
             return (

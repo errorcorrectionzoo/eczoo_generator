@@ -22,8 +22,10 @@ Expected context variables:
 <dt>Description</dt>
 <dd class="code-description">{{code.description}}</dd>
 
+{% if code.protection %}
 <dt>Protection</dt>
 <dd class="code-protection">{{code.protection}}</dd>
+{% endif %}
 
 {% if code.decoder %}
 <dt>Decoder</dt>

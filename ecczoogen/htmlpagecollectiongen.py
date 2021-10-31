@@ -24,7 +24,7 @@ class _HtmlObjectWrapper:
             html_str = self.tohtmlconverter.to_html(value)
         except Exception as e:
             logger.error(f"Error converting ‘{whatobject}’ to HTML: {e}", exc_info=True)
-            return '<exception in value>'
+            raise #return '<exception in value>'
         return markupsafe.Markup( html_str )
 
     def _wrap_obj(self, val, whatobject):
