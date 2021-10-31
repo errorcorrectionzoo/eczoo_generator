@@ -331,7 +331,7 @@ class HtmlPageCollection:
         page_url_html = markupsafe.escape(code_href)
         code_name_html = markupsafe.escape(code.name)
         return markupsafe.Markup(
-f'''<a href="{page_url_html}">{code_name_html}</a>'''
+            f'''<a href="{page_url_html}">{code_name_html}</a>'''
         )
     def _jfilter_code_ref_href(self, code):
         return self.get_code_href(code.code_id)
