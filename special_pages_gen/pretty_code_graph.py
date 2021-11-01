@@ -67,7 +67,7 @@ class PagePrettyCodeGraph:
         self.site_gen_env.compile_external_template(
             source_dir=self.page_source_data_dir,
             fn_template='pretty_code_graph.html',
-            fn_output='pretty_code_graph.html',
+            fn_output='code_graph.html',
             context=context
         )
 
