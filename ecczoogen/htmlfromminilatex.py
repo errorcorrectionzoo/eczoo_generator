@@ -42,14 +42,20 @@ class HtmlRefContext:
     def __init__(self):
         super().__init__()
 
-    def get_ref(self, refkey):
+    # references and citations are inspected to see if they are of the form
+    # "prefix:key".  If so, the prefix is reported in `ref_key_prefix` or
+    # `citeation_key_prefix`; those arguments are None if no prefix was given.
+
+    def get_ref(self, ref_key_prefix, ref_key):
         # return (target_html, targethref)
         raise RuntimeError("Subclass must reimplement get_ref()")
+
     def add_footnote(self, footnotetext):
         # return (footnotelabel_html, footnotehref)
         raise RuntimeError("Subclass must reimplement add_footnote()")
-    def add_citation(self, citation_key, optional_cite_extra_html=None,
-                     manual_citation_html=None):
+
+    def add_citation(self, citation_key_prefix, citation_key,
+                     optional_cite_extra_html=None):
         # return (citelabel_html, citehref)
         raise RuntimeError("Subclass must reimplement add_citation()")
 
@@ -104,6 +110,13 @@ class ToHtmlConverter:
         logger.debug(f"html_wrap_in_tag: code is ‘{s}’")
         return s
 
+    def _get_ref(self, reftarget):
+        refprefix = None
+        if ':' in reftarget:
+            (refprefix, reftarget) = reftarget.split(':', 1)
+        return self.refcontext.get_ref(refprefix, reftarget)
+
+
     def macro_node_to_html(self, mn):
 
         # special symbols macros
@@ -132,7 +145,7 @@ class ToHtmlConverter:
             if len(tgt) != 1:
                 raise ValueError("Invalid \\ref invocation: expected single braced argument")
             reftarget = tgt[0].chars
-            (target_html, target_href) = self.refcontext.get_ref(reftarget)
+            (target_html, target_href) = self._get_ref(reftarget)
             return self.html_wrap_in_tag(
                 'a',
                 target_html,
@@ -143,7 +156,7 @@ class ToHtmlConverter:
         if mn.macroname == 'hyperref':
             reftarget = self.nodearg_to_html(mn, 0)
             disphtml = self.nodearg_to_html(mn, 1)
-            (target_html, target_href) = self.refcontext.get_ref(reftarget)
+            (target_html, target_href) = self._get_ref(reftarget)
             # ignore target_html
             return self.html_wrap_in_tag(
                 'a',
@@ -204,27 +217,40 @@ class ToHtmlConverter:
                     continue
 
                 citekey_verbatim = ''
-                manual_nodes = None
+                citekey_prefix = None
+                after_prefix_nodes = None
                 for n in citekeynodes:
                     if isinstance(n, str):
                         citekey_verbatim += n
                     else:
                         citekey_verbatim += n.latex_verbatim()
 
-                    if manual_nodes is None and citekey_verbatim.startswith('manual:'):
-                        manual_nodes = [ citekey_verbatim[len('manual:'):] ]
-                    elif manual_nodes is not None:
-                        manual_nodes.append(n)
+                    if after_prefix_nodes is None and ':' in citekey_verbatim:
+                        citekey_prefix, citekey_rest = citekey_verbatim.split(':', 1)
+                        after_prefix_nodes = [ citekey_rest ]
+                    elif after_prefix_nodes is not None:
+                        after_prefix_nodes.append(n)
 
-                if manual_nodes is not None:
-                    # we have a manually-provided citation text, parse it -> html
-                    manual_citation_html = self.nodelist_to_html(manual_nodes)
+                if after_prefix_nodes is not None:
+                    after_prefix_verbatim = ''.join(
+                        n if isinstance(n, str) else n.latex_verbatim()
+                        for n in after_prefix_nodes
+                    )
                 else:
-                    manual_citation_html = None
+                    after_prefix_verbatim = None
+
+                if after_prefix_verbatim is not None:
+                    # have a prefix
+                    citation_key_prefix = citekey_prefix
+                    citation_key = after_prefix_verbatim
+                else:
+                    # didn't have a prefix
+                    citation_key_prefix = None
+                    citation_key = citekey_verbatim
 
                 citelabel_html, citehref = \
-                    self.refcontext.add_citation(citekey_verbatim, optional_cite_extra_html,
-                                                 manual_citation_html)
+                    self.refcontext.add_citation(citation_key_prefix, citation_key,
+                                                 optional_cite_extra_html)
 
                 s += self.html_wrap_in_tag(
                     'a',
