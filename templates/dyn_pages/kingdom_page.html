@@ -1,0 +1,10 @@
+{% extends 'dyn_pages/code_list.html' %}
+
+{% block contents %}
+
+<p>Welcome to the {{kingdom.name}}.</p>
+
+{# include the 'contents' block from the code_list.html template #}
+{{ super() }}
+
+{% endblock contents %}

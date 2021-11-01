@@ -1,0 +1,57 @@
+
+#
+# Where to find code files and where to write the generated site files
+#
+dirs:
+  #
+  # Where to find the sources for the eczoo_generator/ site generator (python
+  # packages + associated helper files)
+  #
+  root_dir: .
+  
+  #
+  # Where to find the EC CODE YAML FILES.  Given as an absolute path or as a
+  # path relative to root_source_dir.
+  #
+  codes_dir: ../eczoo_data/codes
+
+  #
+  # Where to OUTPUT THE EC ZOO WEBSITE FILES.  Given as an absolute path or as a
+  # path relative to root_source_dir.
+  #
+  output_dir: ../eczoo_website
+
+
+#
+# Specify how to organize the tree of codes on the website.  THE ‘code_tree:’
+# PROPERTY SHOULD BE THE ONLY PLACE IN THE PRESENT REPOSITORY WHERE EXPLICIT
+# CODE_ID'S ARE HARD-CODED.
+#
+
+code_tree:
+  domains:
+    - domain_id: classical_domain
+      name: 'Classical Domain'
+      description: 'codes for classical systems'
+  
+      kingdoms:
+        - code_id: bits_into_bits
+          name: 'Binary Kingdom'
+    
+        - code_id: q-ary_digits_into_q-ary_digits
+          name: '\(q\)-ary Digits Kingdom'
+    
+    - domain_id: quantum_domain
+      name: 'Quantum Domain'
+      description: 'codes for quantum systems'
+    
+      kingdoms:
+        - code_id: qubits_into_qubits
+          name: 'Qubit Kingdom'
+        - code_id: qudits_into_qudits
+          name: 'Qu\emph{d}it Kingdom'
+        - code_id: oscillators
+          name: 'Oscillator Kingdom'
+        - code_id: groups
+          name: 'Group Kingdom'
+    

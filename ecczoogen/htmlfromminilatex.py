@@ -320,9 +320,14 @@ class ToHtmlConverter:
             return self.specials_node_to_html(node)
 
         if node.isNodeType(latexwalker.LatexMathNode):
-            return htmlescape(
-                node.delimiters[0] + "".join(n.latex_verbatim() for n in node.nodelist)
-                + node.delimiters[1]
+            return (
+                f'<span class="{node.displaytype}-math">'
+                + htmlescape(
+                    node.delimiters[0]
+                    + "".join(n.latex_verbatim() for n in node.nodelist)
+                    + node.delimiters[1]
+                )
+                + '</span>'
             )
 
         raise ValueError(f"Invalid node type: {node!r}")

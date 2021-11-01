@@ -85,8 +85,7 @@ class HtmlPage:
             ext='.html',
             code_id_list,
             context={},
-            link_to_codes_here=True,
-            list_in_sidebar=True
+            link_to_codes_here=False,
     ):
         super().__init__()
         self.name = name
@@ -96,7 +95,6 @@ class HtmlPage:
         self.ext = ext
         self.context = context
         self.link_to_codes_here = link_to_codes_here
-        self.list_in_sidebar = list_in_sidebar
 
     # where to copy the file in the output files
     def pathext(self):
@@ -146,11 +144,10 @@ _rx_cite_doi = re.compile(r'^doi:(?P<doi>.*)$', flags=re.IGNORECASE)
 # ------------------------------------------------------------------------------
 
 class RefContextForHtmlConverter(htmlfromminilatex.HtmlRefContext):
-    def __init__(self, htmlpagecollection, page_notes):
+    def __init__(self, htmlpagecollection, html_page_notes):
         super().__init__()
         self.htmlpagecollection = htmlpagecollection
-        self.page_notes = page_notes
-
+        self.html_page_notes = html_page_notes
 
     def _get_ref_code(self, code_id):
         code = self.htmlpagecollection.zoo.get_code(code_id)
@@ -165,10 +162,22 @@ class RefContextForHtmlConverter(htmlfromminilatex.HtmlRefContext):
         raise ValueError(f"Invalid ref: ‘{refkey}’.  Reference must be "
                          f"to a code, use key of the form ‘code:<code-id>’.")
 
+    def _check_html_page_notes_context(self):
+        if self.html_page_notes is None:
+            raise ValueError(
+                f"You cannot use ‘\\footnote’ here, because the text is being rendered "
+                f"outside of the main page content.  (You cannot use citations or "
+                f"footnotes in code names or domain/kingdom names, for instance, since "
+                f"they might be rendered as links in the side navigation links.)"
+            )
+
     def add_footnote(self, footnote_text_html):
         # return (footnotelabel_html, footnotehref)
+
+        self._check_html_page_notes_context()
+
         footnote = HtmlFootnote(footnote_text_html=footnote_text_html)
-        foot_no = self.page_notes.add_footnote(footnote)
+        foot_no = self.html_page_notes.add_footnote(footnote)
         foot_label_html = self.htmlpagecollection.format_footnote_label_html(self.foot_no)
         return (foot_label_html, f'#fn-{foot_no}')
 
@@ -195,12 +204,14 @@ class RefContextForHtmlConverter(htmlfromminilatex.HtmlRefContext):
                      manual_citation_html=None):
         # return (citelabel_html, citehref)
 
+        self._check_html_page_notes_context()
+
         if manual_citation_html is not None:
             citation = HtmlCitation(citation_key=citation_key)
             citation.citation_text_html = markupsafe.Markup(manual_citation_html)
         else:
             citation = self._get_citation_obj(citation_key)
-        cite_no = self.page_notes.add_citation(citation)
+        cite_no = self.html_page_notes.add_citation(citation)
         cite_label_html = \
             self.htmlpagecollection.format_citation_label_html(cite_no,
                                                                optional_cite_extra_html)
@@ -272,6 +283,8 @@ class HtmlPageCollection:
         self.pages = {}
         self.page_for_code_ids = {}
 
+        self.global_context = {}
+
         # extend the jinja2 env to include our filter(s)
         self.jinja2env.filters['prebaseurl'] = \
             lambda x: self.site_generation_environment.prefix_base_url(x)
@@ -336,6 +349,18 @@ class HtmlPageCollection:
     def _jfilter_code_ref_href(self, code):
         return self.get_code_href(code.code_id)
 
+    def update_global_context(self, d):
+        self.global_context.update(d)
+
+    def wrap_object_with_minilatex_properties(self, obj, html_page_notes=None):
+        tohtml_refcontext = RefContextForHtmlConverter(self, html_page_notes)
+        tohtmlconverter = htmlfromminilatex.ToHtmlConverter(tohtml_refcontext)
+        return _HtmlObjectWrapper(obj, tohtmlconverter, repr(obj))
+
+    def minilatex_to_html(self, s, html_page_notes=None):
+        tohtml_refcontext = RefContextForHtmlConverter(self, html_page_notes)
+        tohtmlconverter = htmlfromminilatex.ToHtmlConverter(tohtml_refcontext)
+        return markupsafe.Markup( tohtmlconverter.to_html(s) )
 
     def generate(self, *, output_dir, additional_context={}):
 
@@ -363,6 +388,8 @@ class HtmlPageCollection:
                     ]
                 ],
                 page_footnotes=page_footnotes,
+                pages=self.pages,
+                **self.global_context,
                 **htmlpage.info,
                 **{k: _HtmlObjectWrapper(v, tohtmlconverter, repr(v))
                    for (k, v) in (htmlpage.context.items() if htmlpage.context else {})},

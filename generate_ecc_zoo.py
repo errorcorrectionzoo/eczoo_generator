@@ -25,6 +25,12 @@ import argparse
 args_parser = argparse.ArgumentParser()
 args_parser.add_argument("--verbose", action='store_true', default=False,
                          help="Print out more information")
+
+args_parser.add_argument("--eczoo-site-setup", action='store',
+                         default='./eczoo_site_setup.yml',
+                         help="Specify alternative settings file instead "
+                         "of ‘./eczoo_site_setup.yml’")
+
 args_parser.add_argument("--run-server", action='store_true', default=False,
                          help="Run the test server")
 args_parser.add_argument("--run-server-host", action='store',
@@ -36,16 +42,26 @@ args = args_parser.parse_args()
 if args.verbose:
     logger.setLevel(logging.DEBUG)
 
+
+with open(args.eczoo_site_setup) as f:
+    eczoo_site_setup = yaml.safe_load(f)
+
+#logger.debug(f"Read setup file:\n{json.dumps(eczoo_site_setup,indent=4)}")
+
 #
 # Fixed paths
 #
 
-_root_dir = os.path.dirname(__file__)
+_root_dir = os.path.abspath(eczoo_site_setup['dirs']['root_dir'])
 
 class Dirs:
     root_dir = _root_dir
 
-    codes_dir = os.path.join(_root_dir, '..', 'eczoo_data', 'codes')
+    codes_dir = os.path.join(_root_dir, eczoo_site_setup['dirs']['codes_dir'])
+
+    output_dir = os.path.join(_root_dir, eczoo_site_setup['dirs']['output_dir'])
+
+    # dirs for specific types of source files:
 
     templates_dir = os.path.join(_root_dir, 'templates')
     pages_dir = os.path.join(_root_dir, 'templates', 'pages')
@@ -57,8 +73,9 @@ class Dirs:
 
     static_assets_dir = os.path.join(_root_dir, 'static_assets')
 
-    output_dir = os.path.join(_root_dir, '..', 'eczoo_website')
 
+logger.debug(f"Set up directory paths:\n  {Dirs.root_dir=}\n"
+             f"  {Dirs.codes_dir=}\n  {Dirs.output_dir=}")
 
 if not os.path.exists(Dirs.output_dir):
     os.makedirs(Dirs.output_dir)
@@ -144,7 +161,8 @@ htmlpgcoll = htmlpagecollectiongen.HtmlPageCollection(
 logger.info("Setting up ecc list pages ...")
 
 #
-# Set up the code pages of the site
+# Set up the individual code pages for the site -- i.e., here, we do one page
+# per code.  These pages are where the "permalink" for the code should point to.
 #
 
 for code_id, code in zoo.all_codes().items():
@@ -160,50 +178,89 @@ for code_id, code in zoo.all_codes().items():
             'code': code,
         },
         template_name='dyn_pages/code_page.html',
-        list_in_sidebar=False,
+        link_to_codes_here=True,
     )
 
     htmlpgcoll.create_page( page )
 
 
 #
-# Codes by type of encoding (X into X)
+# Now construct the domain & kingdom pages.
 #
 
-# root_codes = [
-#     ('qubits_into_qubits', 'Encoding qubits into qubits'),
-#     ('qudits_into_qudits', 'Encoding qudits into qudits'),
-#     ('oscillators_into_oscillators', 'Encoding oscillators into oscillators'),
-#     ('qudits_into_oscillators', 'Encoding qudits into oscillators'),
-#     ('q-ary_digits_into_q-ary_digits', 'Encoding q-ary digits into q-ary digits'),
-#     ('bits_into_bits', 'Encoding bits into bits'),
-# ]
-root_codes = [
-    (code_id, code.name)
-    for (code_id, code) in zoo.root_codes().items()
-]
+# The list of domains and associated kingdoms.  This data tree will use the YAML
+# data, and it will add some more information to the bare YML data tree
+# (e.g. pointers to code objects)
+eczoo_domains = eczoo_site_setup['code_tree']['domains']
 
-for root_code_id, title in root_codes:
+for domain in eczoo_domains:
+    domain_id = domain['domain_id']
+    domain_name = domain['name']
 
-    code_list = zoo.get_code_family_tree(root_code_id)
+    kingdoms = domain['kingdoms']
 
-    page = htmlpagecollectiongen.HtmlPage(
-        name=root_code_id,
+    logger.debug(f"Processing domain ‘{domain_id}’ (‘{domain_name}’)")
+
+    # Create a page for each kingdom of that domain.
+    for kingdom in kingdoms:
+        code = zoo.get_code(kingdom['code_id'])
+        kingdom['code'] = code
+
+        root_code_id = code.code_id
+
+        logger.debug(f"processing kingdom with code_id ‘{root_code_id}’ "
+                     f"(‘{kingdom['name']}’), in domain ‘{domain_id}‘")
+
+        sorted_code_list = list(
+            sorted(zoo.get_code_family_tree(root_code_id),
+                   key=lambda code: code.family_generation_level)
+        )
+
+        kingdom['code_list'] = sorted_code_list
+        sorted_code_id_list = [ c.code_id for c in sorted_code_list ]
+
+        # create kingdom page.
+        kingdom_page = htmlpagecollectiongen.HtmlPage(
+            name=f'kingdom/{root_code_id}',
+            info={
+                'page_title': htmlpgcoll.minilatex_to_html(kingdom['name']),
+            },
+            code_id_list=sorted_code_id_list,
+            context={
+                'kingdom': htmlpgcoll.wrap_object_with_minilatex_properties(kingdom),
+                'domain': htmlpgcoll.wrap_object_with_minilatex_properties(domain),
+            },
+            template_name='dyn_pages/kingdom_page.html',
+        )
+
+        kingdom['htmlpage'] = kingdom_page
+
+        htmlpgcoll.create_page( kingdom_page )
+        #
+        logger.debug(f"kingdom page created (‘{root_code_id}’)")
+
+    # create domain page.
+    domain_page = htmlpagecollectiongen.HtmlPage(
+        name=f'domain/{domain_id}',
         info={
-            'page_title': title,
+            'page_title': domain['name'],
         },
-        code_id_list=[
-            code.code_id
-            for code in sorted(code_list, key=lambda code: code.family_generation_level)
-        ],
-        template_name='dyn_pages/code_list.html',
-        link_to_codes_here=False
+        code_id_list=[ ],
+        context={
+            'domain': htmlpgcoll.wrap_object_with_minilatex_properties(domain),
+        },
+        template_name='dyn_pages/domain_page.html',
     )
 
-    htmlpgcoll.create_page( page )
+    domain['htmlpage'] = domain_page
+
+    htmlpgcoll.create_page( domain_page )
 
 
-# Code index page
+
+#
+# Create a code index page with ALL codes in a single page.
+#
 
 htmlpgcoll.create_page(
     htmlpagecollectiongen.HtmlPage(
@@ -216,7 +273,6 @@ htmlpgcoll.create_page(
             for code in sorted(zoo.all_codes().values(), key=lambda code: code.name)
         ],
         template_name='dyn_pages/code_list.html',
-        link_to_codes_here=False,
     )
 )
 
@@ -228,7 +284,7 @@ htmlpgcoll.create_page(
 #
 
 global_context = {
-    'nav_pages': htmlpgcoll.pages.values()
+    'domains': htmlpgcoll.wrap_object_with_minilatex_properties(eczoo_domains),
 }
 
 
@@ -357,6 +413,7 @@ for SpecialPageClass in special_pages:
         dirs=Dirs,
         site_gen_env=site_gen_env,
         zoo=zoo,
+        eczoo_domains=eczoo_domains,
         htmlpagescollection=htmlpgcoll,
         global_context=global_context,
     )

@@ -27,14 +27,14 @@
 
     box-shadow: 10px 7px 10px rgba(0,0,0,0.3);
 
-    .code-name {
+    .code-name, .domain-name, .kingdom-name {
         display: inline-block;
         padding: 3px;
         margin-right: 1em;
         font-weight: 500;
     }
 
-    .code-description {
+    .code-description, .domain-description {
         display: inline;
         padding-bottom: 3px;
         font-style: italic;
@@ -46,11 +46,15 @@
         display: inline-block;
         width: 1em;
     }
-    .code-link {
+    .code-link, .domain-link, .kingdom-link {
         display: inline-block;
         margin-top: 5px;
         font-style: italic;
         font-size: 0.95em;
+    }
+
+    .kingdom-info {
+        display: block;
     }
 
     a.link-button {

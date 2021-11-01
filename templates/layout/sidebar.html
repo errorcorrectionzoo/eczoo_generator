@@ -1,25 +1,28 @@
 
   <nav id="sidebar">
     <div class="sidebarbox">
-      <h1>Pages</h1>
+      <!--<h1>Pages</h1>-->
       <ul class="navlinks">
         <li><a href="{{ '' | prebaseurl }}">Home</a></li>
         <li><a href="{{ 'pretty_code_graph' | prebaseurl }}">Code graph</a></li>
-        <li><a href="{{ 'about' | prebaseurl }}">About</a></li>
+        <li><a href="{{ 'all' | prebaseurl }}">All codes</a></li>
       </ul>
-      <h1>Codes</h1>
+{% for domain in domains %}
+      <h1><a href="{{domain.htmlpage.path() | prebaseurl}}">{{domain.name}}</a></h1>
       <ul class="navlinks">
-{% for page in nav_pages %}
-{% if page.list_in_sidebar %}
-        <li><a href="{{ page.path() | prebaseurl }}">{{page.info.page_title}}</a></li>
-{% endif %}
+        {% for kingdom in domain.kingdoms %}
+        <li><a href="{{ kingdom.htmlpage.path() | prebaseurl }}">{{kingdom.name}}</a></li>
+        {% endfor %}
+      </ul>
 {% endfor %}
+      <h1>More</h1>
+      <ul class="navlinks">
+        <li><a href="{{ 'about' | prebaseurl }}">About</a></li>
+        <li><a href="{{ 'contributors' | prebaseurl }}">Acknowledgments</a></li>
       </ul>
       <h1>Additional resources</h1>
-      <h1>Code tables</h1>
-      <h1>Acknowledgments</h1>
       <ul class="navlinks">
-        <li><a href="{{ 'contributors' | prebaseurl }}">Contributors</a></li>
+        <li>…</li>
       </ul>
     </div>
   </nav><!-- #sidebar -->

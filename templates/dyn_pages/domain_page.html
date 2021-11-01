@@ -1,0 +1,17 @@
+{% extends 'layout/base_page.html' %}
+
+{% block contents %}
+
+<p>Welcome to the {{domain.name}}.</p>
+
+<p>List of kingdoms:</p>
+
+<ul class="domain-kingdoms-list">
+{% for kingdom in domain.kingdoms %}
+<li><a href="{{ kingdom.htmlpage.path() | prebaseurl}}">{{kingdom.name}}</a></li>
+{% endfor %}
+</ul>
+
+{% include 'pieces/endnotes.html' %}
+
+{% endblock contents %}
