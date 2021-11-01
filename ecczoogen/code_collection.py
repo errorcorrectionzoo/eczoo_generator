@@ -76,7 +76,16 @@ class CodeCollection:
                         f"Processing {rel_type} relation of {code_id} to {relinfo['code_id']}"
                     )
 
-                    related_code = self.get_code(relinfo['code_id'])
+                    rel_code_id = relinfo['code_id']
+                    try:
+                        related_code = self.get_code(rel_code_id)
+                    except InvalidCodeReference as e:
+                        logger.error(
+                            f"Code ‘{code_id}’ (in ‘{codeobj.code_src_filename}’) refers "
+                            f"to a {rel_type} with code id ‘{rel_code_id}’, but that code id "
+                            f"does not exist!  (Note: code ids are case-sensitive.)"
+                        )
+                        raise
 
                     rel_data = code.Relation(code=related_code,
                                              detail=relinfo.get('detail', None))
@@ -138,7 +147,7 @@ class CodeCollection:
     def get_code(self, code_id):
         try:
             return self._codes[code_id]
-        except:
+        except KeyError:
             raise InvalidCodeReference("Unknown code ID: ‘{}’".format(code_id))
 
     def get_code_ids_by_physical_logial(self, physical, logical):

@@ -19,12 +19,13 @@ class Code:
 
             self.name = kw.pop('name')
             self.description = kw.pop('description')
+            self.introduced = kw.pop('introduced', None)
 
             self.protection = kw.pop('protection', None)
-
             self.decoder = kw.pop('decoder', None)
 
-            self.introduced = kw.pop('introduced', None)
+            self.physical = kw.pop('physical', None)
+            self.logical = kw.pop('logical', None)
 
             self.features = {
                 k: v
@@ -32,7 +33,6 @@ class Code:
             }
 
             self.realizations = kw.pop('realizations', None)
-
             
             self.notes = kw.pop('notes', None) # free text
 

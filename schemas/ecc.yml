@@ -13,7 +13,7 @@ properties:
   # every code must have a code_id.
   code_id:
     type: string
-    #pattern: '^[a-z0-9_.-]+$'
+    pattern: '^[a-z0-9_.-]+$'
 
   # every code must have a name.
   name:
@@ -22,6 +22,15 @@ properties:
   # every code must have a description.
   description:
     type: string
+
+
+  # TODO: we should fix the values these fields can take
+  physical:
+    type: string
+    pattern: '^[a-z0-9_.-]+$'
+  logical:
+    type: string
+    pattern: '^[a-z0-9_.-]+$'
 
 
   protection:
