@@ -34,7 +34,7 @@ class Code:
 
             self.realizations = kw.pop('realizations', None)
             
-            self.notes = kw.pop('notes', None) # free text
+            self.notes = kw.pop('notes', None) # array of free text entries
 
             rel_info = dict( kw.pop('relations', {}) )
             self.relations_info = {

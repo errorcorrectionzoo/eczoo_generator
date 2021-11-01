@@ -47,7 +47,11 @@ Expected context variables:
 
 {% if code.notes %}
 <dt>Notes</dt>
-<dd class="code-notes">{{code.notes}}</dd>
+<dd class="code-notes">
+{% for note in code.notes %}
+{{note}} {{ ' ' }}
+{% endfor %}
+</dd>
 {% endif %}
 
 {% if code.realizations %}
