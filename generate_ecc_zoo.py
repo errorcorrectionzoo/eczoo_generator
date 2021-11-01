@@ -424,6 +424,33 @@ for SpecialPageClass in special_pages:
 ################################################################################
 
 #
+# Scan codes' information for citations, and build the bibliography.
+#
+
+logger.info("Generating citation database ...")
+
+citation_scanner = citationtextmanager.MiniLatexCitationScanner()
+
+for code_id, code in zoo.all_codes().items():
+    
+    # look in the code._info field, where we kept the original YML structure
+    citation_scanner.scan_dict_tree(code._info, f'<Code id={code_id}>')
+
+citation_manager = citationtextmanager.CitationTextManager()
+for c in citation_scanner.encountered_citations():
+    try:
+        citation_manager.add_citation(**dict([c.citation_key_prefix, c.citation_key]))
+    except Exception as e:
+        logger.error(f"Invalid citation ‘{c.citation_key_prefix}:{c.citation_key}’ in "
+                     f"‘{c.encountered_where}’:\n{e}")
+        raise
+
+citation_manager.build_database()
+
+
+################################################################################
+
+#
 # generate the pages with the codes
 #
 

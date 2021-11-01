@@ -13,6 +13,7 @@ colorlog = "^6.5.0"
 pylatexenc = "^2.10"
 libsass = "^0.21.0"
 jsonref = "^0.2"
+arxiv = "^1.4.2"
 
 [tool.poetry.dev-dependencies]
 
