@@ -10,7 +10,9 @@ Expected context variables:
 ################################################################################}
 
 <div class="ecc-code" id="ecc_{{code.code_id}}">
-  <span class="short-code-name">{{code|code_ref}}</span>
+  <span class="short-code-name">{{code|code_ref}}
+    {%- if code.introduced %}<span class="code-introduced">{{code.introduced}}</span>{% endif -%}
+  </span>
   <span class="short-code-description">{{code.description}}</span>
   {% if code.protection %}
   <span class="short-code-info">Protection: {{code.protection}}</span>

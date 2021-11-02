@@ -42,16 +42,6 @@ properties:
   realizations:
     type: string
 
-  notes:
-    type: array
-    items:
-      type: string
-
-
-  features:
-    $ref: '/schemas/ecc_features'
-
-
   # references where to look up details about this code.  Currently there is
   # only one type of reference, `introduced:`; where the code was initially
   # introduced.
@@ -62,6 +52,14 @@ properties:
   #   properties:
   introduced:
     type: string
+
+  features:
+    $ref: '/schemas/ecc_features'
+
+  notes:
+    type: array
+    items:
+      type: string
 
   #
   # Relations of the code to other codes:
