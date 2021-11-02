@@ -399,6 +399,6 @@ class HtmlPageCollection:
             )
 
             # template = self.jinja2env.get_template(htmlpage.template_name)
-            # with open(os.path.join(self.dirs.output_dir, output_page_fname), 'w') as f:
+            # with open(os.path.join(self.dirs.output_dir, output_page_fname), 'w', encoding='utf-8') as f:
             #     f.write(template.render(context))
 

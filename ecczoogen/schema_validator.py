@@ -29,7 +29,7 @@ class SchemaValidator:
                     
                     logger.debug(f"Loading schema data ‘/schemas/{schema_rel_path}’ ...")
 
-                    with open(schema_fs_path) as f:
+                    with open(schema_fs_path, encoding='utf-8') as f:
                         d = yaml.safe_load(f)
         
                     schema_uri_data[schema_uri] = d

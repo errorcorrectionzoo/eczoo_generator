@@ -43,7 +43,7 @@ if args.verbose:
     logger.setLevel(logging.DEBUG)
 
 
-with open(args.eczoo_site_setup) as f:
+with open(args.eczoo_site_setup, encoding='utf-8') as f:
     eczoo_site_setup = yaml.safe_load(f)
 
 #logger.debug(f"Read setup file:\n{json.dumps(eczoo_site_setup,indent=4)}")
@@ -364,10 +364,10 @@ def compile_yml_to_json(fn_source, fn_dest):
 
     logger.debug(f"Copying/compiling ‘{fn_source}’ → ‘{fn_dest_json}’")
 
-    with open(fn_source) as f:
+    with open(fn_source, encoding='utf-8') as f:
         data = yaml.safe_load(f)
 
-    with open(fn_dest_json, 'w') as fw:
+    with open(fn_dest_json, 'w', encoding='utf-8') as fw:
         json.dump(data, fw)
 
 
@@ -447,7 +447,7 @@ logger.info("Generating JSON code dump ...")
 
 all_codes_info = { code_id: codeobj._info
                    for code_id, codeobj in zoo.all_codes().items() }
-with open(os.path.join(Dirs.output_dir, 'all_codes_info_dump.json'), 'w') as fw:
+with open(os.path.join(Dirs.output_dir, 'all_codes_info_dump.json'), 'w', encoding='utf-8') as fw:
     json.dump(all_codes_info, fw)
 
 

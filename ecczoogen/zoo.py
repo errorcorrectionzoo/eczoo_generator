@@ -37,7 +37,7 @@ class Zoo:
                     continue
 
                 logger.debug(f"Loading code file ‘{filename}’ ...")
-                with open(os.path.join(codes_dir, fullfname), 'r') as f:
+                with open(os.path.join(codes_dir, fullfname), 'r', encoding='utf-8') as f:
                     try:
                         code_info = yaml.safe_load(f)
                     except Exception as e:

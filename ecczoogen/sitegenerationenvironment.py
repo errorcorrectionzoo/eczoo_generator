@@ -72,7 +72,7 @@ class SiteGenerationEnvironment:
                 'prebaseurl': (lambda x: self.prefix_base_url(x))
             }
         )
-        with open(os.path.join(self.dirs.output_dir, fn_output), 'w') as f:
+        with open(os.path.join(self.dirs.output_dir, fn_output), 'w', encoding='utf-8') as f:
             f.write("/* Automatically generated file. Changes will be overwritten. */\n")
             f.write(css_source)
 
@@ -93,7 +93,7 @@ class SiteGenerationEnvironment:
         # create any parent directories, as necessary
         os.makedirs(os.path.dirname(output_fname), exist_ok=True)
 
-        with open(output_fname, 'w') as fw:
+        with open(output_fname, 'w', encoding='utf-8') as fw:
             fw.write( rendered_output )
 
 
@@ -107,7 +107,7 @@ class SiteGenerationEnvironment:
 
         output_fname = os.path.join(self.dirs.output_dir, fn_output)
 
-        with open(full_src_path) as f:
+        with open(full_src_path, encoding='utf-8') as f:
             pg_source = f.read()
 
         try:
@@ -120,5 +120,5 @@ class SiteGenerationEnvironment:
         # create any parent directories, as necessary
         os.makedirs(os.path.dirname(output_fname), exist_ok=True)
 
-        with open(output_fname, 'w') as fw:
+        with open(output_fname, 'w', encoding='utf-8') as fw:
             fw.write(rendered_output)
