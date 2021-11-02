@@ -166,20 +166,24 @@ a.code-info-corner-icon {
     float: right;
     margin: -3px 0px -3px 5px;
     padding: 3px 5px;
-    opacity: 0.2;
     color: gray;
 
-    width: 8px;
-    height: 8px;
+    //opacity: 0.2;
+    //opacity: 0.9;
+
+    width: 12px;
+    height: 12px;
     margin-top: 2px;
     vertical-align: middle;
     background-size: 100% 100%;
     background-repeat: no-repeat;
 }
 a.code-info-corner-icon:hover {
-    opacity: 0.9;
+    // opacity: 0.9;
+    //opacity: 1.0;
+    background-color: rgba($page-link-highlight-color, 0.1);
+    box-shadow: rgba($page-link-highlight-color, 0.1) 3px 3px 5px;
 }
-
 a.code-self-permalink {
     background-image: url(prebaseurl('static/icons/permalink-logo.svg'));
 }
