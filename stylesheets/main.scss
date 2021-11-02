@@ -186,6 +186,9 @@ a.code-self-permalink {
 a.code-show-github {
     background-image: url(prebaseurl('static/icons/github-logo.svg'));
 }
+a.code-self-edit {
+    background-image: url(prebaseurl('static/icons/edit-icon.svg'));
+}
 
 
 dd.code-name {
@@ -217,6 +220,11 @@ dd.code-name {
     > dd {
         margin-left: .5em;
     }
+}
+
+.display-code-id {
+    font-size: 0.8em;
+    color: #999;
 }
 
 

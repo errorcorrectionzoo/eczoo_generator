@@ -1,0 +1,66 @@
+{% set extra_css = [ "https://unpkg.com/spectre.css/dist/spectre-icons.min.css", "https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" ] %}
+{% extends 'layout/base_page.html' %}
+{% block block_page_title %}Error correction zoo — edit code{% endblock %}
+
+{% block contents %}
+
+{# THIS PAGE IS A PROOF OF CONCEPT #}
+{# IT NEEDS TO BE COMPLETELY REWRITTEN AS A PROPER JS WEB APP (PROBABLY USING REACT) #}
+
+<div id="edit-code"></div>
+
+<button id="submit" style="display:block">Download data file to email to Victor →</button>
+<p>Attach the downloaded file to <a href="mailto:xxx@gmail.com?subject=code data&body=Please attach the downloaded file and send to XXXX@gmail.com. Thanks for your contribution!">an email to this address</a>.</p>
+
+<a id="a-download-code-json" download="code.json" type="text/json" style="display:none">&nbsp;</a>
+
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+
+<script type="text/javascript"
+        src="https://cdn.jsdelivr.net/npm/@json-editor/json-editor@latest/dist/jsoneditor.min.js">
+</script>
+<script type="text/javascript"
+        src="{{ 'js/edit_code.js' | prebaseurl }}">
+</script>
+<script type="text/javascript">
+window.addEventListener("load", function() {
+    eczoo_edit_code_setup("{{''|prebaseurl}}", document.getElementById('edit-code'));
+});
+</script>
+
+<style type="text/css">
+.card-body {
+    padding: 0.5rem 5px;
+    border: none 0px;
+}
+label {
+    font-size: 0.8em;
+    font-weight: 500;
+    padding-left: 5px;
+    margin-bottom: 5px;
+}
+/* .card-title { */
+/*     width: 100%; */
+/*     background-color: #ddf !important; */
+/* } */
+/* div[data-schematype='array'] > .card-body.bg-light, */
+/* div[data-schematype='object']:not([data-schemapath='ecc']) > .card-body.bg-light { */
+/*     background-color: #ddf !important; */
+/* } */
+div[data-schemaid="ecc"] > div > div > div > div.row:nth-child(odd) {
+    background-color: #f2f2f2 !important;
+}
+div[data-schemaid="ecc"] > div > div > div > div.row:nth-child(even) {
+    background-color: #dbdbdb !important;
+}
+.bg-light {
+    background-color: #e0eaf4 !important;
+}
+div[data-schemaid="ecc"] > .bg-light {
+    background-color: transparent !important;
+}
+</style>
+
+{% endblock contents %}

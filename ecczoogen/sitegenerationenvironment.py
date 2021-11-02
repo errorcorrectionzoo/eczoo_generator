@@ -24,9 +24,9 @@ class SiteGenerationEnvironment:
     def copy_file(self, *, source_dir, fn_source, fn_target):
         
         full_src_path = os.path.join(source_dir, fn_source)
-        logger.debug(f"Copying file "
-                     f"‘{os.path.relpath(full_src_path, start=self.dirs.root_dir)}’ "
-                     f"→ ‘{os.path.relpath(fn_target, start=self.dirs.output_dir)}’")
+        logger.info(f"Copying file "
+                    f"‘{os.path.relpath(full_src_path, start=self.dirs.root_dir)}’ "
+                    f"→ ‘{fn_target}’")
         shutil.copy2(full_src_path, os.path.join(self.dirs.output_dir, fn_target))
 
     def copy_tree(self, *, source_dir, target_dir, only_exts=None):
@@ -34,8 +34,8 @@ class SiteGenerationEnvironment:
         def do_copy(fn_src, fn_dest):
             if only_exts and not fn_src.endswith( only_exts ):
                 return
-            logger.debug(f"Copying ‘{os.path.relpath(fn_src, start=self.dirs.root_dir)}’ "
-                         f"→ ‘{os.path.relpath(fn_dest, start=self.dirs.output_dir)}’")
+            logger.info(f"Copying ‘{os.path.relpath(fn_src, start=self.dirs.root_dir)}’ "
+                        f"→ ‘{os.path.relpath(fn_dest, start=self.dirs.output_dir)}’")
             shutil.copy(fn_src, fn_dest)
 
         shutil.copytree(source_dir, os.path.join(self.dirs.output_dir, target_dir),
@@ -57,9 +57,9 @@ class SiteGenerationEnvironment:
 
         full_src_path = os.path.join(source_dir, fn_source)
 
-        logger.debug(f"Compiling SASS → CSS "
-                     f"‘{os.path.relpath(full_src_path, start=self.dirs.root_dir)}’ "
-                     f"→ ‘{fn_output}’")
+        logger.info(f"Compiling SASS → CSS "
+                    f"‘{os.path.relpath(full_src_path, start=self.dirs.root_dir)}’ "
+                    f"→ ‘{fn_output}’")
 
         css_source = sass.compile(
             filename=full_src_path,
@@ -79,7 +79,7 @@ class SiteGenerationEnvironment:
 
     def compile_template(self, *, fn_template, fn_output, context={}):
 
-        logger.debug(f"Compiling template ‘{fn_template}’ → ‘{fn_output}’")
+        logger.info(f"Compiling template ‘{fn_template}’ → ‘{fn_output}’")
 
         output_fname = os.path.join(self.dirs.output_dir, fn_output)
 
@@ -101,9 +101,9 @@ class SiteGenerationEnvironment:
                                   context={}):
 
         full_src_path = os.path.join(source_dir, fn_template)
-        logger.debug(f"Compiling external template "
-                     f"‘{os.path.relpath(full_src_path, start=self.dirs.root_dir)}’ "
-                     f"→ ‘{fn_output}’")
+        logger.info(f"Compiling external template "
+                    f"‘{os.path.relpath(full_src_path, start=self.dirs.root_dir)}’ "
+                    f"→ ‘{fn_output}’")
 
         output_fname = os.path.join(self.dirs.output_dir, fn_output)
 

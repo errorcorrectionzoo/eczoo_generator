@@ -301,6 +301,7 @@ os.makedirs(os.path.join(Dirs.output_dir, output_js_prefix), exist_ok=True)
 
 root_js_list = [
     ('misc.js', 'misc.js'),
+    ('edit_code.js', 'edit_code.js'),
 ]
 
 for root_js, root_js_out in root_js_list:
@@ -434,6 +435,20 @@ htmlpgcoll.generate(
     additional_context=global_context
 )
 
+
+
+################################################################################
+
+#
+# generate a JSON dump of all codes (for editor page)
+#
+
+logger.info("Generating JSON code dump ...")
+
+all_codes_info = { code_id: codeobj._info
+                   for code_id, codeobj in zoo.all_codes().items() }
+with open(os.path.join(Dirs.output_dir, '_all_codes_info_dump.json'), 'w') as fw:
+    json.dump(all_codes_info, fw)
 
 
 ################################################################################
