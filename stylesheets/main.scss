@@ -39,6 +39,7 @@ h1 {
     line-height: 1.6em;
 }
 
+
 // definition lists with "terms" (<dt>) on the left and "definitions" (<dd>) on
 // the right
 dl {
@@ -80,6 +81,18 @@ dd {
     padding-left: 3px;
     padding-right: 3px;
 }
+
+
+//
+// BETA MARKER -- WHILE SITE IS IN "BETA"
+//
+#header {
+    background-image: url(prebaseurl('static/icons/beta-marker.svg'));
+    background-position: 97% 50%;
+    background-size: auto 80%;
+    background-repeat: no-repeat;
+}
+
 
 
 

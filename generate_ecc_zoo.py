@@ -447,7 +447,7 @@ logger.info("Generating JSON code dump ...")
 
 all_codes_info = { code_id: codeobj._info
                    for code_id, codeobj in zoo.all_codes().items() }
-with open(os.path.join(Dirs.output_dir, '_all_codes_info_dump.json'), 'w') as fw:
+with open(os.path.join(Dirs.output_dir, 'all_codes_info_dump.json'), 'w') as fw:
     json.dump(all_codes_info, fw)
 
 

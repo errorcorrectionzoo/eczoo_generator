@@ -27,7 +27,7 @@ window.eczoo_edit_code_setup = function(base_url, install_in_element)
     var code_schema = fetch_load_json('schemas/ecc.json');
     var relation_list_schema = fetch_load_json('schemas/relation_list.json');
     var ecc_features_schema = fetch_load_json('schemas/ecc_features.json');
-    var all_codes_info = fetch_load_json('_all_codes_info_dump.json');
+    var all_codes_info = fetch_load_json('all_codes_info_dump.json');
 
     code_schema.properties.description.format = 'textarea';
     code_schema.properties.protection.format = 'textarea';
@@ -54,7 +54,7 @@ window.eczoo_edit_code_setup = function(base_url, install_in_element)
             startval: cur_code_info,
             form_name_root: 'ecc',
 
-            ref: {
+            refs: {
                 '/schemas/ecc': code_schema,
                 '/schemas/relation_list': relation_list_schema,
                 '/schemas/ecc_features': ecc_features_schema,
