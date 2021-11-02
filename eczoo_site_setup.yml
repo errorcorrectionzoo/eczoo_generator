@@ -52,6 +52,6 @@ code_tree:
           name: 'Qu\emph{d}it Kingdom'
         - code_id: oscillators
           name: 'Oscillator Kingdom'
-        - code_id: groups
+        - code_id: group_quantum
           name: 'Group Kingdom'
     
