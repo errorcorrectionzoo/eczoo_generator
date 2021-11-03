@@ -107,8 +107,8 @@ dd {
     min-width: $page-sidebar-width;
 }
 #sidebar h1 {
-    //font-size: 1.1em;
-    font-size: 1em;
+    //font-size: 1.1rem;
+    font-size: 1rem;
     font-weight: bold;
     margin-bottom: 0.5em;
 }
@@ -220,27 +220,27 @@ dd.code-name {
 }
 
 .cite {
-    font-size: 0.8em;
+    font-size: $endnote-superscript-font-size;
     // "vertical-align: super" shifts the entire baseline downwards, not nice
     vertical-align: top;
 }
 .footnote {
-    font-size: 0.8em;
+    font-size: $endnote-superscript-font-size;
     vertical-align: top;
 }
 
-.features-list {
-    > dt {
-        color: rgba(0,0,0,0.8);
-        font-size: 0.95em;
-    }
-    > dd {
-        margin-left: .5em;
-    }
-}
+// .features-list {
+//     > dt {
+//         color: rgba(0,0,0,0.8);
+//         font-size: $small-font-size;
+//     }
+//     > dd {
+//         margin-left: .5em;
+//     }
+// }
 
 .display-code-id {
-    font-size: 0.8em;
+    font-size: $tiny-fine-print-font-size;
     color: #999;
 }
 
@@ -269,6 +269,24 @@ dd.code-name {
 
 
 
+////////////////////////////////////////////////////////////////////////////////
+//
+// code index style
+//
+////////////////////////////////////////////////////////////////////////////////
+
+.code-index {
+    li {
+        margin-bottom: 0.7rem;
+    }
+
+    .code-name {
+        padding-right: 1em;
+        font-weight: bold;
+    }
+    .code-description {
+    }
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -281,7 +299,7 @@ dd.code-name {
     padding: 3px;
     opacity: 0.85;
 
-    font-size: 0.9em;
+    font-size: $small-font-size;
 
     margin-bottom: 20px;
 }
@@ -328,7 +346,7 @@ $visual-highlight-color: rgba(255,255,0,1.0);
 
 #footer {
     font-style: italic;
-    font-size: 0.8em;
+    font-size: $tiny-fine-print-font-size;
     font-color: rgb(127,127,127);
     padding: 4px;
 

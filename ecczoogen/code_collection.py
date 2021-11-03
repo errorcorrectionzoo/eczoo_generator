@@ -42,7 +42,7 @@ class CodeCollection:
         for lc_code_id, code_ids_iter in lc_code_ids:
             code_ids = list(code_ids_iter)
             if len(code_ids) > 1:
-                msg = ', '.join(f"‘{cid}’ (‘{self.get_code(cid).code_src_filename}’)"
+                msg = ', '.join(f"‘{cid}’ (‘{self.get_code(cid).source_info_filename}’)"
                                 for cid in code_ids)
                 raise ValueError(f"Code IDs for {msg} need to differ more than only by case. "
                                  f"Code IDs must be unique also for case-insensitive "
@@ -56,7 +56,7 @@ class CodeCollection:
             codeobj.relations.parents = []
             codeobj.relations.cousins = []
 
-            code_data_relations = codeobj._info.get('relations', {})
+            code_data_relations = codeobj.source_info.get('relations', {})
             if not code_data_relations:
                 continue
 
@@ -65,7 +65,7 @@ class CodeCollection:
 
                 rels_fld = getattr(codeobj.relations, rel_type+'s')
 
-                # iterate over e.g. codeobj._info.relations.parents
+                # iterate over e.g. codeobj.source_info.relations.parents
 
                 code_data_relations_reltypelist = code_data_relations.get(rel_type+'s', [])
                 if not code_data_relations_reltypelist:

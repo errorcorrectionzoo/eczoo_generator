@@ -72,6 +72,7 @@ class Dirs:
     javascripts_dir = os.path.join(_root_dir, 'javascripts')
 
     static_assets_dir = os.path.join(_root_dir, 'static_assets')
+    static_favicon_files_dir = os.path.join(_root_dir, 'static_favicon_files')
 
 
 logger.debug(f"Set up directory paths:\n  {Dirs.root_dir=}\n"
@@ -142,6 +143,13 @@ site_gen_env.copy_tree(
     source_dir=Dirs.static_assets_dir,
     target_dir='static/',
     only_exts=static_asset_exts,
+)
+
+# also take care of favicon
+site_gen_env.copy_tree(
+    source_dir=Dirs.static_favicon_files_dir,
+    target_dir='', # root of output directory
+    only_exts=('.png', '.svg', '.ico', '.xml', '.webmanifest',)
 )
 
 
@@ -275,7 +283,7 @@ htmlpgcoll.create_page(
             code.code_id
             for code in sorted(zoo.all_codes().values(), key=lambda code: code.name)
         ],
-        template_name='dyn_pages/code_list.html',
+        template_name='dyn_pages/code_index.html',
     )
 )
 
@@ -448,7 +456,7 @@ htmlpgcoll.generate(
 
 logger.info("Generating JSON code dump ...")
 
-all_codes_info = { code_id: codeobj._info
+all_codes_info = { code_id: codeobj.source_info
                    for code_id, codeobj in zoo.all_codes().items() }
 with open(os.path.join(Dirs.output_dir, 'all_codes_info_dump.json'), 'w', encoding='utf-8') as fw:
     json.dump(all_codes_info, fw)

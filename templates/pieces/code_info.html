@@ -20,7 +20,7 @@ Expected context variables:
   <a class="code-info-corner-icon code-show-github"
      target="_blank"
      title="edit code information directly on github.com"
-     href="https://github.com/errorcorrectionzoo/eczoo_data/tree/main/codes/{{code.code_src_filename}}">&nbsp;</a>
+     href="https://github.com/errorcorrectionzoo/eczoo_data/tree/main/codes/{{code.source_info_filename}}">&nbsp;</a>
   <a class="code-info-corner-icon code-self-edit"
      target="_blank"
      title="edit code information on this site without using github"
@@ -41,15 +41,12 @@ Expected context variables:
 {% endif %}
 
 {% if code.features %}
-<dt>Features</dt>
-<dd class="code-features">
-  <dl class="features-list">
 {% for featurename, featuretext in code.features.items() %}
-    <dt>{{featurename}}:</dt>
-    <dd>{{featuretext}}</dd>
-{% endfor %}
-  </dl>
+<dt class="code-feature code-feature-{{featurename}}">{{featurename}}</dt>
+<dd class="code-feature code-feature-{{featurename}}">
+  {{featuretext}}
 </dd>
+{% endfor %}
 {% endif %}
 
 {% if code.notes %}

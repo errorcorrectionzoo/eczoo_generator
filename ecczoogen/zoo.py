@@ -53,7 +53,7 @@ class Zoo:
 
                 codeobj = code.Code( code_info )
 
-                codeobj.code_src_filename = os.path.relpath(fullfname, start=codes_dir)
+                codeobj.source_info_filename = os.path.relpath(fullfname, start=codes_dir)
 
                 self._collection.add_code( codeobj )
 

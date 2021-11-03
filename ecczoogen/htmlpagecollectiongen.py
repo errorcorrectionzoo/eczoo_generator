@@ -19,22 +19,26 @@ class _HtmlObjectWrapper:
         self.tohtmlconverter = tohtmlconverter
         self.whatobject = whatobject
 
-    def _to_html(self, value, whatobject):
+    def _to_html_str(self, value, whatobject):
         try:
-            html_str = self.tohtmlconverter.to_html(value)
+            return self.tohtmlconverter.to_html(value)
         except Exception as e:
             logger.error(f"Error converting ‘{whatobject}’ to HTML: {e}", exc_info=True)
             raise
-        return markupsafe.Markup( html_str )
 
     def _wrap_obj(self, val, whatobject):
         if val is None:
             return None
+        if isinstance(val, _HtmlObjectWrapper):
+            # already wrapped (?!)
+            return val
         if isinstance(val, str):
-            return self._to_html(val, whatobject)
+            return _HtmlStringWrapper(val, self.tohtmlconverter, whatobject)
+        if isinstance(val, list):
+            return _HtmlListObjectWrapper(val, self.tohtmlconverter, whatobject)
         if isinstance(val, dict):
             return _HtmlDictObjectWrapper(val, self.tohtmlconverter, whatobject)
-        #logger.debug(f"Got attr value, generic type -> {val=}")
+        #logger.debug(f"Got attr value ‘{val!r}’, generic type {type(val)}")
         return _HtmlObjectWrapper(val, self.tohtmlconverter, whatobject)
 
     def __bool__(self):
@@ -57,6 +61,47 @@ class _HtmlObjectWrapper:
 
     def __repr__(self):
         return f'_HtmlObjectWrapper({self.obj!r})'
+
+
+class _HtmlStringWrapper(_HtmlObjectWrapper):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    # __bool__ def'd in base class
+
+    def __str__(self):
+        return self._to_html_str(self.obj, self.whatobject)
+
+    # The __html__() method will ensure this string is seen as "HTML-safe" by
+    # `markup.escape()`.
+    #
+    # This method works as an alternative to `markupsafe.Markup(..)`, for
+    # strings that we don't want to pre-compile before we're sure that the
+    # actual string is needed.
+    def __html__(self):
+        return self._to_html_str(self.obj, self.whatobject)
+
+    def __add__(self, other):
+        return self._wrap_obj(self.obj + other, '('+self.whatobject+'+str)')
+    def __radd__(self, other):
+        return self._wrap_obj(other + self.obj, '(str+'+self.whatobject+')')
+
+
+class _HtmlListObjectWrapper(_HtmlObjectWrapper):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    # __bool__, __getitem__, __iter__ def'd in base class
+
+    def __len__(self):
+        return len(self.obj)
+
+    def __bool__(self):
+        return (True if self.obj else False)
+
+    # custom conversion to string
+    def __str__(self):
+        return "".join(f"<p>{item}</p>" for item in self)
 
 
 class _HtmlDictObjectWrapper(_HtmlObjectWrapper):
@@ -335,14 +380,18 @@ class HtmlPageCollection:
 
 
     def _jfilter_code_ref(self, code):
-        code_href = self.get_code_href(code.code_id)
+        # need str(code.code_id) since for now we brutally wrap all the entire
+        # code object into an _HtmlObjectWrapper instance
+        code_href = self.get_code_href( str(code.code_id) )
         page_url_html = markupsafe.escape(code_href)
         code_name_html = markupsafe.escape(code.name)
         return markupsafe.Markup(
             f'''<a href="{page_url_html}">{code_name_html}</a>'''
         )
     def _jfilter_code_ref_href(self, code):
-        return self.get_code_href(code.code_id)
+        # need str(code.code_id) since for now we brutally wrap all the entire
+        # code object into an _HtmlObjectWrapper instance
+        return self.get_code_href( str(code.code_id) )
 
     def update_global_context(self, d):
         self.global_context.update(d)

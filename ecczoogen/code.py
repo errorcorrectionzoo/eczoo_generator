@@ -6,10 +6,10 @@ class Code:
     def __init__(self, info):
         super().__init__()
 
-        self._info = info
+        self.source_info = info
 
         # source file (the zoo sets this relative to the codes_dir folder)
-        self.code_src_filename = None
+        self.source_info_filename = None
 
         # parse the data structure.
         try:
@@ -21,19 +21,19 @@ class Code:
             self.description = kw.pop('description')
             self.introduced = kw.pop('introduced', None)
 
-            self.protection = kw.pop('protection', None)
-            self.decoder = kw.pop('decoder', None)
-
             self.physical = kw.pop('physical', None)
             self.logical = kw.pop('logical', None)
 
+            self.protection = kw.pop('protection', None)
+            self.decoder = kw.pop('decoder', None)
+
+            self.realizations = kw.pop('realizations', None)
+            
             self.features = {
                 k: v
                 for (k,v) in kw.pop('features', {}).items() # a dictionary
             }
 
-            self.realizations = kw.pop('realizations', None)
-            
             self.notes = kw.pop('notes', None) # array of free text entries
 
             rel_info = dict( kw.pop('relations', {}) )
