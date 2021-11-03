@@ -11,6 +11,7 @@ enum:
   - "q-ary_digits"
   - "qubits"
   - "qudits"
+  - "fermions"
   - "groups"
   - "oscillators"
   - "rigid_bodies"
