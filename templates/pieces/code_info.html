@@ -11,12 +11,18 @@ Expected context variables:
 
 <dl class="ecc-code ecc-code-page" id="ecc_{{code.code_id}}">
 
+
 <dt>Name</dt>
-<dd class="code-name">{{code.name}}
-  {% if code.introduced %}<span class="code-introduced">{{code.introduced}}</span>{% endif %}
+<dd class="code-name">
+  {{code.name}}
+  {%- if code.introduced -%}
+    <span class="code-introduced">{{code.introduced}}</span>
+  {%- endif -%}
   <a class="code-info-corner-icon code-self-permalink"
      title="permanent link to this code (click and then copy the location in the address bar)"
-     href="{{code|code_ref_href}}">&nbsp;</a></dd>
+     href="{{code|code_ref_href}}">&nbsp;</a>
+</dd>
+
 
 <dt>Description</dt>
 <dd class="code-description">{{code.description}}</dd>
@@ -26,11 +32,37 @@ Expected context variables:
 <dd class="code-protection">{{code.protection}}</dd>
 {% endif %}
 
-{% if code.features.decoders %}
-<dt>Decoder</dt>
-<dd class="code-decoders">{{code.features.decoders}}</dd>
-{% endif %}
 
+<!-- Display features -->
+
+
+{# helper macro to display features #}
+
+{% macro disp_feature_field(featurename, label) -%}
+  {%- if code.features[featurename] -%}
+  <dt>{{label}}</dt>
+  <dd class="code-feature-{{featurename}}">
+    {{- code.features[featurename] -}}
+  </dd>
+  {% endif %}
+{%- endmacro %}
+
+
+{{ disp_feature_field('rate', 'Rate') }}
+
+{{ disp_feature_field('encoders', 'Encoder') }}
+
+{{ disp_feature_field('transversal_gates', 'Transversal Gates') }}
+
+{{ disp_feature_field('general_gates', 'Gates') }}
+
+{{ disp_feature_field('decoders', 'Decoder') }}
+
+{{ disp_feature_field('fault_tolerance', 'Fault Tolerance') }}
+
+{{ disp_feature_field('threshold', 'Threshold') }}
+
+{#
 {% if code.features %}
 {% for featurename, featuretext in code.features.items() %}
 <dt class="code-feature code-feature-{{featurename}}">{{featurename}}</dt>
@@ -38,6 +70,14 @@ Expected context variables:
   {{featuretext}}
 </dd>
 {% endfor %}
+{% endif %}
+#}
+
+{% if code.realizations %}
+<dt>Realizations</dt>
+<dd class="code-realizations">
+  {{code.realizations}}
+</dd>
 {% endif %}
 
 {% if code.notes %}
@@ -47,12 +87,8 @@ Expected context variables:
 </dd>
 {% endif %}
 
-{% if code.realizations %}
-<dt>Realizations</dt>
-<dd class="code-realizations">
-  {{code.realizations}}
-</dd>
-{% endif %}
+
+<!-- Relationships to other codes -->
 
 {% if code.relations.parents %}
 <dt>Parent(s)</dt>
@@ -89,6 +125,7 @@ Expected context variables:
   {% include 'pieces/list_code_relations.html' %}
 </dd>
 {% endif %}
+
 
 <!-- zoo-related information and how to edit -->
 

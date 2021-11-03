@@ -97,7 +97,7 @@ dd {
 
 
 //
-// BETA MARKER -- WHILE SITE IS IN "BETA"
+// Add logo as background-image with BETA marker
 //
 #header {
     background-image: url(prebaseurl('static/icons/eczoo-main-logo.svg'));
@@ -112,6 +112,11 @@ dd {
     box-shadow: none;
 }
 
+@media (max-width: $page-main-width+2*$page-main-margins) {
+#header {
+    background-image: url(prebaseurl('static/icons/eczoo-main-logo-mobile.svg'));
+}
+}
 
 
 
