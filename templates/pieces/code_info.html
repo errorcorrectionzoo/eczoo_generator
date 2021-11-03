@@ -16,16 +16,7 @@ Expected context variables:
   {% if code.introduced %}<span class="code-introduced">{{code.introduced}}</span>{% endif %}
   <a class="code-info-corner-icon code-self-permalink"
      title="permanent link to this code (click and then copy the location in the address bar)"
-     href="{{code|code_ref_href}}">&nbsp;</a>
-  <a class="code-info-corner-icon code-show-github"
-     target="_blank"
-     title="edit code information directly on github.com"
-     href="https://github.com/errorcorrectionzoo/eczoo_data/tree/main/codes/{{code.source_info_filename}}">&nbsp;</a>
-  <a class="code-info-corner-icon code-self-edit"
-     target="_blank"
-     title="edit code information on this site without using github"
-     href="{{ ('edit_code?code_id='+code.code_id) | prebaseurl }}">&nbsp;</a>
-</dd>
+     href="{{code|code_ref_href}}">&nbsp;</a></dd>
 
 <dt>Description</dt>
 <dd class="code-description">{{code.description}}</dd>
@@ -99,8 +90,22 @@ Expected context variables:
 </dd>
 {% endif %}
 
-<dt class="display-code-id">Internal code ID</dt>
-<dd class="display-code-id">{{code.code_id}}</dd>
-
+<dt class="display-code-id">Error correction zoo code information</dt>
+<dd class="display-code-id">
+  <div>
+    <span class="display-code-id-label">Internal code ID:</span>
+    {{code.code_id}}
+  </div>
+  <div>
+    <a class="code-link-with-icon code-show-github"
+       target="_blank"
+       title="Edit code information directly on github.com"
+       href="https://github.com/errorcorrectionzoo/eczoo_data/tree/main/codes/{{code.source_info_filename}}">code information on github.com</a><!--
+    --><a class="code-link-with-icon code-self-edit"
+       target="_blank"
+       title="edit code information on this site without using github"
+       href="{{ ('edit_code?code_id='+code.code_id) | prebaseurl }}">edit on this site</a>
+  </div>
+</dd>
 
 </dl>

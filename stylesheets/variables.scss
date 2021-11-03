@@ -10,7 +10,9 @@ $page-sidebar-margin: 20px;
 $page-sidebar-width: 220px;
 
 $page-header-bleed: 10px;
-$page-header-gap: 10px;
+$page-header-gap: 0px; //10px;
+
+$main-content-top-space: 1rem;
 
 $page-footer-gap: 10px;
 
@@ -35,6 +37,9 @@ $endnote-superscript-font-size: 0.8rem;
 $tiny-fine-print-font-size: 0.8rem;
 
 
+$parskip-half-length: 0.35em;
+
+
 //
 // Base colors
 //
@@ -42,3 +47,4 @@ $tiny-fine-print-font-size: 0.8rem;
 $page-link-color: rgba(50,50,200,1.0);
 $page-link-highlight-color: rgba(80,80,255,1.0);
 
+$text-dim-color: rgba(120, 120, 140, 1.0);
