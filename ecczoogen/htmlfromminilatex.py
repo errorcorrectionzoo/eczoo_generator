@@ -107,14 +107,16 @@ class ToHtmlConverter:
         s += '>'
         s += str(htmlcontent)
         s += f'</{tagname}>'
-        logger.debug(f"html_wrap_in_tag: code is ‘{s}’")
+        #logger.debug(f"html_wrap_in_tag: code is ‘{s}’")
         return s
 
     def _get_ref(self, reftarget):
         refprefix = None
         if ':' in reftarget:
             (refprefix, reftarget) = reftarget.split(':', 1)
-        return self.refcontext.get_ref(refprefix, reftarget)
+        (target_html, target_href) = self.refcontext.get_ref(refprefix, reftarget)
+        return (target_html, target_href)
+
 
 
     def macro_node_to_html(self, mn):
@@ -146,6 +148,7 @@ class ToHtmlConverter:
                 raise ValueError("Invalid \\ref invocation: expected single braced argument")
             reftarget = tgt[0].chars
             (target_html, target_href) = self._get_ref(reftarget)
+            logger.debug(f"Ref: ‘{mn.latex_verbatim()}’ → ‘{target_html}’")
             return self.html_wrap_in_tag(
                 'a',
                 target_html,
@@ -158,6 +161,7 @@ class ToHtmlConverter:
             disphtml = self.nodearg_to_html(mn, 1)
             (target_html, target_href) = self._get_ref(reftarget)
             # ignore target_html
+            logger.debug(f"Ref: ‘{mn.latex_verbatim()}’ → ‘{target_html}’")
             return self.html_wrap_in_tag(
                 'a',
                 disphtml,
@@ -178,8 +182,8 @@ class ToHtmlConverter:
 
             citekeylist_nodelist = self.get_nodearglist(mn, 1)
 
-            logger.debug(f"Parsing citation command: {citekeylist_nodelist=}")
-            logger.debug(f"  {optional_cite_extra_html_nodelist=}")
+            #logger.debug(f"Parsing citation command: {citekeylist_nodelist=}")
+            #logger.debug(f"  {optional_cite_extra_html_nodelist=}")
 
             if not citekeylist_nodelist:
                 raise ValueError("Expected single {...} argument to ‘\\cite’") 
@@ -192,7 +196,7 @@ class ToHtmlConverter:
             # citation keys.  We keep everything in terms of nodes and node
             # lists for now.
             for n in citekeylist_nodelist:
-                logger.debug(f"{cite_key_split_nodelist=}")
+                #logger.debug(f"{cite_key_split_nodelist=}")
                 if n.isNodeType(latexwalker.LatexCharsNode):
                     parts = n.chars.split(',')
                     if parts[0]:
@@ -203,12 +207,12 @@ class ToHtmlConverter:
                         continue
                     for p in parts:
                         cite_key_split_nodelist.append( [p] )
-                    logger.debug(f"  now {cite_key_split_nodelist=}")
+                    #logger.debug(f"  now {cite_key_split_nodelist=}")
                     continue
 
                 cite_key_split_nodelist[-1].append(n)
                         
-            logger.debug(f"Citation keys are split: {cite_key_split_nodelist=}")
+            #logger.debug(f"Citation keys are split: {cite_key_split_nodelist=}")
 
             s = ''
             for citekeynodes in cite_key_split_nodelist:
@@ -260,7 +264,7 @@ class ToHtmlConverter:
                     },
                     class_='cite',
                 )
-            logger.debug(f"Citation: ‘{citekeylist_nodelist}’ → ‘{s}’")
+            logger.debug(f"Citation: ‘{mn.latex_verbatim()}’ → ‘{s}’")
             return s
 
         if mn.macroname == 'footnote':

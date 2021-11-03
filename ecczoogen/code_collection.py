@@ -159,23 +159,25 @@ class CodeCollection:
 
     def get_code_family_tree(self, parent_code_id):
 
-        logger.debug(f"getting code family tree for ‘{parent_code_id}’ ...")
+        #logger.debug(f"getting code family tree for ‘{parent_code_id}’ ...")
 
         parent_code = self.get_code(parent_code_id)
         
         all_children = [ parent_code ]
+        all_children_ids = set( parent_code.code_id )
 
         def _visit_code(c):
             children = c.relations.parent_of
             for child_rel in children:
                 child = child_rel.code
-                if child.code_id not in all_children:
+                if child.code_id not in all_children_ids:
                     all_children.append(child)
+                    all_children_ids.add(child.code_id)
             for child_rel in children:
                 _visit_code(child_rel.code)
 
         _visit_code(parent_code)
 
-        logger.debug(f"code family tree for ‘{parent_code_id}’ -> ‘{all_children}’")
+        #logger.debug(f"code family tree for ‘{parent_code_id}’ -> ‘{all_children}’")
 
         return all_children

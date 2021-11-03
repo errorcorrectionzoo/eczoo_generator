@@ -171,7 +171,8 @@ for code_id, code in zoo.all_codes().items():
     page = htmlpagecollectiongen.HtmlPage(
         name=f'c/{code_id}',
         info={
-            'page_title': code.name,
+            'page_title': htmlpgcoll.minilatex_to_html(code.name),
+            'page_title_text': code.name,
         },
         code_id_list=[ code_id ],
         context={
@@ -224,6 +225,7 @@ for domain in eczoo_domains:
             name=f'kingdom/{root_code_id}',
             info={
                 'page_title': htmlpgcoll.minilatex_to_html(kingdom['name']),
+                'page_title_text': kingdom['name'],
             },
             code_id_list=sorted_code_id_list,
             context={
@@ -237,13 +239,14 @@ for domain in eczoo_domains:
 
         htmlpgcoll.create_page( kingdom_page )
         #
-        logger.debug(f"kingdom page created (‘{root_code_id}’)")
+        #logger.debug(f"kingdom page created (‘{root_code_id}’)")
 
     # create domain page.
     domain_page = htmlpagecollectiongen.HtmlPage(
         name=f'domain/{domain_id}',
         info={
-            'page_title': domain['name'],
+            'page_title': htmlpgcoll.minilatex_to_html(domain['name']),
+            'page_title_text': domain['name'],
         },
         code_id_list=[ ],
         context={
