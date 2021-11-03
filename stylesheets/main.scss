@@ -100,7 +100,7 @@ dd {
 // BETA MARKER -- WHILE SITE IS IN "BETA"
 //
 #header {
-    background-image: url(prebaseurl('static/icons/beta-marker.svg'));
+    background-image: url(prebaseurl('static/icons/eczoo-main-logo.svg'));
     background-position: 97% 50%;
     background-size: auto 80%;
     background-repeat: no-repeat;
@@ -226,10 +226,8 @@ a.code-info-corner-icon {
     padding: 3px 5px;
     color: $text-dim-color;
 
-    //opacity: 0.2;
+    opacity: 0.2;
     //opacity: 0.9;
-
-    opacity: 0.3;
 
     width: 12px;
     height: 12px;
