@@ -372,20 +372,22 @@ dt.display-code-id {
     font-size: $small-font-size;
 
     margin-bottom: 20px;
-}
 
-#endnotes dt {
-    font-style: normal;
-    min-width: 2.5em;
-    text-align: right;
-}
+    dl {
+        margin-top: 0px;
+        margin-bottom: 0px;
+    }
 
-#endnotes dd {
-    margin-left: 5px;
-}
+    dt {
+        font-style: normal;
+        min-width: 2.5em;
+        text-align: right;
+    }
 
+    dd {
+        margin-left: 5px;
+    }
 
-#endnotes {
     dt, dd {
         transition: background-color 0.5s;
     }
