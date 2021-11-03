@@ -14,6 +14,7 @@ properties:
   code_id:
     type: string
     pattern: '^[a-z0-9_.-]+$'
+    _single_line_string: True
     _description: >-
       An internal identifier for the code.  It must be unique across all codes
       on the error correction zoo.
@@ -21,7 +22,8 @@ properties:
   # every code must have a name.
   name:
     type: string
-    _minilatex: 'only-formatting'
+    _minilatex: 'no-refs'
+    _single_line_string: True
     _description: >-
       The name of the code.  It is listed in multiple places, so don't make it
       too long.
@@ -38,6 +40,7 @@ properties:
   # \cite{...} reference where the code was introduced.
   introduced:
     type: string
+    _single_line_string: True
     _minilatex: 'full'
     _description: >-
       First reference with the code (optional).  This field should be a single
@@ -45,28 +48,25 @@ properties:
       cite multiple references with a single ‘\cite’ command, separating keys
       with commas.
 
-
-  # TODO: we should fix the values these fields can take
   physical:
-    type: string
-    pattern: '^[a-z0-9_.-]+$'
+    $ref: '/schemas/ecc_space'
 
   logical:
-    type: string
-    pattern: '^[a-z0-9_.-]+$'
-
+    $ref: '/schemas/ecc_space'
 
   protection:
+    _minilatex: 'full'
     type: string
 
-  decoder:
-    type: string
-
-  realizations:
-    type: string
 
   features:
     $ref: '/schemas/ecc_features'
+
+
+  realizations:
+    type: array
+    items:
+      type: string
 
   notes:
     type: array
@@ -82,6 +82,6 @@ properties:
     properties:
       # List of code_ids that are a "parent" of the present code
       parents:
-        $ref: '/schemas/relation_list'
+        $ref: '/schemas/ecc_relation_list'
       cousins:
-        $ref: '/schemas/relation_list'
+        $ref: '/schemas/ecc_relation_list'

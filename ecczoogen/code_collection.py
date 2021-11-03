@@ -81,7 +81,7 @@ class CodeCollection:
                         related_code = self.get_code(rel_code_id)
                     except InvalidCodeReference as e:
                         logger.error(
-                            f"Code ‘{code_id}’ (in ‘{codeobj.code_src_filename}’) refers "
+                            f"Code ‘{code_id}’ (in ‘{codeobj.source_info_filename}’) refers "
                             f"to a {rel_type} with code id ‘{rel_code_id}’, but that code id "
                             f"does not exist!  (Note: code ids are case-sensitive.)"
                         )

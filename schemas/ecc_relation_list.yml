@@ -1,5 +1,5 @@
 $schema: "http://json-schema.org/draft-06/schema"
-$id: "https://errorcorrectionzoo.org/schemas/relation_list"
+$id: "https://errorcorrectionzoo.org/schemas/ecc_relation_list"
 
 #
 # A <relation_list> is a list of objects, each object describing a relation of
@@ -17,6 +17,7 @@ items:
 
   properties:
     code_id:
+      _single_line_string: True
       type: string
     detail:
       type: string

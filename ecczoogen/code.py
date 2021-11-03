@@ -16,24 +16,22 @@ class Code:
             kw = dict(info)
 
             self.code_id = kw.pop('code_id')
-
-            self.name = kw.pop('name')
-            self.description = kw.pop('description')
-            self.introduced = kw.pop('introduced', None)
-
             self.physical = kw.pop('physical', None)
             self.logical = kw.pop('logical', None)
 
-            self.protection = kw.pop('protection', None)
-            self.decoder = kw.pop('decoder', None)
+            self.name = kw.pop('name')
+            self.introduced = kw.pop('introduced', None)
+            self.description = kw.pop('description')
 
-            self.realizations = kw.pop('realizations', None)
-            
+            self.protection = kw.pop('protection', None)
+
             self.features = {
                 k: v
                 for (k,v) in kw.pop('features', {}).items() # a dictionary
             }
 
+            self.realizations = kw.pop('realizations', None)
+            
             self.notes = kw.pop('notes', None) # array of free text entries
 
             rel_info = dict( kw.pop('relations', {}) )

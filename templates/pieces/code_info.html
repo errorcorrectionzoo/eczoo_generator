@@ -26,9 +26,9 @@ Expected context variables:
 <dd class="code-protection">{{code.protection}}</dd>
 {% endif %}
 
-{% if code.decoder %}
+{% if code.features.decoders %}
 <dt>Decoder</dt>
-<dd class="code-decoder">{{code.decoder}}</dd>
+<dd class="code-decoders">{{code.features.decoders}}</dd>
 {% endif %}
 
 {% if code.features %}
@@ -43,65 +43,69 @@ Expected context variables:
 {% if code.notes %}
 <dt>Notes</dt>
 <dd class="code-notes">
-{% for note in code.notes %}
-{{note}} {{ ' ' }}
-{% endfor %}
+  {{code.notes}}
 </dd>
 {% endif %}
 
 {% if code.realizations %}
 <dt>Realizations</dt>
-<dd class="code-realizations">{{code.realizations}}</dd>
+<dd class="code-realizations">
+  {{code.realizations}}
+</dd>
 {% endif %}
 
 {% if code.relations.parents %}
 <dt>Parent(s)</dt>
 <dd class="code-parents">
-{% set use_relation_type = 'parents' %}
-{% set use_relations = code.relations.parents %}
-{% include 'pieces/list_code_relations.html' %}
+  {% set use_relation_type = 'parents' %}
+  {% set use_relations = code.relations.parents %}
+  {% include 'pieces/list_code_relations.html' %}
 </dd>
 {% endif %}
 
 {% if code.relations.parent_of %}
 <dt>Parent of</dt>
 <dd class="code-parent-of">
-{% set use_relation_type = 'parent-of' %}
-{% set use_relations = code.relations.parent_of %}
-{% include 'pieces/list_code_relations.html' %}
+  {% set use_relation_type = 'parent-of' %}
+  {% set use_relations = code.relations.parent_of %}
+  {% include 'pieces/list_code_relations.html' %}
 </dd>
 {% endif %}
 
 {% if code.relations.cousins %}
 <dt>Cousin(s)</dt>
 <dd class="code-cousins">
-{% set use_relation_type = 'cousins' %}
-{% set use_relations = code.relations.cousins %}
-{% include 'pieces/list_code_relations.html' %}
+  {% set use_relation_type = 'cousins' %}
+  {% set use_relations = code.relations.cousins %}
+  {% include 'pieces/list_code_relations.html' %}
 </dd>
 {% endif %}
 
 {% if code.relations.cousin_of %}
 <dt>Cousin of</dt>
 <dd class="code-cousin-of">
-{% set use_relation_type = 'cousin-of' %}
-{% set use_relations = code.relations.cousin_of %}
-{% include 'pieces/list_code_relations.html' %}
+  {% set use_relation_type = 'cousin-of' %}
+  {% set use_relations = code.relations.cousin_of %}
+  {% include 'pieces/list_code_relations.html' %}
 </dd>
 {% endif %}
 
-<dt class="display-code-id">Error correction zoo code information</dt>
+<!-- zoo-related information and how to edit -->
+
+<dt class="display-code-id">
+  Error correction zoo code information
+</dt>
 <dd class="display-code-id">
   <div>
     <span class="display-code-id-label">Internal code ID:</span>
     {{code.code_id}}
-  </div>
-  <div>
+  </div>{#
+#}<div>
     <a class="code-link-with-icon code-show-github"
        target="_blank"
        title="Edit code information directly on github.com"
-       href="https://github.com/errorcorrectionzoo/eczoo_data/tree/main/codes/{{code.source_info_filename}}">code information on github.com</a><!--
-    --><a class="code-link-with-icon code-self-edit"
+       href="https://github.com/errorcorrectionzoo/eczoo_data/tree/main/codes/{{code.source_info_filename}}">code information on github.com</a>{#
+  #}<a class="code-link-with-icon code-self-edit"
        target="_blank"
        title="edit code information on this site without using github"
        href="{{ ('edit_code?code_id='+code.code_id) | prebaseurl }}">edit on this site</a>
