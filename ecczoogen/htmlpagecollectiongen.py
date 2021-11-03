@@ -103,6 +103,11 @@ class _HtmlListObjectWrapper(_HtmlObjectWrapper):
     def __str__(self):
         return "".join(f"<p>{item}</p>" for item in self)
 
+    # see the string wrapper object above (_HtmlStringWrapper) for info about
+    # __html__
+    def __html__(self):
+        return "".join(f"<p>{item}</p>" for item in self)
+
 
 class _HtmlDictObjectWrapper(_HtmlObjectWrapper):
     def __init__(self, *args, **kwargs):
