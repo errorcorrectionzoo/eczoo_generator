@@ -42,7 +42,7 @@ class CodeCollection:
         for lc_code_id, code_ids_iter in lc_code_ids:
             code_ids = list(code_ids_iter)
             if len(code_ids) > 1:
-                msg = ', '.join(f"‘{cid}’ (‘{self.get_code(cid).code_src_filename}’)"
+                msg = ', '.join(f"‘{cid}’ (‘{self.get_code(cid).source_info_filename}’)"
                                 for cid in code_ids)
                 raise ValueError(f"Code IDs for {msg} need to differ more than only by case. "
                                  f"Code IDs must be unique also for case-insensitive "
@@ -56,7 +56,7 @@ class CodeCollection:
             codeobj.relations.parents = []
             codeobj.relations.cousins = []
 
-            code_data_relations = codeobj._info.get('relations', {})
+            code_data_relations = codeobj.source_info.get('relations', {})
             if not code_data_relations:
                 continue
 
@@ -65,7 +65,7 @@ class CodeCollection:
 
                 rels_fld = getattr(codeobj.relations, rel_type+'s')
 
-                # iterate over e.g. codeobj._info.relations.parents
+                # iterate over e.g. codeobj.source_info.relations.parents
 
                 code_data_relations_reltypelist = code_data_relations.get(rel_type+'s', [])
                 if not code_data_relations_reltypelist:
@@ -81,7 +81,7 @@ class CodeCollection:
                         related_code = self.get_code(rel_code_id)
                     except InvalidCodeReference as e:
                         logger.error(
-                            f"Code ‘{code_id}’ (in ‘{codeobj.code_src_filename}’) refers "
+                            f"Code ‘{code_id}’ (in ‘{codeobj.source_info_filename}’) refers "
                             f"to a {rel_type} with code id ‘{rel_code_id}’, but that code id "
                             f"does not exist!  (Note: code ids are case-sensitive.)"
                         )
@@ -159,23 +159,25 @@ class CodeCollection:
 
     def get_code_family_tree(self, parent_code_id):
 
-        logger.debug(f"getting code family tree for ‘{parent_code_id}’ ...")
+        #logger.debug(f"getting code family tree for ‘{parent_code_id}’ ...")
 
         parent_code = self.get_code(parent_code_id)
         
         all_children = [ parent_code ]
+        all_children_ids = set( parent_code.code_id )
 
         def _visit_code(c):
             children = c.relations.parent_of
             for child_rel in children:
                 child = child_rel.code
-                if child.code_id not in all_children:
+                if child.code_id not in all_children_ids:
                     all_children.append(child)
+                    all_children_ids.add(child.code_id)
             for child_rel in children:
                 _visit_code(child_rel.code)
 
         _visit_code(parent_code)
 
-        logger.debug(f"code family tree for ‘{parent_code_id}’ -> ‘{all_children}’")
+        #logger.debug(f"code family tree for ‘{parent_code_id}’ -> ‘{all_children}’")
 
         return all_children

@@ -279,7 +279,7 @@ class PagePrettyCodeGraph:
             'relative_placement_constraint': relative_placement_constraint,
         }
 
-        with open(output_data_js_fname, 'w') as fw:
+        with open(output_data_js_fname, 'w', encoding='utf-8') as fw:
             fw.write("pretty_code_graph_data = ")
             json.dump(data, fw, indent=4)
             fw.write(";")

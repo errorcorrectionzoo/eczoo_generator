@@ -39,6 +39,19 @@ h1 {
     line-height: 1.6em;
 }
 
+p, ul, ol {
+    margin-top: $parskip-half-length;
+    margin-bottom: $parskip-half-length;
+}
+p:first-child, ul:first-child, ol:first-child {
+    margin-top: 0px;
+}
+p:last-child, ul:last-child, ol:last-child {
+    margin-bottom: 0px;
+}
+
+
+
 // definition lists with "terms" (<dt>) on the left and "definitions" (<dd>) on
 // the right
 dl {
@@ -52,7 +65,8 @@ dt {
 }
 dd {
     grid-column-start: 2;
-    margin-left: 25px;
+    //margin-left: 25px;
+    margin-left: 1.5rem;
 }
 
 
@@ -82,6 +96,29 @@ dd {
 }
 
 
+//
+// Add logo as background-image with BETA marker
+//
+#header {
+    background-image: url(prebaseurl('static/icons/eczoo-main-logo.svg'));
+    background-position: 97% 50%;
+    background-size: auto 80%;
+    background-repeat: no-repeat;
+
+    z-index: 100;
+    box-shadow: rgba(0,0,0,0.15) 5px 5px 10px;
+}
+.app-full-width #header {
+    box-shadow: none;
+}
+
+@media (max-width: $page-main-width+2*$page-main-margins) {
+#header {
+    background-image: url(prebaseurl('static/icons/eczoo-main-logo-mobile.svg'));
+}
+}
+
+
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -93,16 +130,31 @@ dd {
 #sidebar {
     min-width: $page-sidebar-width;
 }
+
+
+// sidebar contents
+
 #sidebar h1 {
-    //font-size: 1.1em;
-    font-size: 1em;
+    //font-size: 1.1rem;
+    font-size: 1rem;
     font-weight: bold;
     margin-bottom: 0.5em;
 }
 #sidebar .sidebarbox {
-    border: dotted 1px gray; /*rgba(127,0,0,0.25);*/
-    padding: 3px;
+    //border: dotted 1px gray; /*rgba(127,0,0,0.25);*/
+
+    border: none 0px;
+    background-color: rgba(245,245,255,1.0);
+
+    z-index: 90;
+    box-shadow: rgba(0,0,0,0.08) 3px 3px 6px;
+
+    padding: 5px;
 }
+.app-full-width #sidebar .sidebarbox {
+    box-shadow: none;
+}
+
 
 .navlinks {
     list-style: none;
@@ -116,18 +168,29 @@ dd {
 
 
 
+////////////////////////////////////////////////////////////////////////////////
+//
+// main section, all pages
+//
+////////////////////////////////////////////////////////////////////////////////
+
+
+@mixin card-item {
+    margin: 1rem 0px 1rem;
+    padding: 10px;
+    border: solid 1px rgba($text-dim-color,0.15);
+}
+
 
 
 ////////////////////////////////////////////////////////////////////////////////
 //
-// main section & code info
+// main section for code list pages
 //
 ////////////////////////////////////////////////////////////////////////////////
 
 .ecc-code {
-    margin: 0px 0px 20px;
-    padding: 3px;
-    border: dotted 1px gray;
+    @include card-item;
 }
 .ecc-code.ecc-code-page {
     border: none 0px;
@@ -147,7 +210,7 @@ dd {
 
 .na {
     font-style: italic;
-    color: #aaa;
+    color: $text-dim-color;
 }
 
 .code-relations-list {
@@ -166,11 +229,13 @@ a.code-info-corner-icon {
     float: right;
     margin: -3px 0px -3px 5px;
     padding: 3px 5px;
-    opacity: 0.2;
-    color: gray;
+    color: $text-dim-color;
 
-    width: 8px;
-    height: 8px;
+    opacity: 0.2;
+    //opacity: 0.9;
+
+    width: 12px;
+    height: 12px;
     margin-top: 2px;
     vertical-align: middle;
     background-size: 100% 100%;
@@ -178,6 +243,22 @@ a.code-info-corner-icon {
 }
 a.code-info-corner-icon:hover {
     opacity: 0.9;
+    //opacity: 1.0;
+    //background-color: rgba($page-link-highlight-color, 0.1);
+    //box-shadow: rgba($page-link-highlight-color, 0.1) 3px 3px 5px;
+}
+
+a.code-link-with-icon {
+    display: inline-block;
+
+    vertical-align: middle;
+
+    min-height: 12px;
+    margin-right: 1rem;
+    padding: 5px 5px 5px 17px;
+    background-size: 12px 12px;
+    background-position: 0% 50%;
+    background-repeat: no-repeat;
 }
 
 a.code-self-permalink {
@@ -185,6 +266,9 @@ a.code-self-permalink {
 }
 a.code-show-github {
     background-image: url(prebaseurl('static/icons/github-logo.svg'));
+}
+a.code-self-edit {
+    background-image: url(prebaseurl('static/icons/edit-icon.svg'));
 }
 
 
@@ -200,23 +284,34 @@ dd.code-name {
 }
 
 .cite {
-    font-size: 0.8em;
+    font-size: $endnote-superscript-font-size;
     // "vertical-align: super" shifts the entire baseline downwards, not nice
     vertical-align: top;
 }
 .footnote {
-    font-size: 0.8em;
+    font-size: $endnote-superscript-font-size;
     vertical-align: top;
 }
 
-.features-list {
-    > dt {
-        color: rgba(0,0,0,0.5);
-        font-size: 0.95em;
-    }
-    > dd {
-        margin-left: .5em;
-    }
+// .features-list {
+//     > dt {
+//         color: rgba(0,0,0,0.8);
+//         font-size: $small-font-size;
+//     }
+//     > dd {
+//         margin-left: .5em;
+//     }
+// }
+
+dt.display-code-id {
+    max-width: 120px;
+}
+.display-code-id {
+    margin-top: 1.5rem;
+
+    // font-size: $tiny-fine-print-font-size;
+    color: $text-dim-color;
+
 }
 
 
@@ -244,6 +339,24 @@ dd.code-name {
 
 
 
+////////////////////////////////////////////////////////////////////////////////
+//
+// code index style
+//
+////////////////////////////////////////////////////////////////////////////////
+
+.code-index {
+    li {
+        margin-bottom: 0.7rem;
+    }
+
+    .code-name {
+        padding-right: 1em;
+        font-weight: bold;
+    }
+    .code-description {
+    }
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -252,27 +365,32 @@ dd.code-name {
 ////////////////////////////////////////////////////////////////////////////////
 
 #endnotes {
-    border: dotted 1px gray;
-    padding: 3px;
+    // border: dotted 1px gray;
+    // padding: 3px;
+
+    @include card-item;
+
     opacity: 0.85;
 
-    font-size: 0.9em;
+    font-size: $small-font-size;
 
     margin-bottom: 20px;
-}
 
-#endnotes dt {
-    font-style: normal;
-    min-width: 2.5em;
-    text-align: right;
-}
+    dl {
+        margin-top: 0px;
+        margin-bottom: 0px;
+    }
 
-#endnotes dd {
-    margin-left: 5px;
-}
+    dt {
+        font-style: normal;
+        min-width: 2.5em;
+        text-align: right;
+    }
 
+    dd {
+        margin-left: 5px;
+    }
 
-#endnotes {
     dt, dd {
         transition: background-color 0.5s;
     }
@@ -303,8 +421,8 @@ $visual-highlight-color: rgba(255,255,0,1.0);
 
 #footer {
     font-style: italic;
-    font-size: 0.8em;
-    font-color: rgb(127,127,127);
+    font-size: $tiny-fine-print-font-size;
+    font-color: $text-dim-color;
     padding: 4px;
 
     margin-bottom: 20px;

@@ -5,7 +5,55 @@ $id: "https://errorcorrectionzoo.org/schemas/ecc_features"
 # the features: code object property
 #
 
-type: object
+# type: object
 
-# todo, we should codify the exact properties and values that can be set under
-# within the `features:` tree.
+# # todo, we should codify the exact properties and values that can be set under
+# # within the `features:` tree.
+
+type: object
+additionalProperties: false
+required: []
+properties:
+
+  rate:
+    type: string
+    _minilatex: 'full'
+
+  encoders:
+    type: array
+    items:
+      type: string
+      _minilatex: 'full'
+
+  general_gates:
+    type: array
+    items:
+      type: string
+      _minilatex: 'full'
+
+  decoders: 
+    type: array
+    items:
+      type: string
+      _minilatex: 'full'
+
+  transversal_gates:
+    type: string
+    _minilatex: 'full'
+
+  fault_tolerance:
+    type: array
+    items:
+      type: string
+      _minilatex: 'full'
+
+  threshold: 
+    type: array
+    items:
+      type: string
+      _minilatex: 'full'
+
+
+  # We can decide to add new standard feature fields here.
+  #
+  # ...

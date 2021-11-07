@@ -7,61 +7,71 @@ $id: "https://errorcorrectionzoo.org/schemas/ecc"
 #
 type: object
 additionalProperties: false
-required: ['code_id', 'name', 'description',]
+required: ['code_id', 'name', 'description', ]
 properties:
 
   # every code must have a code_id.
   code_id:
     type: string
     pattern: '^[a-z0-9_.-]+$'
+    _single_line_string: True
+    _description: >-
+      An internal identifier for the code.  It must be unique across all codes
+      on the error correction zoo.
 
   # every code must have a name.
   name:
     type: string
+    _minilatex: 'no-refs'
+    _single_line_string: True
+    _description: >-
+      The name of the code.  It is listed in multiple places, so don't make it
+      too long.
 
   # every code must have a description.
   description:
     type: string
+    _minilatex: 'full'
+    _description: >-
+      Describe code subspace as best as you can here.  Anything applicable to a
+      larger parent set of codes (see below) should go in that entry instead of
+      here.
 
+  # \cite{...} reference where the code was introduced.
+  introduced:
+    type: string
+    _single_line_string: True
+    _minilatex: 'full'
+    _description: >-
+      First reference with the code (optional).  This field should be a single
+      ‘\cite{}’ command with the appropriate reference(s).  Recall that you can
+      cite multiple references with a single ‘\cite’ command, separating keys
+      with commas.
 
-  # TODO: we should fix the values these fields can take
   physical:
-    type: string
-    pattern: '^[a-z0-9_.-]+$'
-  logical:
-    type: string
-    pattern: '^[a-z0-9_.-]+$'
+    $ref: '/schemas/ecc_space'
 
+  logical:
+    $ref: '/schemas/ecc_space'
 
   protection:
+    _minilatex: 'full'
     type: string
-
-  decoder:
-    type: string
-
-  realizations:
-    type: string
-
-  notes:
-    type: array
-    items:
-      type: string
 
 
   features:
     $ref: '/schemas/ecc_features'
 
 
-  # references where to look up details about this code.  Currently there is
-  # only one type of reference, `introduced:`; where the code was initially
-  # introduced.
-  #
-  # references:
-  #   type: object
-  #   additionalProperties: false
-  #   properties:
-  introduced:
-    type: string
+  realizations:
+    type: array
+    items:
+      type: string
+
+  notes:
+    type: array
+    items:
+      type: string
 
   #
   # Relations of the code to other codes:
@@ -72,6 +82,6 @@ properties:
     properties:
       # List of code_ids that are a "parent" of the present code
       parents:
-        $ref: '/schemas/relation_list'
+        $ref: '/schemas/ecc_relation_list'
       cousins:
-        $ref: '/schemas/relation_list'
+        $ref: '/schemas/ecc_relation_list'

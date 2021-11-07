@@ -1,0 +1,19 @@
+{% extends 'layout/base_page.html' %}
+
+{% block contents %}
+
+<ul class="code-index">
+{% for code in code_list %}
+  <li>
+    <span class="code-name">
+      {{code|code_ref}}
+      {%- if code.introduced %}<span class="code-introduced">{{code.introduced}}</span>{% endif -%}
+    </span>
+    <span class="code-description">{{code.description}}</span>
+  </li>
+{% endfor %}
+</ul>
+
+{% include 'pieces/endnotes.html' %}
+
+{% endblock contents %}

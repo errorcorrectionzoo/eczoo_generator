@@ -19,17 +19,22 @@ class AutoFilenameExtensionsHttpRequestHandler(http.server.SimpleHTTPRequestHand
         if not self.path or self.path == '/':
             return super().do_GET()
 
-        local_fs_path = self.translate_path(self.path)
+        path = self.path
+        if '?' in path:
+            path, _ = path.split('?', 1)
+        local_fs_path = self.translate_path(path)
 
         found_ext = None
         if not os.path.exists(local_fs_path):
             for try_ext in try_extensions:
-                try_path = self.path+try_ext
+                try_path = path+try_ext
                 logger.debug(f"trying {try_ext} → {try_path} ...")
                 if os.path.exists(self.translate_path(try_path)):
-                    self.path = try_path
+                    self.path = path+try_ext
                     break
             else:
+                logger.warning(f"File ‘{path}’ (‘{local_fs_path}’) not found, "
+                               f"tried extensions {try_extensions}")
                 self.send_error(http.server.HTTPStatus.NOT_FOUND,
                                 f"File not found, tried extensions {try_extensions}")
                 return None

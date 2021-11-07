@@ -1,0 +1,23 @@
+$schema: "http://json-schema.org/draft-06/schema"
+$id: "https://errorcorrectionzoo.org/schemas/ecc_relation_list"
+
+#
+# A <relation_list> is a list of objects, each object describing a relation of
+# an ecc with another ecc.  A relation has a `code_id` (a string, the other
+# code), and a `detail` (free form text, provide information about the
+# relationship)
+#
+
+type: array
+
+items:
+  type: object
+  required: ['code_id']
+  additionalProperties: false
+
+  properties:
+    code_id:
+      _single_line_string: True
+      type: string
+    detail:
+      type: string

@@ -6,26 +6,24 @@ class Code:
     def __init__(self, info):
         super().__init__()
 
-        self._info = info
+        self.source_info = info
 
         # source file (the zoo sets this relative to the codes_dir folder)
-        self.code_src_filename = None
+        self.source_info_filename = None
 
         # parse the data structure.
         try:
             kw = dict(info)
 
             self.code_id = kw.pop('code_id')
-
-            self.name = kw.pop('name')
-            self.description = kw.pop('description')
-            self.introduced = kw.pop('introduced', None)
-
-            self.protection = kw.pop('protection', None)
-            self.decoder = kw.pop('decoder', None)
-
             self.physical = kw.pop('physical', None)
             self.logical = kw.pop('logical', None)
+
+            self.name = kw.pop('name')
+            self.introduced = kw.pop('introduced', None)
+            self.description = kw.pop('description')
+
+            self.protection = kw.pop('protection', None)
 
             self.features = {
                 k: v
@@ -71,7 +69,10 @@ class Code:
         return self.name
 
     def __repr__(self):
-        return "Code(code_id={!r})".format(self.code_id)
+        return (
+            f"Code(code_id={self.code_id!r}, "
+                 f"source_info_filename={self.source_info_filename!r})"
+        )
 
 
 class Relation:

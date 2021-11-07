@@ -43,7 +43,7 @@ if args.verbose:
     logger.setLevel(logging.DEBUG)
 
 
-with open(args.eczoo_site_setup) as f:
+with open(args.eczoo_site_setup, encoding='utf-8') as f:
     eczoo_site_setup = yaml.safe_load(f)
 
 #logger.debug(f"Read setup file:\n{json.dumps(eczoo_site_setup,indent=4)}")
@@ -72,6 +72,7 @@ class Dirs:
     javascripts_dir = os.path.join(_root_dir, 'javascripts')
 
     static_assets_dir = os.path.join(_root_dir, 'static_assets')
+    static_favicon_files_dir = os.path.join(_root_dir, 'static_favicon_files')
 
 
 logger.debug(f"Set up directory paths:\n  {Dirs.root_dir=}\n"
@@ -144,6 +145,13 @@ site_gen_env.copy_tree(
     only_exts=static_asset_exts,
 )
 
+# also take care of favicon
+site_gen_env.copy_tree(
+    source_dir=Dirs.static_favicon_files_dir,
+    target_dir='', # root of output directory
+    only_exts=('.png', '.svg', '.ico', '.xml', '.webmanifest',)
+)
+
 
 ################################################################################
 
@@ -171,7 +179,8 @@ for code_id, code in zoo.all_codes().items():
     page = htmlpagecollectiongen.HtmlPage(
         name=f'c/{code_id}',
         info={
-            'page_title': code.name,
+            'page_title': htmlpgcoll.minilatex_to_html(code.name),
+            'page_title_text': code.name,
         },
         code_id_list=[ code_id ],
         context={
@@ -224,6 +233,7 @@ for domain in eczoo_domains:
             name=f'kingdom/{root_code_id}',
             info={
                 'page_title': htmlpgcoll.minilatex_to_html(kingdom['name']),
+                'page_title_text': kingdom['name'],
             },
             code_id_list=sorted_code_id_list,
             context={
@@ -237,13 +247,14 @@ for domain in eczoo_domains:
 
         htmlpgcoll.create_page( kingdom_page )
         #
-        logger.debug(f"kingdom page created (‘{root_code_id}’)")
+        #logger.debug(f"kingdom page created (‘{root_code_id}’)")
 
     # create domain page.
     domain_page = htmlpagecollectiongen.HtmlPage(
         name=f'domain/{domain_id}',
         info={
-            'page_title': domain['name'],
+            'page_title': htmlpgcoll.minilatex_to_html(domain['name']),
+            'page_title_text': domain['name'],
         },
         code_id_list=[ ],
         context={
@@ -272,7 +283,7 @@ htmlpgcoll.create_page(
             code.code_id
             for code in sorted(zoo.all_codes().values(), key=lambda code: code.name)
         ],
-        template_name='dyn_pages/code_list.html',
+        template_name='dyn_pages/code_index.html',
     )
 )
 
@@ -301,6 +312,7 @@ os.makedirs(os.path.join(Dirs.output_dir, output_js_prefix), exist_ok=True)
 
 root_js_list = [
     ('misc.js', 'misc.js'),
+    ('edit_code.js', 'edit_code.js'),
 ]
 
 for root_js, root_js_out in root_js_list:
@@ -363,10 +375,10 @@ def compile_yml_to_json(fn_source, fn_dest):
 
     logger.debug(f"Copying/compiling ‘{fn_source}’ → ‘{fn_dest_json}’")
 
-    with open(fn_source) as f:
+    with open(fn_source, encoding='utf-8') as f:
         data = yaml.safe_load(f)
 
-    with open(fn_dest_json, 'w') as fw:
+    with open(fn_dest_json, 'w', encoding='utf-8') as fw:
         json.dump(data, fw)
 
 
@@ -461,6 +473,20 @@ htmlpgcoll.generate(
     additional_context=global_context
 )
 
+
+
+################################################################################
+
+#
+# generate a JSON dump of all codes (for editor page)
+#
+
+logger.info("Generating JSON code dump ...")
+
+all_codes_info = { code_id: codeobj.source_info
+                   for code_id, codeobj in zoo.all_codes().items() }
+with open(os.path.join(Dirs.output_dir, 'all_codes_info_dump.json'), 'w', encoding='utf-8') as fw:
+    json.dump(all_codes_info, fw)
 
 
 ################################################################################

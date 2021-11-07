@@ -11,14 +11,18 @@ Expected context variables:
 
 <dl class="ecc-code ecc-code-page" id="ecc_{{code.code_id}}">
 
+
 <dt>Name</dt>
-<dd class="code-name">{{code.name}}
-  {% if code.introduced %}<span class="code-introduced">{{code.introduced}}</span>{% endif %}
+<dd class="code-name">
+  {{code.name}}
+  {%- if code.introduced -%}
+    <span class="code-introduced">{{code.introduced}}</span>
+  {%- endif -%}
   <a class="code-info-corner-icon code-self-permalink"
+     title="permanent link to this code (click and then copy the location in the address bar)"
      href="{{code|code_ref_href}}">&nbsp;</a>
-  <a class="code-info-corner-icon code-show-github"
-     target="_blank"
-     href="https://github.com/errorcorrectionzoo/eczoo_data/tree/main/codes/{{code.code_src_filename}}">&nbsp;</a></dd>
+</dd>
+
 
 <dt>Description</dt>
 <dd class="code-description">{{code.description}}</dd>
@@ -28,72 +32,121 @@ Expected context variables:
 <dd class="code-protection">{{code.protection}}</dd>
 {% endif %}
 
-{% if code.decoder %}
-<dt>Decoder</dt>
-<dd class="code-decoder">{{code.decoder}}</dd>
-{% endif %}
 
+<!-- Display features -->
+
+
+{# helper macro to display features #}
+
+{% macro disp_feature_field(featurename, label) -%}
+  {%- if code.features[featurename] -%}
+  <dt>{{label}}</dt>
+  <dd class="code-feature-{{featurename}}">
+    {{- code.features[featurename] -}}
+  </dd>
+  {% endif %}
+{%- endmacro %}
+
+
+{{ disp_feature_field('rate', 'Rate') }}
+
+{{ disp_feature_field('encoders', 'Encoder') }}
+
+{{ disp_feature_field('transversal_gates', 'Transversal Gates') }}
+
+{{ disp_feature_field('general_gates', 'Gates') }}
+
+{{ disp_feature_field('decoders', 'Decoder') }}
+
+{{ disp_feature_field('fault_tolerance', 'Fault Tolerance') }}
+
+{{ disp_feature_field('threshold', 'Threshold') }}
+
+{#
 {% if code.features %}
-<dt>Features</dt>
-<dd class="code-features">
-  <dl class="features-list">
 {% for featurename, featuretext in code.features.items() %}
-    <dt>({{featurename}})</dt>
-    <dd>{{featuretext}}</dd>
+<dt class="code-feature code-feature-{{featurename}}">{{featurename}}</dt>
+<dd class="code-feature code-feature-{{featurename}}">
+  {{featuretext}}
+</dd>
 {% endfor %}
-  </dl>
+{% endif %}
+#}
+
+{% if code.realizations %}
+<dt>Realizations</dt>
+<dd class="code-realizations">
+  {{code.realizations}}
 </dd>
 {% endif %}
 
 {% if code.notes %}
 <dt>Notes</dt>
 <dd class="code-notes">
-{% for note in code.notes %}
-{{note}} {{ ' ' }}
-{% endfor %}
+  {{code.notes}}
 </dd>
 {% endif %}
 
-{% if code.realizations %}
-<dt>Realizations</dt>
-<dd class="code-realizations">{{code.realizations}}</dd>
-{% endif %}
+
+<!-- Relationships to other codes -->
 
 {% if code.relations.parents %}
 <dt>Parent(s)</dt>
 <dd class="code-parents">
-{% set use_relation_type = 'parents' %}
-{% set use_relations = code.relations.parents %}
-{% include 'pieces/list_code_relations.html' %}
+  {% set use_relation_type = 'parents' %}
+  {% set use_relations = code.relations.parents %}
+  {% include 'pieces/list_code_relations.html' %}
 </dd>
 {% endif %}
 
 {% if code.relations.parent_of %}
 <dt>Parent of</dt>
 <dd class="code-parent-of">
-{% set use_relation_type = 'parent-of' %}
-{% set use_relations = code.relations.parent_of %}
-{% include 'pieces/list_code_relations.html' %}
+  {% set use_relation_type = 'parent-of' %}
+  {% set use_relations = code.relations.parent_of %}
+  {% include 'pieces/list_code_relations.html' %}
 </dd>
 {% endif %}
 
 {% if code.relations.cousins %}
 <dt>Cousin(s)</dt>
 <dd class="code-cousins">
-{% set use_relation_type = 'cousins' %}
-{% set use_relations = code.relations.cousins %}
-{% include 'pieces/list_code_relations.html' %}
+  {% set use_relation_type = 'cousins' %}
+  {% set use_relations = code.relations.cousins %}
+  {% include 'pieces/list_code_relations.html' %}
 </dd>
 {% endif %}
 
 {% if code.relations.cousin_of %}
 <dt>Cousin of</dt>
 <dd class="code-cousin-of">
-{% set use_relation_type = 'cousin-of' %}
-{% set use_relations = code.relations.cousin_of %}
-{% include 'pieces/list_code_relations.html' %}
+  {% set use_relation_type = 'cousin-of' %}
+  {% set use_relations = code.relations.cousin_of %}
+  {% include 'pieces/list_code_relations.html' %}
 </dd>
 {% endif %}
 
+
+<!-- zoo-related information and how to edit -->
+
+<dt class="display-code-id">
+  Error correction zoo code information
+</dt>
+<dd class="display-code-id">
+  <div>
+    <span class="display-code-id-label">Internal code ID:</span>
+    {{code.code_id}}
+  </div>{#
+#}<div>
+    <a class="code-link-with-icon code-show-github"
+       target="_blank"
+       title="Edit code information directly on github.com"
+       href="https://github.com/errorcorrectionzoo/eczoo_data/tree/main/codes/{{code.source_info_filename}}">code information on github.com</a>{#
+  #}<a class="code-link-with-icon code-self-edit"
+       target="_blank"
+       title="edit code information on this site without using github"
+       href="{{ ('edit_code?code_id='+code.code_id) | prebaseurl }}">edit on this site</a>
+  </div>
+</dd>
 
 </dl>
