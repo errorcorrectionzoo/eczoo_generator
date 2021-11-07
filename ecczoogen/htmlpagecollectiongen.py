@@ -7,7 +7,9 @@ logger = logging.getLogger(__name__)
 
 import markupsafe
 
-from . import code, htmlfromminilatex
+from . import code
+
+from . import minilatextohtml
 
 
 # ------------------------------------------------------------------------------
@@ -192,7 +194,7 @@ class HtmlCitation:
 
 # ------------------------------------------------------------------------------
 
-class RefContextForHtmlConverter(htmlfromminilatex.HtmlRefContext):
+class RefContextForHtmlConverter(minilatextohtml.HtmlRefContext):
     def __init__(self, htmlpagecollection, html_page_notes):
         super().__init__()
         self.htmlpagecollection = htmlpagecollection
@@ -201,7 +203,7 @@ class RefContextForHtmlConverter(htmlfromminilatex.HtmlRefContext):
     def _get_ref_code(self, code_id):
         code = self.htmlpagecollection.zoo.get_code(code_id)
         code_href = self.htmlpagecollection.get_code_href(code_id)
-        code_name_html = htmlfromminilatex.ToHtmlConverter(self).to_html(code.name)
+        code_name_html = minilatextohtml.ToHtmlConverter(self).to_html(code.name)
         return (code_name_html, code_href)
         
     def get_ref(self, ref_key_prefix, ref_key):
@@ -403,12 +405,12 @@ class HtmlPageCollection:
 
     def wrap_object_with_minilatex_properties(self, obj, html_page_notes=None):
         tohtml_refcontext = RefContextForHtmlConverter(self, html_page_notes)
-        tohtmlconverter = htmlfromminilatex.ToHtmlConverter(tohtml_refcontext)
+        tohtmlconverter = minilatextohtml.ToHtmlConverter(tohtml_refcontext)
         return _HtmlObjectWrapper(obj, tohtmlconverter, repr(obj))
 
     def minilatex_to_html(self, s, html_page_notes=None):
         tohtml_refcontext = RefContextForHtmlConverter(self, html_page_notes)
-        tohtmlconverter = htmlfromminilatex.ToHtmlConverter(tohtml_refcontext)
+        tohtmlconverter = minilatextohtml.ToHtmlConverter(tohtml_refcontext)
         return markupsafe.Markup( tohtmlconverter.to_html(s) )
 
     def generate(self, *, output_dir, additional_context={}):
@@ -422,7 +424,7 @@ class HtmlPageCollection:
             page_footnotes = HtmlPageNotes(self)
 
             tohtml_refcontext = RefContextForHtmlConverter(self, page_footnotes)
-            tohtmlconverter = htmlfromminilatex.ToHtmlConverter(tohtml_refcontext)
+            tohtmlconverter = minilatextohtml.ToHtmlConverter(tohtml_refcontext)
 
             context = dict(
                 code_list=[

@@ -9,6 +9,132 @@ logger = logging.getLogger(__name__)
 
 from pylatexenc import latexwalker, macrospec
 
+# ----------------------------
+
+# The following utility is used to parse the main argument of \cite{} as well as
+# the first argument of \href{}{}.  In those arguments, special characters (such
+# as '%' and '$') should be interpreted literally, with no LaTeX special
+# meaning.  They are not quite verbatim args because the argument is enclosed in
+# matched braces.  Additionally, any open brace opens a normal LaTeX group in
+# which normal parsing is used again (e.g., for "\cite{manual:{Author,
+# \emph{Some Book Title}, 1955}}")
+class VerbatimLikeSingleArgumentParser:
+    def __init__(self, delimiters=('{','}',)):
+        super().__init__()
+        self.delimiters = delimiters
+
+    def parse_arg(self, w, pos, *, parsing_state, **kwargs):
+        open_tok = w.get_token(pos, include_brace_chars=[self.delimiters])
+        if open_tok.tok != 'brace_open':
+            raise ValueError(f"Expected opening brace ‘{self.delimiters[0]}’ for argument")
+
+        open_pos = open_tok.pos
+
+        content_node_list = []
+        content_start_pos = open_tok.pos + open_tok.len
+        pos = content_start_pos
+
+        def _flush_chars_node():
+            if pos == content_start_pos:
+                # no chars, no need for a node
+                return
+            # assemble chars seen so far into a chars node
+            charsnode = w.make_node( latexwalker.LatexCharsNode,
+                                     chars=w.s[content_start_pos:pos],
+                                     pos=content_start_pos,
+                                     len=pos - content_start_pos,
+                                     parsing_state=parsing_state )
+            content_node_list.append(charsnode)
+
+        while pos < len(w.s):
+            if w.s[pos] == self.delimiters[1]:
+                _flush_chars_node()
+                pos += 1 # point one after to return correct length
+                break
+            if w.s[pos] != '{':
+                # add char and move on
+                pos += 1
+                continue
+            # we have s[pos] == '{' -- assemble chars seen so far into a chars
+            # node, and read a normal LaTeX group
+            _flush_chars_node()
+            groupnode, grouppos, grouplen = \
+                w.get_latex_braced_group(pos, parsing_state=parsing_state)
+            content_node_list.append(groupnode)
+            content_start_pos = grouppos + grouplen
+            pos = content_start_pos
+
+        group_node = w.make_node(
+            latexwalker.LatexGroupNode,
+            delimiters=self.delimiters,
+            nodelist=content_node_list,
+            pos=open_pos,
+            len=pos - open_pos,
+            parsing_state=parsing_state
+        )
+        return group_node, group_node.pos, group_node.len
+
+
+
+class MacroVerbatimLikeArgumentArgsParser(macrospec.MacroStandardArgsParser):
+    def __init__(self, arg_spec_list):
+        # arg_spec_list is a list of a standard argspec type ('{', '[', '*') or
+        # a VerbatimLikeSingleArgumentParser instance.
+        self.arg_spec_list = arg_spec_list
+        argspec = ''.join([a if a in ('[', '{', '*') else '{'
+                           for a in arg_spec_list])
+        super().__init__(argspec)
+
+    def parse_args(self, w, pos, parsing_state=None):
+        
+        if parsing_state is None:
+            parsing_state = w.make_parsing_state()
+
+        start_pos = pos
+
+        argnlist = []
+
+        for j, argt in enumerate(self.arg_spec_list):
+            if isinstance(argt, VerbatimLikeSingleArgumentParser):
+                node, nodepos, nodelen = \
+                    argt.parse_arg(w, pos, parsing_state=parsing_state)
+                pos = nodepos + nodelen
+                argnlist.append(node)
+                continue
+
+            if argt == '{':
+                (node, np, nl) = w.get_latex_expression(
+                    pos,
+                    strict_braces=False,
+                    parsing_state=parsing_state,
+                )
+                pos = np + nl
+                argnlist.append(node)
+
+            elif argt == '[':
+
+                optarginfotuple = w.get_latex_maybe_optional_arg(
+                    pos,
+                    parsing_state=parsing_state,
+                )
+                if optarginfotuple is None:
+                    argnlist.append(None)
+                    continue
+                (node, np, nl) = optarginfotuple
+                pos = np + nl
+                argnlist.append(node)
+
+            else:
+                raise ValueError(f"Invalid argument type: {argt!r}")
+        
+        parsed = macrospec.ParsedMacroArgs(
+            argspec=self.argspec,
+            argnlist=argnlist,
+        )
+
+        return (parsed, start_pos, pos-start_pos)
+
+
 _lw_context = macrospec.LatexContextDb()
 _lw_context.add_context_category(
     'base-formatting',
@@ -28,14 +154,29 @@ _lw_context.add_context_category(
     'x-refs',
     macros=[
         macrospec.MacroSpec('ref', '{'),
-        macrospec.MacroSpec('cite', '[{'),
+        macrospec.MacroSpec('cite',
+                            args_parser=MacroVerbatimLikeArgumentArgsParser(
+                                arg_spec_list=(
+                                    '[',
+                                    VerbatimLikeSingleArgumentParser(delimiters=('{','}')),
+                                )
+                            )),
         macrospec.MacroSpec('footnote', '{'),
-        macrospec.MacroSpec('href', '{{'),
+        macrospec.MacroSpec('href',
+                            args_parser=MacroVerbatimLikeArgumentArgsParser(
+                                arg_spec_list=(
+                                    VerbatimLikeSingleArgumentParser(delimiters=('{','}')),
+                                    '{',
+                                )
+                            )),
         macrospec.MacroSpec('hyperref', '[{'),
         macrospec.MacroSpec('url', '{'),
     ]
 )
 
+
+
+# ----------------------------
 
 
 class HtmlRefContext:
@@ -67,7 +208,7 @@ class ToHtmlConverter:
         self.refcontext = refcontext
 
     def to_html(self, s):
-        lw = latexwalker.LatexWalker(s, _lw_context)
+        lw = latexwalker.LatexWalker(s, latex_context=_lw_context, tolerant_parsing=False)
         nodelist, _, _ = lw.get_latex_nodes()
         html = self.nodelist_to_html(nodelist)
         #logger.debug(f"HTML: ‘{s}’ → ‘{html}’")
@@ -194,7 +335,9 @@ class ToHtmlConverter:
             #
             # we first iterate through the node list and build the list of
             # citation keys.  We keep everything in terms of nodes and node
-            # lists for now.
+            # lists for now.  The only nodes that should appear are char nodes
+            # and group nodes; anything else points to an internal parsing
+            # error.
             for n in citekeylist_nodelist:
                 #logger.debug(f"{cite_key_split_nodelist=}")
                 if n.isNodeType(latexwalker.LatexCharsNode):
@@ -209,8 +352,10 @@ class ToHtmlConverter:
                         cite_key_split_nodelist.append( [p] )
                     #logger.debug(f"  now {cite_key_split_nodelist=}")
                     continue
-
-                cite_key_split_nodelist[-1].append(n)
+                if n.isNodeType(latexwalker.LatexGroupNode):
+                    cite_key_split_nodelist[-1].append(n)
+                    continue
+                raise ValueError(f"Unexpected node {n!r}, expected char node or group node in citation argument")
                         
             #logger.debug(f"Citation keys are split: {cite_key_split_nodelist=}")
 

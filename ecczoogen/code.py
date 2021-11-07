@@ -69,7 +69,10 @@ class Code:
         return self.name
 
     def __repr__(self):
-        return "Code(code_id={!r})".format(self.code_id)
+        return (
+            f"Code(code_id={self.code_id!r}, "
+                 f"source_info_filename={self.source_info_filename!r})"
+        )
 
 
 class Relation:
