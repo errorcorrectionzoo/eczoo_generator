@@ -1,5 +1,5 @@
 
-import htmlfromminilatex
+from . import minilatextohtml
 
 import arxiv
 
@@ -13,7 +13,10 @@ class Citation:
         self.doi = doi
         self.manual_citation_minilatex = manual_citation_minilatex
 
-        self.endnote_citation_text = None
+        self.full_citation_text_minilatex = None
+
+    def has_full_citation(self):
+        return self.full_citation_text_minilatex is not None
 
     def equals(self, other):
         if (self.arxivid is None) != (other.arxivid is None) \
@@ -38,6 +41,12 @@ class CitationTextManager:
             'doi': {},
             'manual_citation_minilatex': {},
         }
+
+    def save_db_json(self, fw):
+        json.dump(...,fw)
+
+    def load_db_json(self, f):
+        ..... = json.load(f)
 
     def add_citation(self, **kwargs):
         cit = Citation(**kwargs)
@@ -102,7 +111,15 @@ class CitationTextManager:
     #
     # We build the database here
     #
-    def build_database(self):
+    def build_full_citation_text_database(self):
+
+        _rx_id_from_entryid = re.compile(
+            'https?://arxiv.org/abs/(?P<arxivid>.*?)(?P<versionnum>v\d+)?$',
+            flags=re.IGNORECASE
+        )
+
+        ### FIXME: separate logic of retrieving meta-info from arxiv/citeref
+        ### (and caching it) from actually rendering the citation texts.
 
         #
         # fetch meta-info from the arxiv for all encountered arXiv IDs, and
@@ -117,8 +134,46 @@ class CitationTextManager:
             id_list=self._citations_by_field['arxivid'].keys()
         )
         for result in big_slow_client.results(searchobj):
-                # build citation from the arxiv
-                ............
+            #
+            # build citation from the arxiv meta-information
+            #
+
+            m = _rx_id_from_entryid.match(result.entryid)
+            if m is None:
+                logger.warning(f"Unable to parse arXiv ID from {result.entryid!r}")
+
+            arxivid = m.group('arxivid')
+            arxividver = arxivid + m.group('versionnum')
+            if arxivid not in self._citations_by_field['arxivid']:
+                # try with version number
+                if arxividver in self._citations_by_field['arxivid']:
+                    arxivid = arxividver
+                else:
+                    logger.warning(
+                        f"Got arxiv ID in response that we didn't seem to query: "
+                        f"‘{arxivid}’ (version ‘{arxvidver}’"
+                    )
+                    continue
+
+            citobj = self._citations_by_field['arxivid'][arxivid]
+
+            if result.doi is not None and result.doi:
+                doi = str(result.doi)
+                if doi in self._citations_by_field['doi']:
+                    # already exists by DOI, merge objects -->
+                    otherciteobj = self._citations_by_field['doi'][doi]
+                    otherciteobj.arxivid = arxivid
+                    self._citations_by_field['arxivid'][arxivid] = otherciteobj
+                else:
+                    citeobj.doi = doi
+                    self._citations_by_field['doi'][doi] = citeobj
+                #
+                # don't process formatted text now, do it with the DOI. (it will
+                # include arxiv info since we kept the arxiv field in the
+                # citation object)
+                continue
+
+            ............
 
         #
         # same thing, but for DOIs.  Query DOI/Crossref's API with content negotiation !
@@ -159,7 +214,7 @@ EncounteredCitation = collections.namedtuple('citation_key_prefix',
                                              'encountered_where')
 
 
-class CitationScannerRefContext(htmlfromminilatex.HtmlRefContext):
+class CitationScannerRefContext(minilatextohtml.HtmlRefContext):
     def __init__(self, *, where=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -167,7 +222,7 @@ class CitationScannerRefContext(htmlfromminilatex.HtmlRefContext):
         self.encountered_citations = []
         self.cur_where = where
 
-    def get_ref(self, refkey):
+    def get_ref(self, ref_key_prefix, ref_key):
         # return (target_html, targethref)
         return ('','')
 
@@ -193,7 +248,7 @@ class MiniLatexCitationScanner:
         super().__init__()
 
         self.refcontext = CitationScannerRefContext()
-        self.tohtmlconverter = htmlfromminilatex.ToHtmlConverter(self.refcontext)
+        self.tohtmlconverter = minilatextohtml.ToHtmlConverter(self.refcontext)
 
     def scan(self, s, where):
         self.refcontext.cur_where = where
