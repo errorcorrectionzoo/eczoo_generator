@@ -1,8 +1,12 @@
 # latex inspired mini-language to HTML
 
-import markupsafe
+# note that this sub-module isn't markupsafe-aware, it only treats strings.
+
+import html
+
 def htmlescape(x):
-    return str(markupsafe.escape(x))
+    return str(html.escape(x))
+
 
 import logging
 logger = logging.getLogger(__name__)
