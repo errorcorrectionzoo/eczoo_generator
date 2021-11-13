@@ -13,7 +13,13 @@ sys.path.insert(0, '.')
 import ecczoogen
 ecczoogen.setup_logging(level=logging.INFO)
 
-from ecczoogen import zoo, htmlpagecollectiongen, sitegenerationenvironment, server
+from ecczoogen import (
+    zoo,
+    htmlpagecollectiongen,
+    sitegenerationenvironment,
+    server,
+    citationtextmanager
+)
 
 logger = logging.getLogger()
 
@@ -445,20 +451,30 @@ citation_scanner = citationtextmanager.MiniLatexCitationScanner()
 
 for code_id, code in zoo.all_codes().items():
     
-    # look in the code._info field, where we kept the original YML structure
-    citation_scanner.scan_dict_tree(code._info, f'<Code id={code_id}>')
+    # look in the code.source_info field, where we kept the original YML structure
+    citation_scanner.scan_dict_tree(code.source_info, f'<Code id={code_id}>')
 
 citation_manager = citationtextmanager.CitationTextManager()
-for c in citation_scanner.encountered_citations():
+for c in citation_scanner.get_encountered_citations():
     try:
-        citation_manager.add_citation(**dict([c.citation_key_prefix, c.citation_key]))
+        citation_manager.add_citation(**{c.citation_key_prefix.lower(): c.citation_key})
     except Exception as e:
         logger.error(f"Invalid citation ‘{c.citation_key_prefix}:{c.citation_key}’ in "
                      f"‘{c.encountered_where}’:\n{e}")
         raise
 
-citation_manager.build_database()
+if os.path.exists('_cache_citations.json'):
+    with open('_cache_citations.json', 'r') as f:
+        citation_manager.load_db_json(f)
 
+citation_manager.fetch_citation_info()
+
+with open('_cache_citations.json', 'w') as fw:
+    citation_manager.save_db_json(fw)
+
+citation_manager.build_full_citation_text_database()
+
+htmlpgcoll.set_citation_manager(citation_manager)
 
 ################################################################################
 
@@ -470,7 +486,8 @@ logger.info("Generating code pages ...")
 
 htmlpgcoll.generate(
     output_dir=Dirs.output_dir,
-    additional_context=global_context
+    additional_context=global_context,
+    get_citation_full_text_html=citation_manager.get_citation_full_text_html,
 )
 
 

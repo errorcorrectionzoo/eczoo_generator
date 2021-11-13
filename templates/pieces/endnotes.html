@@ -22,13 +22,7 @@ Expected context variables:
       <!-- Citation: {{citation.citation_key}} -->
       <dt id="cite-{{citation.no}}">{{citation.no|format_citation_label_html}}</dt>
       <dd>
-        {% if citation.arxivid %}
-          <a href="https://arxiv.org/abs/{{citation.arxivid}}" target="_blank" class="arxiv-link">arXiv:{{citation.arxivid}}</a>
-        {% endif %}
-        {% if citation.doi %}
-          <a href="https://doi.org/{{citation.doi}}" target="_blank" class="doi-link">doi:{{citation.doi}}</a>
-        {% endif %}
-        {{citation.citation_text_html}}
+        {{ citation.citation_obj.citation_full_text_html() }}
       </dd>
 {% endfor %}    
     </dl>
