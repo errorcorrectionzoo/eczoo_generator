@@ -174,6 +174,10 @@ class HtmlCitation:
         self.no = no
         self.citation_obj = citation_obj
 
+    def full_citation_text_html(self):
+        return minilatextohtml.ToHtmlConverter(None) \
+                              .to_html(self.citation_obj.full_citation_text_minilatex)
+
 
 # _rx_ref_code = re.compile(r'^code:(?P<code_id>.*)$', flags=re.IGNORECASE)
 # _rx_cite_arxiv = re.compile(r'^arxiv:(?P<arxivid>[-a-zA-Z/_.+0-9]+)$', flags=re.IGNORECASE)
@@ -223,7 +227,7 @@ class RefContextForHtmlConverter(minilatextohtml.HtmlRefContext):
 
     def _get_citation_obj(self, citation_key_prefix, citation_key):
 
-        citation_obj = self.citation_manager.get_citation(
+        citation_obj = self.htmlpagecollection.citation_manager.get_citation(
             **{citation_key_prefix.lower(): citation_key}
         )
 

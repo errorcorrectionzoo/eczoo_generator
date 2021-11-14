@@ -463,13 +463,13 @@ for c in citation_scanner.get_encountered_citations():
                      f"‘{c.encountered_where}’:\n{e}")
         raise
 
-if os.path.exists('_cache_citations.json'):
-    with open('_cache_citations.json', 'r') as f:
+if os.path.exists('cache_citation_fetched_data.json'):
+    with open('cache_citation_fetched_data.json', 'r') as f:
         citation_manager.load_db_json(f)
 
 citation_manager.fetch_citation_info()
 
-with open('_cache_citations.json', 'w') as fw:
+with open('cache_citation_fetched_data.json', 'w') as fw:
     citation_manager.save_db_json(fw)
 
 citation_manager.build_full_citation_text_database()
@@ -487,7 +487,6 @@ logger.info("Generating code pages ...")
 htmlpgcoll.generate(
     output_dir=Dirs.output_dir,
     additional_context=global_context,
-    get_citation_full_text_html=citation_manager.get_citation_full_text_html,
 )
 
 

@@ -30,6 +30,7 @@ _rx_arxivid = re.compile(
 )
 
 
+
 class Citation:
     def __init__(self, *,
                  arxiv=None,
@@ -38,6 +39,13 @@ class Citation:
         self.arxiv = arxiv
         self.doi = doi
         self.manual_citation_minilatex = manual_citation_minilatex
+
+        if len([ x
+                 for x in (self.arxiv, self.doi, self.manual_citation_minilatex,)
+                 if x is not None ]) != 1:
+            raise ValueError(f"Can only specify one of arxiv (‘{arxiv}’), doi"
+                             f" (‘{doi}’), or manual_citation_minilatex "
+                             f"(‘{manual_citation_minilatex}’)")
 
         self.full_citation_text_minilatex = None
 
@@ -59,6 +67,21 @@ class Citation:
         return True
 
 
+def _get_single_kwarg(kwargs):
+    # remove None values
+    kwargs = {k: v
+              for (k, v) in kwargs.items()
+              if v is not None}
+
+    if len(kwargs) != 1:
+        raise ValueError("Must specify exactly one of the fields "
+                         "arxiv=..., doi=..., or manual_citation_minilatex=...")
+
+    (fld, val),  = kwargs.items()
+    return (fld, val)
+
+
+
 class CitationTextManager:
     def __init__(self):
         self._citations_db = []
@@ -69,7 +92,9 @@ class CitationTextManager:
         }
 
         self._fetched_info = {
-            # _fetched_info['arxiv']['XXXX.XXXXX'][v-num] = { ... arXiv API response... }
+            # _fetched_info['arxiv'][arxivid] = { ... arXiv API response... }
+            # (both for arxivid with and w/o the version number, unless specific
+            # version no is requested.)
             'arxiv': {},
             # _fetched_info['doi']['10.ZZZZZ'] = { ... citeproc-json via crossref API ... }
             'doi': {}
@@ -86,79 +111,76 @@ class CitationTextManager:
 
 
     def add_citation(self, **kwargs):
-        cit = Citation(**kwargs)
 
         logger.debug(f"add_citation({kwargs=})")
 
-        for c in self._citations_db:
-            if c.arxiv is not None and c.arxiv == cit.arxiv:
-                logger.debug(f"We already have a citation to arxiv id ‘{cit.arxiv}’")
-                return
-            if c.doi is not None and c.doi == cit.doi:
-                logger.debug(f"We already have a citation to DOI ‘{cit.doi}’")
-                return
-            if c.manual_citation_minilatex is not None \
-               and c.manual_citation_minilatex == cit.manual_citation_minilatex:
-                logger.debug(f"We already have a citation ‘{cit.manual_citation_minilatex}’")
-                return
 
+        fld, val = _get_single_kwarg(kwargs)
+
+        if val in self._citations_by_field[fld]:
+            logger.debug(f"We already have a citation with {fld}=‘{val}’")
+            return
+
+        cit = Citation(**kwargs)
         self._citations_db.append(cit)
-        for fld in ('arxiv', 'doi', 'manual_citation_minilatex',):
-            v = getattr(cit, fld, None)
-            if v is not None:
-                if v in self._citations_by_field[fld]:
-                    self._citations_by_field[fld][v].add(cit)
-                else:
-                    self._citations_by_field[fld][v] = set([cit])
+
+        self._citations_by_field[fld][val] = cit
             
 
     def get_citation(self, **kwargs):
+
+        fld, val = _get_single_kwarg(kwargs)
+
+        citation = self._citations_by_field[fld].get(val, None)
+        if citation is None:
+            raise ValueError(f"Citation not found for {kwargs=} in internally "
+                             f"constructed database!")
+        return citation
         
-        # give direct access to assign 'matches' from within nested function
-        p = {'matches': None}
+        # # give direct access to assign 'matches' from within nested function
+        # p = {'matches': None}
 
-        def _refine_with(fld, value):
-            if value is None:
-                return
+        # def _refine_with(fld, value):
+        #     if value is None:
+        #         return
 
-            new_matches = self._citations_by_field[fld].get(value, set())
-            if p['matches'] is None:
-                p['matches'] = new_matches
-                return
-            p['matches'].intersection_update(new_matches)
+        #     new_matches = self._citations_by_field[fld].get(value, set())
+        #     if p['matches'] is None:
+        #         p['matches'] = new_matches
+        #         return
+        #     p['matches'].intersection_update(new_matches)
 
-        for fld, value in kwargs.items():
-            _refine_with(fld, value)
-            if p['matches'] is not None and len(p['matches']) == 0:
-                # no matches
-                raise ValueError(f"Citation not found for {kwargs=} in internally "
-                                 f"constructed database!")
+        # for fld, value in kwargs.items():
+        #     _refine_with(fld, value)
+        #     if p['matches'] is not None and len(p['matches']) == 0:
+        #         # no matches
+        #         raise ValueError(f"Citation not found for {kwargs=} in internally "
+        #                          f"constructed database!")
 
-        if len(p['matches']) > 1:
-            logger.warning(f"Warning: multiple citations found for {kwargs=}. "
-                           f"How is this even possible??  Probable bug in code.")
+        # if len(p['matches']) > 1:
+        #     logger.warning(f"Warning: multiple citations found for {kwargs=}. "
+        #                    f"How is this even possible??  Probable bug in code.")
 
-        return p['matches'].pop() # pick any element, should be a single element anyways
+        # return p['matches'].pop() # pick any element, should be a single element anyways
 
 
+    # def _has_fetched_info_for_arxivid(self, arxividstr):
+    #     m = _rx_arxivid.match(arxividstr)
+    #     if m is None:
+    #         raise ValueError(
+    #             f"Error parsing arXiv ID w/ possible version number: {arxividstr!r}"
+    #         )
 
-    def _has_fetched_info_for_arxivid(self, arxividstr):
-        m = _rx_arxivid.match(arxividstr)
-        if m is None:
-            raise ValueError(
-                f"Error parsing arXiv ID w/ possible version number: {arxividstr!r}"
-            )
+    #     arxivid = m.group('arxivid').lower()
+    #     versionnum = m.group('versionnum')
 
-        arxivid = m.group('arxivid').lower()
-        versionnum = m.group('versionnum')
-
-        if arxivid not in self._fetched_info['arxiv']:
-            return False
-        if not versionnum:
-            return True
-        if versionnum in self._fetched_info['arxiv'][arxivid]:
-            return True
-        return False
+    #     if arxivid not in self._fetched_info['arxiv']:
+    #         return False
+    #     if not versionnum:
+    #         return True
+    #     if versionnum in self._fetched_info['arxiv'][arxivid]:
+    #         return True
+    #     return False
         
 
     #
@@ -174,7 +196,7 @@ class CitationTextManager:
         arxivid_list = [
             arxivid
             for arxivid in arxivid_list
-            if not self._has_fetched_info_for_arxivid(arxivid)
+            if arxivid not in self._fetched_info['arxiv']
         ]
 
         doi_list = set([
@@ -219,11 +241,18 @@ class CitationTextManager:
                 authors=[a.name for a in result.authors],
                 #journal_ref=result.journal_ref,
                 doi=doi,
+                arxivid=arxivid,
+                arxivver=arxivver,
             )
 
-            if arxivid not in self._fetched_info['arxiv']:
-                self._fetched_info['arxiv'][arxivid] = {}
-            self._fetched_info['arxiv'][arxivid][arxivver] = result_d
+            if not versionnum:
+                self._fetched_info['arxiv'][arxivid] = result_d
+            else:
+                self._fetched_info['arxiv'][arxivid+versionnum] = result_d
+                if arxivid not in self._fetched_info['arxiv'] \
+                   or self._fetched_info['arxiv'][arxivid].arxivver is None \
+                   or self._fetched_info['arxiv'][arxivid].arxivver < arxivver:
+                    self._fetched_info['arxiv'][arxivid] = result_d
 
             if doi is not None:
                 doi_list.add(doi)
@@ -257,7 +286,7 @@ class CitationTextManager:
 
         # first go through the citation objects that were cited by arXiv ID
 
-        for arxividstr, citeobjs in self._citations_by_field['arxiv'].items():
+        for arxividstr, citeobj in self._citations_by_field['arxiv'].items():
 
             m = _rx_arxivid.match(arxividstr)
             if m is None:
@@ -307,25 +336,31 @@ class CitationTextManager:
 
         # then go through the citation objects that were cited by DOI
 
-        bib_style = citeproc.CitationStylesStyle('eczoo-bib-style', validate=False)
+        bib_style = citeproc.CitationStylesStyle('eczoo-bib-style.csl', validate=False)
 
         for doi, citeobj in self._citations_by_field['doi'].items():
 
             if doi not in self._fetched_info['doi']:
                 logger.warning(f"No crossref info retreived for ‘{doi}’")
                 continue
-            d = self._fetched_info['doi'][doi]
+            d = {'id': doi}
+            d.update({k : v
+                      for k, v in self._fetched_info['doi'][doi].items()
+                      if k != 'id'})
+
+            #logger.debug(f"{d=}")
 
             bib_source = citeproc.source.json.CiteProcJSON([d])
             bibliography = citeproc.CitationStylesBibliography(bib_style, bib_source,
                                                                citeproc.formatter.html)
 
-            bibliography.register(d['id'])
+            citation1 = citeproc.Citation([citeproc.CitationItem(doi)])
+            bibliography.register(citation1)
             bibliography_items = [str(item) for item in bibliography.bibliography()]
             assert len(bibliography_items) == 1
             full_citation_text = bibliography_items[0]
 
-            if citeobj.arxivid is not None:
+            if citeobj.arxiv is not None:
                 arxividstr = citeobj.arxiv
                 full_citation_text += \
                     f" \href{{https://arxiv.org/abs/{arxividstr}}}{{arXiv:{arxividstr}}}"

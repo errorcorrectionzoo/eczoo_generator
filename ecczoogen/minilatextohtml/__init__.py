@@ -436,7 +436,7 @@ class ToHtmlConverter:
             
             return self.html_wrap_in_tag(
                 'a',
-                disp,
+                disphtml,
                 attrs={'href': url, 'target': '_blank'},
                 class_='href',
             )

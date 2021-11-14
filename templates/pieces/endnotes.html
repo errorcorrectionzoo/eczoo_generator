@@ -22,7 +22,7 @@ Expected context variables:
       <!-- Citation: {{citation.citation_key}} -->
       <dt id="cite-{{citation.no}}">{{citation.no|format_citation_label_html}}</dt>
       <dd>
-        {{ citation.citation_obj.citation_full_text_html() }}
+        {{ citation.full_citation_text_html() }}
       </dd>
 {% endfor %}    
     </dl>
