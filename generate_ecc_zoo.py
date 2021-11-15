@@ -18,7 +18,7 @@ from ecczoogen import (
     htmlpagecollectiongen,
     sitegenerationenvironment,
     server,
-    citationtextmanager
+    citationmanager
 )
 
 logger = logging.getLogger()
@@ -447,14 +447,14 @@ for SpecialPageClass in special_pages:
 
 logger.info("Generating citation database ...")
 
-citation_scanner = citationtextmanager.MiniLatexCitationScanner()
+citation_scanner = citationmanager.MiniLatexCitationScanner()
 
 for code_id, code in zoo.all_codes().items():
     
     # look in the code.source_info field, where we kept the original YML structure
     citation_scanner.scan_dict_tree(code.source_info, f'<Code id={code_id}>')
 
-citation_manager = citationtextmanager.CitationTextManager()
+citation_manager = citationmanager.CitationTextManager()
 for c in citation_scanner.get_encountered_citations():
     try:
         citation_manager.add_citation(**{c.citation_key_prefix.lower(): c.citation_key})

@@ -16,7 +16,7 @@ jsonref = "^0.2"
 arxiv = "^1.4.2"
 requests = "^2.26.0"
 backoff = "^1.11.1"
-citeproc-py = "^0.6.0"
+citeproc-py = {'git' = "https://github.com/phfaist/citeproc-py.git"}
 
 [tool.poetry.dev-dependencies]
 

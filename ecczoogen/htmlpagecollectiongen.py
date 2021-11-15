@@ -175,8 +175,10 @@ class HtmlCitation:
         self.citation_obj = citation_obj
 
     def full_citation_text_html(self):
-        return minilatextohtml.ToHtmlConverter(None) \
-                              .to_html(self.citation_obj.full_citation_text_minilatex)
+        return markupsafe.Markup(
+            minilatextohtml.ToHtmlConverter(None)
+            .to_html(self.citation_obj.full_citation_text_minilatex)
+        )
 
 
 # _rx_ref_code = re.compile(r'^code:(?P<code_id>.*)$', flags=re.IGNORECASE)

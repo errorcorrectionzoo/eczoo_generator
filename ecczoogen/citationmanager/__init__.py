@@ -3,16 +3,20 @@ import json
 from urllib.parse import quote as urlquote
 import base64
 import collections
+import warnings
 import logging
 
-from . import minilatextohtml
+from .. import minilatextohtml
 
 import arxiv
 import requests
 import backoff
 
 import citeproc
+import citeproc.source
 import citeproc.source.json
+
+from . import _cslformatter
 
 
 logger = logging.getLogger(__name__)
@@ -284,41 +288,26 @@ class CitationTextManager:
     #
     def build_full_citation_text_database(self):
 
+        bib_style = citeproc.CitationStylesStyle('eczoo-bib-style.csl', validate=False)
+
+
         # first go through the citation objects that were cited by arXiv ID
 
         for arxividstr, citeobj in self._citations_by_field['arxiv'].items():
 
-            m = _rx_arxivid.match(arxividstr)
-            if m is None:
-                raise ValueError(
-                    f"Error parsing arXiv ID w/ possible version number: {arxividstr!r}"
-                )
-
-            arxivid = m.group('arxivid').lower()
-            versionnum = m.group('versionnum')
-            arxivver = int(versionnum) if versionnum else None
-
-            if arxivid not in self._fetched_info['arxiv']:
-                logger.warning(f"No arXiv info retreived for ‘{arxivid}’")
+            if arxividstr not in self._fetched_info['arxiv']:
+                logger.warning(f"No arXiv info retreived for ‘{arxividstr}’")
                 continue
-            if arxivver is not None:
-                if arxivver not in self._fetched_info['arxiv'][arxivid]:
-                    logger.warning(
-                        f"No arXiv info retreived for ‘{arxivid}’ version ‘v{arxivver}’"
-                    )
-                    continue
-                d = self._fetched_info['arxiv'][arxivid][arxivver]
-            else:
-                vers = sorted(self._fetched_info['arxiv'][arxivid].keys())
-                d = self._fetched_info['arxiv'][arxivid][vers[-1]]
+
+            d = self._fetched_info['arxiv'][arxividstr]
 
             if d['doi'] is not None:
                 doi = d['doi']
                 if doi in self._citations_by_field['doi']:
                     # already exists by DOI, merge objects -->
                     otherciteobj = self._citations_by_field['doi'][doi]
-                    otherciteobj.arxiv = arxivid
-                    self._citations_by_field['arxiv'][arxivid] = otherciteobj
+                    otherciteobj.arxiv = arxividstr
+                    self._citations_by_field['arxiv'][arxividstr] = otherciteobj
                 else:
                     citeobj.doi = doi
                     self._citations_by_field['doi'][doi] = citeobj
@@ -329,14 +318,30 @@ class CitationTextManager:
                 continue
         
             # produce formatted citation text here
-            citeobj.full_citation_text_minilatex = \
-                _get_full_citation_text_minilatex_for_pure_arxiv_entry(arxividstr, d)
+            # full_citation_text = \
+            #     _get_full_citation_text_minilatex_for_pure_arxiv_entry(arxividstr, d)
 
+            citeprocjsond = {
+                'id': arxividstr,
+                'type': 'article-journal',
+                'author': [
+                    {'family': n}
+                    for n in d['authors']
+                ],
+                'title': d['title'],
 
+            }
+            full_citation_text = _generate_citation_from_citeprocjsond(citeprocjsond,
+                                                                       bib_style=bib_style)
+
+            full_citation_text += \
+                fr" \href{{https://arxiv.org/abs/{arxividstr}}}{{{arxividstr}}}"
+
+            citeobj.full_citation_text_minilatex = full_citation_text
+
+            logger.debug(f"Citation arXiv:{arxividstr} → {full_citation_text}")
 
         # then go through the citation objects that were cited by DOI
-
-        bib_style = citeproc.CitationStylesStyle('eczoo-bib-style.csl', validate=False)
 
         for doi, citeobj in self._citations_by_field['doi'].items():
 
@@ -350,23 +355,19 @@ class CitationTextManager:
 
             #logger.debug(f"{d=}")
 
-            bib_source = citeproc.source.json.CiteProcJSON([d])
-            bibliography = citeproc.CitationStylesBibliography(bib_style, bib_source,
-                                                               citeproc.formatter.html)
+            full_citation_text = _generate_citation_from_citeprocjsond(d, bib_style=bib_style)
 
-            citation1 = citeproc.Citation([citeproc.CitationItem(doi)])
-            bibliography.register(citation1)
-            bibliography_items = [str(item) for item in bibliography.bibliography()]
-            assert len(bibliography_items) == 1
-            full_citation_text = bibliography_items[0]
+            full_citation_text += \
+                fr" \href{{https://doi.org/{doi}}}{{DOI}}"
 
             if citeobj.arxiv is not None:
                 arxividstr = citeobj.arxiv
                 full_citation_text += \
-                    f" \href{{https://arxiv.org/abs/{arxividstr}}}{{arXiv:{arxividstr}}}"
+                    f"; \href{{https://arxiv.org/abs/{arxividstr}}}{{{arxividstr}}}"
 
             citeobj.full_citation_text_minilatex = full_citation_text
             
+            logger.debug(f"Citation doi:{doi} → {full_citation_text}")
         
         #
         # Now also process manual_citation_minilatex entries
@@ -383,19 +384,34 @@ class CitationTextManager:
         return
         
 
+def _generate_citation_from_citeprocjsond(citeprocjsond, bib_style):
+
+    with warnings.catch_warnings():
+        warnings.simplefilter('ignore', citeproc.source.MissingArgumentWarning)
+        warnings.simplefilter('ignore', citeproc.source.UnsupportedArgumentWarning)
+
+        bib_source = citeproc.source.json.CiteProcJSON([citeprocjsond])
+        bibliography = citeproc.CitationStylesBibliography(bib_style, bib_source,
+                                                           _cslformatter)
+
+        citation1 = citeproc.Citation([citeproc.CitationItem(citeprocjsond['id'])])
+        bibliography.register(citation1)
+        bibliography_items = [str(item) for item in bibliography.bibliography()]
+        assert len(bibliography_items) == 1
+        return bibliography_items[0]
 
 
-def _get_full_citation_text_minilatex_for_pure_arxiv_entry(arxividstr, d):
-    if len(d['authors']) < 8:
-        authors = list(d['authors'])
-        if len(authors) > 1:
-            authors[-1] = 'and  '+authors[-1]
-        authors_part = ", ".join(authors)
-    else:
-        authors_part = fr"{d['authors'][0]} \emph{{et al.}}"
-    
-    return authors_part \
-        + fr", \href{{https://arxiv.org/abs/{arxividstr}}}{{arXiv:{arxividstr}}}"
+# def _get_full_citation_text_minilatex_for_pure_arxiv_entry(arxividstr, d):
+#     if len(d['authors']) < 8:
+#         authors = list(d['authors'])
+#         if len(authors) > 1:
+#             authors[-1] = 'and  '+authors[-1]
+#         authors_part = ", ".join(authors)
+#     else:
+#         authors_part = fr"{d['authors'][0]} \emph{{et al.}}"
+#
+#     return authors_part \
+#         + fr", \href{{https://arxiv.org/abs/{arxividstr}}}{{arXiv:{arxividstr}}}"
 
 
 # ----------------------------
