@@ -13,6 +13,8 @@ sys.path.insert(0, '.')
 import ecczoogen
 ecczoogen.setup_logging(level=logging.INFO)
 
+import requests
+
 from ecczoogen import (
     zoo,
     htmlpagecollectiongen,
@@ -463,13 +465,35 @@ for c in citation_scanner.get_encountered_citations():
                      f"‘{c.encountered_where}’:\n{e}")
         raise
 
-if os.path.exists('cache_citation_fetched_data.json'):
-    with open('cache_citation_fetched_data.json', 'r') as f:
-        citation_manager.load_db_json(f)
+cache_citation_fetched_data_filename = 'cache_citation_fetched_data.json'
+
+for path in (Dirs.output_dir, 'https://errorcorrectionzoo.org'):
+    cachefile = os.path.join(path, cache_citation_fetched_data_filename)
+    logger.debug(f"Try to read cache from ‘{cachefile}’ ...")
+    if cachefile.startswith( ('https://', 'http://') ):
+        r = requests.get(cachefile)
+        if r.status_code == 200:
+            r.encoding = 'utf-8'
+            try:
+                citation_manager.load_db_json(r.text)
+                logger.debug(f"Cache read from ‘{cachefile}’")
+                break
+            except Exception as e:
+                logger.debug(f"Ignoring exception -> {e}")
+                continue
+    elif os.path.exists(cachefile):
+        with open(cachefile, 'r') as f:
+            try:
+                citation_manager.load_db_json(f)
+                logger.debug(f"Cache read from ‘{cachefile}’")
+                break
+            except Exception as e:
+                logger.debug(f"Ignoring exception -> {e}")
+                continue
 
 citation_manager.fetch_citation_info()
 
-with open('cache_citation_fetched_data.json', 'w') as fw:
+with open(os.path.join(Dirs.output_dir, cache_citation_fetched_data_filename), 'w') as fw:
     citation_manager.save_db_json(fw)
 
 citation_manager.build_full_citation_text_database()

@@ -1,5 +1,6 @@
 import re
 import json
+import datetime
 from urllib.parse import quote as urlquote
 import base64
 import collections
@@ -101,7 +102,10 @@ class CitationTextManager:
             # version no is requested.)
             'arxiv': {},
             # _fetched_info['doi']['10.ZZZZZ'] = { ... citeproc-json via crossref API ... }
-            'doi': {}
+            'doi': {},
+            
+            # time stamp for the cache
+            'fetched_date': datetime.datetime.now().isoformat(),
         }
 
 
@@ -109,9 +113,20 @@ class CitationTextManager:
         json.dump(self._fetched_info, fw)
 
     def load_db_json(self, f):
-        self._fetched_info = json.load(f)
-        assert ('arxiv' in self._fetched_info)
-        assert ('doi' in self._fetched_info)
+        self.load_db_obj( json.load(f) )
+
+    def load_db_json_s(self, s):
+        self.load_db_obj( json.loads(s) )
+
+    def load_db_obj(self, obj):
+        assert ('arxiv' in obj)
+        assert ('doi' in obj)
+        assert ('fetched_date' in obj)
+        t = datetime.datetime.fromisoformat(obj['fetched_date'])
+        if (datetime.datetime.now() - t) > datetime.timedelta(days=30):
+            logger.debug(f"Not using the requested cache file, it's too old.")
+            raise RuntimeError("Cache is too old, not using it.")
+        self._fetched_info = obj
 
 
     def add_citation(self, **kwargs):
@@ -209,57 +224,59 @@ class CitationTextManager:
             if doi not in self._fetched_info['doi']
         ])
 
-        #
-        # fetch meta-info from the arxiv for all encountered arXiv IDs, and
-        # build the associated citation text endnotes.
-        #
-        big_slow_client = arxiv.Client(
-            page_size=10000,
-            delay_seconds=4,
-            num_retries=5
-        )
-        searchobj = arxiv.Search(
-            id_list=arxivid_list,
-        )
-        for result in big_slow_client.results(searchobj):
+
+        if arxivid_list:
             #
-            # build citation from the arxiv meta-information
+            # fetch meta-info from the arxiv for all encountered arXiv IDs, and
+            # build the associated citation text endnotes.
             #
-
-            m = _rx_id_from_entryid.match(result.entry_id)
-            if m is None:
-                logger.warning(f"Unable to parse arXiv ID from {result.entry_id!r}")
-                continue
-
-            arxivid = m.group('arxivid').lower()
-            versionnum = m.group('versionnum')
-            arxivver = int(versionnum) if versionnum else None
-
-            doi = None
-            if result.doi is not None and result.doi:
-                doi = str(result.doi)
-
-            result_d = dict(
-                entry_id=result.entry_id,
-                title=result.title,
-                authors=[a.name for a in result.authors],
-                #journal_ref=result.journal_ref,
-                doi=doi,
-                arxivid=arxivid,
-                arxivver=arxivver,
+            big_slow_client = arxiv.Client(
+                page_size=10000,
+                delay_seconds=4,
+                num_retries=5
             )
+            searchobj = arxiv.Search(
+                id_list=arxivid_list,
+            )
+            for result in big_slow_client.results(searchobj):
+                #
+                # build citation from the arxiv meta-information
+                #
 
-            if not versionnum:
-                self._fetched_info['arxiv'][arxivid] = result_d
-            else:
-                self._fetched_info['arxiv'][arxivid+versionnum] = result_d
-                if arxivid not in self._fetched_info['arxiv'] \
-                   or self._fetched_info['arxiv'][arxivid].arxivver is None \
-                   or self._fetched_info['arxiv'][arxivid].arxivver < arxivver:
+                m = _rx_id_from_entryid.match(result.entry_id)
+                if m is None:
+                    logger.warning(f"Unable to parse arXiv ID from {result.entry_id!r}")
+                    continue
+
+                arxivid = m.group('arxivid').lower()
+                versionnum = m.group('versionnum')
+                arxivver = int(versionnum) if versionnum else None
+
+                doi = None
+                if result.doi is not None and result.doi:
+                    doi = str(result.doi)
+
+                result_d = dict(
+                    entry_id=result.entry_id,
+                    title=result.title,
+                    authors=[a.name for a in result.authors],
+                    #journal_ref=result.journal_ref,
+                    doi=doi,
+                    arxivid=arxivid,
+                    arxivver=arxivver,
+                )
+
+                if not versionnum:
                     self._fetched_info['arxiv'][arxivid] = result_d
+                else:
+                    self._fetched_info['arxiv'][arxivid+versionnum] = result_d
+                    if arxivid not in self._fetched_info['arxiv'] \
+                       or self._fetched_info['arxiv'][arxivid].arxivver is None \
+                       or self._fetched_info['arxiv'][arxivid].arxivver < arxivver:
+                        self._fetched_info['arxiv'][arxivid] = result_d
 
-            if doi is not None:
-                doi_list.add(doi)
+                if doi is not None:
+                    doi_list.add(doi)
 
 
         #
@@ -275,10 +292,24 @@ class CitationTextManager:
         #     CSL style file.
         #
         
-        for doi in doi_list:
+        if doi_list:
 
-            # fetch informatino as CSL-JSON
-            self._fetched_info['doi'][doi] = _get_crossref_citeproc_json_object(doi)
+            req_session = requests.Session()
+
+            # let's avoid having this in cleartext in the source file...
+            addr = base64.b64decode('cGhmYWlzdEBnb'+'WFpbC5jb20=').decode('utf-8')
+            headers = {
+                'User-Agent':
+                    f"ecczoogen-bibliography-build-script/0.1 "
+                    f"(https://github.com/errorcorrectionzoo; mailto:{addr})",
+            }
+            req_session.headers.update(headers)
+
+            for doi in doi_list:
+
+                # fetch informatino as CSL-JSON
+                self._fetched_info['doi'][doi] = \
+                    _get_crossref_citeproc_json_object(doi, req_session)
 
 
 
@@ -430,20 +461,11 @@ def _backoff_handler(details):
                       requests.exceptions.RequestException,
                       max_tries=8,
                       on_backoff=_backoff_handler)
-def _get_crossref_citeproc_json_object(doi):
+def _get_crossref_citeproc_json_object(doi, req_session):
 
     doi_escaped = urlquote(doi)
 
-    # let's avoid having this in cleartext in the source file...
-    addr = base64.b64decode('cGhmYWlzdEBnb'+'WFpbC5jb20=').decode('utf-8')
-
-    headers = {
-        'User-Agent':
-            f"ecczoogen-bibliography-build-script/0.1 "
-            f"(https://github.com/errorcorrectionzoo; mailto:{addr})",
-    }
-
-    r = requests.get(
+    r = req_session.get(
         f"https://api.crossref.org/works/{doi_escaped}/"
           f"transform/application/vnd.citationstyles.csl+json"
     )
