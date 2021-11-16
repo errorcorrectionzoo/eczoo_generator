@@ -390,6 +390,8 @@ def _generate_citation_from_citeprocjsond(citeprocjsond, bib_style):
         warnings.simplefilter('ignore', citeproc.source.MissingArgumentWarning)
         warnings.simplefilter('ignore', citeproc.source.UnsupportedArgumentWarning)
 
+        logger.debug(f"Creating citation for entry ‘{citeprocjsond['id']}’")
+
         bib_source = citeproc.source.json.CiteProcJSON([citeprocjsond])
         bibliography = citeproc.CitationStylesBibliography(bib_style, bib_source,
                                                            _cslformatter)

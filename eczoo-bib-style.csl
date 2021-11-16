@@ -21,7 +21,7 @@
     <names variable="author">
       <name delimiter=", " initialize-with=". " and="text"/>
       <label form="long" prefix=", " suffix=" "/>
-      <et-al font-style="italic"/>
+      <!--<et-al font-style="italic"/>-->
       <substitute>
         <names variable="editor"/>
         <names variable="translator"/>
@@ -143,7 +143,7 @@
         </else-if>
         <else>
           <group delimiter=", ">
-          <text variable="title" text-case="sentence" prefix="“" suffix="”"/>
+          <text variable="title"  prefix="“" suffix="”"/><!--text-case="sentence"-->
 
           <group delimiter=" ">
             <choose>
