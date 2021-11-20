@@ -457,10 +457,14 @@ def _backoff_handler(details):
                    "calling function {target} with args {args} and kwargs "
                    "{kwargs}".format(**details), exc_info=True)
 
+def _backoff_fatal_code(e):
+    return e.response.status_code == 404
+
 @backoff.on_exception(backoff.expo,
                       requests.exceptions.RequestException,
                       max_tries=8,
-                      on_backoff=_backoff_handler)
+                      on_backoff=_backoff_handler,
+                      giveup=_backoff_fatal_code)
 def _get_crossref_citeproc_json_object(doi, req_session):
 
     doi_escaped = urlquote(doi)
