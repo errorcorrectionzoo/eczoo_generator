@@ -475,7 +475,7 @@ for path in (Dirs.output_dir, 'https://errorcorrectionzoo.org'):
         if r.status_code == 200:
             r.encoding = 'utf-8'
             try:
-                citation_manager.load_db_json(r.text)
+                citation_manager.load_db_json_s(r.text)
                 logger.debug(f"Cache read from ‘{cachefile}’")
                 break
             except Exception as e:
