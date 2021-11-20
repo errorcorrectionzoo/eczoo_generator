@@ -13,7 +13,15 @@ sys.path.insert(0, '.')
 import ecczoogen
 ecczoogen.setup_logging(level=logging.INFO)
 
-from ecczoogen import zoo, htmlpagecollectiongen, sitegenerationenvironment, server
+import requests
+
+from ecczoogen import (
+    zoo,
+    htmlpagecollectiongen,
+    sitegenerationenvironment,
+    server,
+    citationmanager
+)
 
 logger = logging.getLogger()
 
@@ -436,6 +444,65 @@ for SpecialPageClass in special_pages:
 ################################################################################
 
 #
+# Scan codes' information for citations, and build the bibliography.
+#
+
+logger.info("Generating citation database ...")
+
+citation_scanner = citationmanager.MiniLatexCitationScanner()
+
+for code_id, code in zoo.all_codes().items():
+    
+    # look in the code.source_info field, where we kept the original YML structure
+    citation_scanner.scan_dict_tree(code.source_info, f'<Code id={code_id}>')
+
+citation_manager = citationmanager.CitationTextManager()
+for c in citation_scanner.get_encountered_citations():
+    try:
+        citation_manager.add_citation(**{c.citation_key_prefix.lower(): c.citation_key})
+    except Exception as e:
+        logger.error(f"Invalid citation ‘{c.citation_key_prefix}:{c.citation_key}’ in "
+                     f"‘{c.encountered_where}’:\n{e}")
+        raise
+
+cache_citation_fetched_data_filename = 'cache_citation_fetched_data.json'
+
+for path in (Dirs.output_dir, 'https://errorcorrectionzoo.org'):
+    cachefile = os.path.join(path, cache_citation_fetched_data_filename)
+    logger.debug(f"Try to read cache from ‘{cachefile}’ ...")
+    if cachefile.startswith( ('https://', 'http://') ):
+        r = requests.get(cachefile)
+        if r.status_code == 200:
+            r.encoding = 'utf-8'
+            try:
+                citation_manager.load_db_json_s(r.text)
+                logger.debug(f"Cache read from ‘{cachefile}’")
+                break
+            except Exception as e:
+                logger.debug(f"Ignoring exception -> {e}")
+                continue
+    elif os.path.exists(cachefile):
+        with open(cachefile, 'r') as f:
+            try:
+                citation_manager.load_db_json(f)
+                logger.debug(f"Cache read from ‘{cachefile}’")
+                break
+            except Exception as e:
+                logger.debug(f"Ignoring exception -> {e}")
+                continue
+
+citation_manager.fetch_citation_info()
+
+with open(os.path.join(Dirs.output_dir, cache_citation_fetched_data_filename), 'w') as fw:
+    citation_manager.save_db_json(fw)
+
+citation_manager.build_full_citation_text_database()
+
+htmlpgcoll.set_citation_manager(citation_manager)
+
+################################################################################
+
+#
 # generate the pages with the codes
 #
 
@@ -443,7 +510,7 @@ logger.info("Generating code pages ...")
 
 htmlpgcoll.generate(
     output_dir=Dirs.output_dir,
-    additional_context=global_context
+    additional_context=global_context,
 )
 
 

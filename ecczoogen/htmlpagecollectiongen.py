@@ -165,26 +165,20 @@ class HtmlPage:
 
 
 class HtmlFootnote:
-    def __init__(self, *, no=None, #label_html=None,
-                 footnote_text_html=None):
+    def __init__(self, *, no=None, footnote_text_html=None):
         self.no = no
-        #self.label_html = label_html
-
         self.footnote_text_html = footnote_text_html
 
 class HtmlCitation:
-    def __init__(self, *, no=None, #label_html=None,
-                 full_citation_key=None, arxivid=None, doi=None, citation_text_html=''):
+    def __init__(self, *, no=None, citation_obj):
         self.no = no
-        #self.label_html = label_html
+        self.citation_obj = citation_obj
 
-        self.full_citation_key = full_citation_key
-        self.arxivid = arxivid
-        self.doi = doi
-        self.citation_text_html = citation_text_html
-
-    def is_same_citation_target(self, other):
-        return self.full_citation_key.lower() == other.full_citation_key.lower()
+    def full_citation_text_html(self):
+        return markupsafe.Markup(
+            minilatextohtml.ToHtmlConverter(None)
+            .to_html(self.citation_obj.full_citation_text_minilatex)
+        )
 
 
 # _rx_ref_code = re.compile(r'^code:(?P<code_id>.*)$', flags=re.IGNORECASE)
@@ -234,21 +228,12 @@ class RefContextForHtmlConverter(minilatextohtml.HtmlRefContext):
         return (foot_label_html, f'#fn-{foot_no}')
 
     def _get_citation_obj(self, citation_key_prefix, citation_key):
-        citation = HtmlCitation(full_citation_key=citation_key_prefix + ':' + citation_key)
 
-        citation_key_prefix = citation_key_prefix.lower()
+        citation_obj = self.htmlpagecollection.citation_manager.get_citation(
+            **{citation_key_prefix.lower(): citation_key}
+        )
 
-        if citation_key_prefix == 'arxiv':
-            citation.arxivid = citation_key
-        elif citation_key_prefix == 'doi':
-            citation.doi = citation_key
-        elif citation_key_prefix == 'manual':
-            citation.citation_text_html = \
-                self.htmlpagecollection.minilatex_to_html(citation_key)
-        else:
-            raise ValueError(f"Invalid citation key: ‘{citation_key}’.  "
-                             + "Expected arxiv:###, doi:### or manual:{###}")
-
+        citation = HtmlCitation(citation_obj=citation_obj)
         return citation
 
     def add_citation(self, citation_key_prefix, citation_key,
@@ -293,7 +278,7 @@ class HtmlPageNotes:
 
         # see if citation is already there
         for c in self.citations:
-            if c.is_same_citation_target(citation):
+            if c.citation_obj.equals(citation.citation_obj):
                 return c.no #(c.no, c.label_html)
 
         # add it if not there already
@@ -320,10 +305,14 @@ class HtmlPageNotes:
 
 
 class HtmlPageCollection:
-    def __init__(self, zoo, site_generation_environment):
+    def __init__(self,
+                 zoo,
+                 site_generation_environment):
         super().__init__()
         self.zoo = zoo
         self.site_generation_environment = site_generation_environment
+
+        self.citation_manager = None
 
         self.jinja2env = self.site_generation_environment.jinja2env
 
@@ -342,6 +331,7 @@ class HtmlPageCollection:
             lambda foot_no: markupsafe.Markup( self.format_footnote_label_html(foot_no) )
         self.jinja2env.filters['format_citation_label_html'] = \
             lambda cite_no: markupsafe.Markup( self.format_citation_label_html(cite_no) )
+
 
     def create_page(self, htmlpage):
         if htmlpage.name in self.pages:
@@ -377,6 +367,11 @@ class HtmlPageCollection:
         full_page_path = self.site_generation_environment.prefix_base_url(page_path)
         return f'{full_page_path}#ecc_{code_id}'
 
+
+    def set_citation_manager(self, citation_manager):
+        self.citation_manager = citation_manager
+
+
     def format_footnote_label_html(self, foot_no):
         return markupsafe.Markup(f'({foot_no:d})')
 
@@ -384,7 +379,6 @@ class HtmlPageCollection:
         if optional_cite_extra_html is not None:
             return markupsafe.Markup(f'[{cite_no:d}; {optional_cite_extra_html}]')
         return markupsafe.Markup(f'[{cite_no:d}]')
-
 
     def _jfilter_code_ref(self, code):
         # need str(code.code_id) since for now we brutally wrap all the entire

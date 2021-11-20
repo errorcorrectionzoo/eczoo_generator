@@ -13,6 +13,10 @@ colorlog = "^6.5.0"
 pylatexenc = "^2.10"
 libsass = "^0.21.0"
 jsonref = "^0.2"
+arxiv = "^1.4.2"
+requests = "^2.26.0"
+backoff = "^1.11.1"
+citeproc-py = {'git' = "https://github.com/phfaist/citeproc-py.git"}
 
 [tool.poetry.dev-dependencies]
 

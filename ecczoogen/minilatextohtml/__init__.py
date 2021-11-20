@@ -145,6 +145,9 @@ _lw_context.add_context_category(
     macros=[
         macrospec.MacroSpec('textbackslash', ''),
         macrospec.MacroSpec('%', ''),
+        macrospec.MacroSpec('#', ''),
+        macrospec.MacroSpec('&', ''),
+        macrospec.MacroSpec('$', ''),
         macrospec.MacroSpec(' ', ''),
         macrospec.MacroSpec('{', ''),
         macrospec.MacroSpec('}', ''),
@@ -267,8 +270,8 @@ class ToHtmlConverter:
     def macro_node_to_html(self, mn):
 
         # special symbols macros
-        if mn.macroname == '%':
-            return '%'
+        if mn.macroname in ('%', '#', '&', '$'):
+            return mn.macroname
         if mn.macroname == ' ':
             return ' '
         if mn.macroname == '{':
@@ -413,7 +416,7 @@ class ToHtmlConverter:
                     },
                     class_='cite',
                 )
-            logger.debug(f"Citation: ‘{mn.latex_verbatim()}’ → ‘{s}’")
+            #logger.debug(f"Citation: ‘{mn.latex_verbatim()}’ → ‘{s}’")
             return s
 
         if mn.macroname == 'footnote':
@@ -436,7 +439,7 @@ class ToHtmlConverter:
             
             return self.html_wrap_in_tag(
                 'a',
-                disp,
+                disphtml,
                 attrs={'href': url, 'target': '_blank'},
                 class_='href',
             )
