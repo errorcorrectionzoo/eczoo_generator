@@ -3,6 +3,7 @@ import json
 import datetime
 from urllib.parse import quote as urlquote
 import base64
+import copy
 import collections
 import warnings
 import logging
@@ -422,6 +423,17 @@ def _generate_citation_from_citeprocjsond(citeprocjsond, bib_style):
         warnings.simplefilter('ignore', citeproc.source.UnsupportedArgumentWarning)
 
         logger.debug(f"Creating citation for entry ‘{citeprocjsond['id']}’")
+
+        # patch JSON for limitations of citeproc-py (?)
+        #
+        # E.g. for authors with 'name': ... instead of 'given': and 'family':
+
+        if 'author' in citeprocjsond:
+            citeprocjsond = copy.copy(citeprocjsond)
+            for author in citeprocjsond['author']:
+                if 'name' in author and 'family' not in author and 'given' not in author:
+                    author['family'] = author['name']
+                    del author['name']
 
         bib_source = citeproc.source.json.CiteProcJSON([citeprocjsond])
         bibliography = citeproc.CitationStylesBibliography(bib_style, bib_source,
