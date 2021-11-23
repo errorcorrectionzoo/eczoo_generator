@@ -34,7 +34,17 @@ class Zoo:
             for filename in filenames:
                 fullfname = os.path.join(dirpath, filename)
                 if not fullfname.endswith('.yml'):
-                    continue
+                    if fullfname.endswith('~') or fullfname.endswith('.bak'):
+                        # okay, backup file, we can skip
+                        logger.debug(f"Skipping backup file {show_dirpath}/{filename}")
+                        continue
+                    msg = (
+                        f"All files in the code data tree must have the suffix '.yml' to "
+                        f"indicate that they are YaML files. "
+                        f"Offending file: ‘{show_dirpath}/{filename}’."
+                    )
+                    logger.error(msg)
+                    raise ValueError(msg)
 
                 logger.debug(f"Loading code file ‘{filename}’ ...")
                 with open(os.path.join(codes_dir, fullfname), 'r', encoding='utf-8') as f:
