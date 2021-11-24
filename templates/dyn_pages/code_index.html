@@ -2,7 +2,7 @@
 
 {% block contents %}
 
-<ul class="code-index">
+<ol class="code-index">
 {% for code in code_list %}
   <li>
     <span class="code-name">
@@ -12,7 +12,7 @@
     <span class="code-description">{{code.description}}</span>
   </li>
 {% endfor %}
-</ul>
+</ol>
 
 {% include 'pieces/endnotes.html' %}
 
