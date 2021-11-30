@@ -8,7 +8,7 @@ import collections
 import warnings
 import logging
 
-from .. import minilatextohtml
+import minilatextohtml
 
 import arxiv
 import requests

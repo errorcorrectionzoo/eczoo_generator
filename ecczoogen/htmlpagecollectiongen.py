@@ -9,7 +9,7 @@ import markupsafe
 
 from . import code
 
-from . import minilatextohtml
+import minilatextohtml
 
 
 # ------------------------------------------------------------------------------
