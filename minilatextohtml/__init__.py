@@ -162,9 +162,30 @@ def _make_lw_context():
         ]
     )
     lw_context.add_context_category(
+        'math-environments',
+        environments=[
+            macrospec.EnvironmentSpec('align', ''),
+            macrospec.EnvironmentSpec('align*', ''),
+            macrospec.EnvironmentSpec('gather', ''),
+            macrospec.EnvironmentSpec('gather*', ''),
+            macrospec.EnvironmentSpec('equation', ''),
+            macrospec.EnvironmentSpec('equation*', ''),
+        ]
+    )
+    lw_context.add_context_category(
         'x-refs',
         macros=[
-            macrospec.MacroSpec('ref', '{'),
+            macrospec.MacroSpec('ref', args_parser=MacroVerbatimLikeArgumentArgsParser(
+                                    arg_spec_list=(
+                                        VerbatimLikeSingleArgumentParser(delimiters=('{','}')),
+                                    )
+                                )),
+            # \label{...} for equations
+            macrospec.MacroSpec('label', args_parser=MacroVerbatimLikeArgumentArgsParser(
+                                    arg_spec_list=(
+                                        VerbatimLikeSingleArgumentParser(delimiters=('{','}')),
+                                    )
+                                )),
             macrospec.MacroSpec('cite',
                                 args_parser=MacroVerbatimLikeArgumentArgsParser(
                                     arg_spec_list=(
@@ -181,7 +202,11 @@ def _make_lw_context():
                                     )
                                 )),
             macrospec.MacroSpec('hyperref', '[{'),
-            macrospec.MacroSpec('url', '{'),
+            macrospec.MacroSpec('url', args_parser=MacroVerbatimLikeArgumentArgsParser(
+                                    arg_spec_list=(
+                                        VerbatimLikeSingleArgumentParser(delimiters=('{','}')),
+                                    )
+                                )),
         ]
     )
     return lw_context
@@ -219,6 +244,11 @@ class ToHtmlConverter:
     def __init__(self, refcontext):
         super().__init__()
         self.refcontext = refcontext
+
+        self._math_environmentnames = [
+            e.environmentname
+            for e in _lw_context.iter_environment_specs(categories=['math-environments'])
+        ]
 
     def to_html(self, s):
         lw = latexwalker.LatexWalker(s, latex_context=_lw_context, tolerant_parsing=False)
@@ -459,15 +489,87 @@ class ToHtmlConverter:
                 attrs={'href': url, 'target': '_blank'},
                 class_='href url',
             )
+
+        if mn.macroname == 'label':
+            raise ValueError(f"The x\\label macro needs to be placed "
+                             f"immediately inside the relevant environment: "
+                             f"‘{mn.verbatim_latex()}’")
         
         raise ValueError(f"Unknown macro: ‘\\{mn.macroname}’")
 
-    def environment_node_to_html(self, node):
-        logger_error(f"Environments not supported! ‘{node.environmentname}’")
-        raise ValueError(f"LaTeX environments are not supported: ‘%{node.environmentname}’")
+    def _scan_env_for_label(self, nodelist):
+        labelnode = None
+        new_nodelist = []
+        for j, n in enumerate(nodelist):
+            if n.isNodeType(latexwalker.LatexMacroNode) and n.macroname == 'label':
+                # found label
+                labelnode = n
+                cn = None
+                
+                # fix following chars node, if any
+                if j < len(nodelist)-1 \
+                   and nodelist[j+1].isNodeType(latexwalker.LatexCharsNode):
+                    # remove leading '\n' from following chars node
+                    cn = nodelist[j+1]
+                    if cn.chars[:1] == '\n':
+                        new_nodelist.append(
+                            latexwalker.LatexCharsNode(
+                                parsing_state=cn.parsing_state,
+                                chars=cn.chars[1:],
+                                pos=cn.pos+1,
+                                len=cn.len-1,
+                            )
+                        )
+                        j += 1
+
+                new_nodelist += nodelist[j+1:]
+                break
+            else:
+                new_nodelist.append(n)
+                continue
+        return (labelnode, new_nodelist)
+                
+
+    def environment_node_to_html(self, en):
+
+        if en.environmentname in self._math_environmentnames:
+
+            labelnode, new_nodelist = self._scan_env_for_label(en.nodelist)
+
+            envname_safer = en.environmentname.replace("*","-star")
+
+            label = None
+            htmlclass = f'display-math env-{envname_safer}'
+            attrs = {}
+            label_safer = None
+            if labelnode:
+                label = self.nodearg_to_html(labelnode, 0)
+                label_safer = label.replace(':', '--')
+                attrs['id'] = label_safer
+
+            eqn_contents = htmlescape(
+                "".join(n.latex_verbatim() for n in new_nodelist)
+            )
+            # remove trailing spaces, eg. left after \label{}
+            eqn_contents = eqn_contents.rstrip(' ')
+
+            wrapped = self.html_wrap_in_tag(
+                'span',
+                r"\begin{"+en.environmentname+"}"
+                + eqn_contents
+                + r"\end{"+en.environmentname+"}"
+                ,
+                class_=htmlclass,
+                attrs=attrs,
+            )
+            print(wrapped)
+            return wrapped
+
+        logger_error(f"Environment not supported: ‘{node.environmentname}’")
+        raise ValueError(f"LaTeX environment is not supported: ‘{node.environmentname}’")
 
     def specials_node_to_html(self, node):
-        raise ValueError(f"Unknown specials: ‘{mn.macroname}’")
+        raise ValueError(f"Unknown specials: ‘{node.macroname}’")
 
     def node_to_html(self, node):
 
