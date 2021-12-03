@@ -6,11 +6,12 @@ $id: "https://errorcorrectionzoo.org/schemas/ecc_space"
 #
 
 type: string
-enum: 
+enum:
   - "bits"
   - "q-ary_digits"
   - "qubits"
   - "qudits"
+  - "galois"
   - "fermions"
   - "groups"
   - "oscillators"
