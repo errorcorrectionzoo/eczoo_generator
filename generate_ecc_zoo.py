@@ -187,7 +187,7 @@ for code_id, code in zoo.all_codes().items():
     page = htmlpagecollectiongen.HtmlPage(
         name=f'c/{code_id}',
         info={
-            'page_title': htmlpgcoll.minilatex_to_html(code.name),
+            'page_title': htmlpgcoll.minilatex_to_html(code.name, f"name of ‘{code_id}’"),
             'page_title_text': code.name,
         },
         code_id_list=[ code_id ],
@@ -240,7 +240,10 @@ for domain in eczoo_domains:
         kingdom_page = htmlpagecollectiongen.HtmlPage(
             name=f'kingdom/{root_code_id}',
             info={
-                'page_title': htmlpgcoll.minilatex_to_html(kingdom['name']),
+                'page_title': htmlpgcoll.minilatex_to_html(
+                    kingdom['name'],
+                    f"name of kingdom ‘{root_code_id}’"
+                ),
                 'page_title_text': kingdom['name'],
             },
             code_id_list=sorted_code_id_list,
@@ -261,7 +264,10 @@ for domain in eczoo_domains:
     domain_page = htmlpagecollectiongen.HtmlPage(
         name=f'domain/{domain_id}',
         info={
-            'page_title': htmlpgcoll.minilatex_to_html(domain['name']),
+            'page_title': htmlpgcoll.minilatex_to_html(
+                domain['name'],
+                f"name of domain ‘{domain_id}’"
+            ),
             'page_title_text': domain['name'],
         },
         code_id_list=[ ],
@@ -321,6 +327,7 @@ os.makedirs(os.path.join(Dirs.output_dir, output_js_prefix), exist_ok=True)
 root_js_list = [
     ('misc.js', 'misc.js'),
     ('edit_code.js', 'edit_code.js'),
+    ('mathjaxinit.js', 'mathjaxinit.js'),
 ]
 
 for root_js, root_js_out in root_js_list:

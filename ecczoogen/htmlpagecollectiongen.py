@@ -22,11 +22,7 @@ class _HtmlObjectWrapper:
         self.whatobject = whatobject
 
     def _to_html_str(self, value, whatobject):
-        try:
-            return self.tohtmlconverter.to_html(value)
-        except Exception as e:
-            logger.error(f"Error converting ‘{whatobject}’ to HTML: {e}", exc_info=True)
-            raise
+        return self.tohtmlconverter.to_html(value, what=whatobject)
 
     def _wrap_obj(self, val, whatobject):
         if val is None:
@@ -103,12 +99,12 @@ class _HtmlListObjectWrapper(_HtmlObjectWrapper):
 
     # custom conversion to string
     def __str__(self):
-        return "".join(f"<p>{item}</p>" for item in self)
+        return "".join([f"<span class=\"paragraph-in-list\">{item}</span>" for item in self])
 
     # see the string wrapper object above (_HtmlStringWrapper) for info about
     # __html__
     def __html__(self):
-        return "".join(f"<p>{item}</p>" for item in self)
+        return "".join([f"<span class=\"paragraph-in-list\">{item}</span>" for item in self])
 
 
 class _HtmlDictObjectWrapper(_HtmlObjectWrapper):
@@ -169,15 +165,22 @@ class HtmlFootnote:
         self.no = no
         self.footnote_text_html = footnote_text_html
 
+    def full_footnote_text_html(self):
+        return markupsafe.Markup( self.footnote_text_html )
+
 class HtmlCitation:
     def __init__(self, *, no=None, citation_obj):
         self.no = no
         self.citation_obj = citation_obj
 
     def full_citation_text_html(self):
+        if self.citation_obj.full_citation_text_minilatex is None:
+            raise ValueError(f"Unresolved citation {self.citation_obj}!  "
+                             f"Is it a valid reference?")
         return markupsafe.Markup(
             minilatextohtml.ToHtmlConverter(None)
-            .to_html(self.citation_obj.full_citation_text_minilatex)
+            .to_html(self.citation_obj.full_citation_text_minilatex,
+                     what=f'full citation {self.citation_obj}')
         )
 
 
@@ -197,13 +200,24 @@ class RefContextForHtmlConverter(minilatextohtml.HtmlRefContext):
     def _get_ref_code(self, code_id):
         code = self.htmlpagecollection.zoo.get_code(code_id)
         code_href = self.htmlpagecollection.get_code_href(code_id)
-        code_name_html = minilatextohtml.ToHtmlConverter(self).to_html(code.name)
+        code_name_html = minilatextohtml.ToHtmlConverter(self).to_html(
+            code.name,
+            what=f"name of ‘{code_id}’"
+        )
         return (code_name_html, code_href)
         
     def get_ref(self, ref_key_prefix, ref_key):
+        if ref_key_prefix == 'eq':
+            raise ValueError(
+                f"Equation references should use \\eqref{{eq:XXX}}, not \\ref{{eq:XXX}}: "
+                f"‘{ref_key}’"
+            )
         if ref_key_prefix != 'code':
-            raise ValueError(f"Invalid ref: ‘{refkey}’.  Such references must be "
-                             f"to a code; use a ref label of the form ‘code:<code-id>’.")
+            raise ValueError(
+                f"Invalid ref: ‘{ref_key}’.  Such references must be "
+                f"to a code; use a ref label of the form ‘code:<code-id>’.  "
+                f"For equation references, use \\eqref{{eq:XXX}} instead of \\ref."
+            )
 
         return self._get_ref_code(ref_key)
         
@@ -224,7 +238,7 @@ class RefContextForHtmlConverter(minilatextohtml.HtmlRefContext):
 
         footnote = HtmlFootnote(footnote_text_html=footnote_text_html)
         foot_no = self.html_page_notes.add_footnote(footnote)
-        foot_label_html = self.htmlpagecollection.format_footnote_label_html(self.foot_no)
+        foot_label_html = self.htmlpagecollection.format_footnote_label_html(foot_no)
         return (foot_label_html, f'#fn-{foot_no}')
 
     def _get_citation_obj(self, citation_key_prefix, citation_key):
@@ -255,9 +269,9 @@ class RefContextForHtmlConverter(minilatextohtml.HtmlRefContext):
 
 class HtmlPageNotes:
     def __init__(self, htmlpagecollection):
-        self.foot_no = 0 # last attributed footnote number
+        self.foot_no = -1 # last attributed footnote number
         self.footnotes = []
-        self.cite_no = 0 # last attributed citation number
+        self.cite_no = -1 # last attributed citation number
         self.citations = []
 
         self.htmlpagecollection = htmlpagecollection
@@ -272,7 +286,7 @@ class HtmlPageNotes:
         #footnote.label_html = foot_label_html
 
         self.footnotes.append( footnote )
-        return (foot_no, foot_label_html)
+        return foot_no #, foot_label_html)
 
     def add_citation(self, citation):
 
@@ -297,6 +311,19 @@ class HtmlPageNotes:
 
 
 
+
+
+# ------------------------------------------------------------------------------
+
+
+_alpha = 'abcdefghijklmnopqrstuvwxyz'
+
+def alphacounter(n):
+    # a, b, c, d, ..., y, z, aa, bb, cc, ..., zz, aaa, ...
+    w = 1 + (n // 26)
+    m = n % 26
+    return _alpha[m] * w
+    
 
 
 # ------------------------------------------------------------------------------
@@ -373,12 +400,16 @@ class HtmlPageCollection:
 
 
     def format_footnote_label_html(self, foot_no):
-        return markupsafe.Markup(f'({foot_no:d})')
+        fn_symb = alphacounter(foot_no)
+        return fn_symb
 
     def format_citation_label_html(self, cite_no, optional_cite_extra_html=None):
+
+        cite_symb = f'{1+cite_no:d}'
+
         if optional_cite_extra_html is not None:
-            return markupsafe.Markup(f'[{cite_no:d}; {optional_cite_extra_html}]')
-        return markupsafe.Markup(f'[{cite_no:d}]')
+            return markupsafe.Markup(f'[{cite_symb}; {optional_cite_extra_html}]')
+        return markupsafe.Markup(f'[{cite_symb}]')
 
     def _jfilter_code_ref(self, code):
         # need str(code.code_id) since for now we brutally wrap all the entire
@@ -402,10 +433,10 @@ class HtmlPageCollection:
         tohtmlconverter = minilatextohtml.ToHtmlConverter(tohtml_refcontext)
         return _HtmlObjectWrapper(obj, tohtmlconverter, repr(obj))
 
-    def minilatex_to_html(self, s, html_page_notes=None):
+    def minilatex_to_html(self, s, html_page_notes=None, what='(unknown)'):
         tohtml_refcontext = RefContextForHtmlConverter(self, html_page_notes)
         tohtmlconverter = minilatextohtml.ToHtmlConverter(tohtml_refcontext)
-        return markupsafe.Markup( tohtmlconverter.to_html(s) )
+        return markupsafe.Markup( tohtmlconverter.to_html(s, what=what) )
 
     def generate(self, *, output_dir, additional_context={}):
 

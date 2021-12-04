@@ -12,7 +12,7 @@ Expected context variables:
     <dl id="footnotes">
 {% for footnote in page_footnotes.footnotes %}
       <dt id="fn-{{footnote.no}}">{{footnote.no|format_footnote_label_html}}</dt>
-      <dd>{{footnote.footnote_text_html}}</dd>
+      <dd>{{footnote.full_footnote_text_html()}}</dd>
 {% endfor %}    
     </dl>
 {% endif %}

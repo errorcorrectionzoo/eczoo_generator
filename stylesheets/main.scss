@@ -197,8 +197,12 @@ dd {
 }
 
 
+//$ecc-dl-left-column-width: 120px;
+$ecc-dl-left-column-width: 80px;
+
 .ecc-code > dt {
-    min-width: 120px;
+    //min-width: 120px;
+    min-width: $ecc-dl-left-column-width;
 }
 
 .ecc-code > dt,
@@ -276,35 +280,8 @@ dd.code-name {
     font-weight: bold;
 }
 
-.emph, .textit {
-    font-style: italic;
-}
-.textbf {
-    font-weight: bold;
-}
-
-.cite {
-    font-size: $endnote-superscript-font-size;
-    // "vertical-align: super" shifts the entire baseline downwards, not nice
-    vertical-align: top;
-}
-.footnote {
-    font-size: $endnote-superscript-font-size;
-    vertical-align: top;
-}
-
-// .features-list {
-//     > dt {
-//         color: rgba(0,0,0,0.8);
-//         font-size: $small-font-size;
-//     }
-//     > dd {
-//         margin-left: .5em;
-//     }
-// }
-
 dt.display-code-id {
-    max-width: 120px;
+    max-width: $ecc-dl-left-column-width;
 }
 .display-code-id {
     margin-top: 1.5rem;
@@ -313,6 +290,137 @@ dt.display-code-id {
     color: $text-dim-color;
 
 }
+
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// mini-latex formatting
+//
+////////////////////////////////////////////////////////////////////////////////
+
+
+.emph, .textit {
+    font-style: italic;
+}
+.textbf {
+    font-weight: bold;
+}
+
+
+@mixin fixbaseline-superscript-text {
+    font-size: $endnote-superscript-font-size;
+
+    // "vertical-align: super" shifts the entire baseline downwards, not nice
+    // vertical-align: top;
+
+    display: inline-block;
+    
+    // shift upwards to make superscript, without shifting the baseline
+    // downwards.
+    vertical-align: 0.3em;
+    margin-top: -0.3em;
+}
+
+.cite {
+    @include fixbaseline-superscript-text;
+}
+.footnote {
+    @include fixbaseline-superscript-text;
+}
+
+
+.paragraph-in-list {
+    display: block;
+    margin-top: $parskip-half-length;
+    margin-bottom: $parskip-half-length;
+    margin-left: 1rem;
+}
+.paragraph-in-list:first-child {
+    margin-top: 0px;
+}
+.paragraph-in-list:last-child {
+    margin-bottom: 0px;
+}
+
+.paragraph-in-list::before {
+    content: '\25b9';
+    font-size: 0.65rem;
+    float: left;
+    margin-left: -0.8rem;
+    color: $text-dim-color;
+}
+
+.paragraph-in-list:only-child {
+    margin-left: 0px;
+}
+.paragraph-in-list:only-child::before {
+    display: none;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// endnotes: citations and footnotes
+//
+////////////////////////////////////////////////////////////////////////////////
+
+#endnotes {
+    // border: dotted 1px gray;
+    // padding: 3px;
+
+    @include card-item;
+
+    opacity: 0.85;
+
+    font-size: $small-font-size;
+
+    margin-bottom: 20px;
+
+    dl {
+        margin-top: 0px;
+        margin-bottom: 0px;
+    }
+
+    dt {
+        font-style: normal;
+        min-width: 2.5em;
+        text-align: right;
+    }
+
+    dd {
+        margin-left: 5px;
+        margin-bottom: 0.4em;
+    }
+
+    dt, dd {
+        transition: background-color 0.5s;
+    }
+
+    // superscript text for footnotes, not for citations
+    #footnotes {
+        dt {
+            @include fixbaseline-superscript-text;
+        }
+    }
+
+}
+
+$visual-highlight-color: rgba(255,255,0,1.0);
+
+@mixin visual-highlight {
+    background-color: $visual-highlight-color;
+    box-shadow: $visual-highlight-color 0px 0px 10px;
+    //transition: background-color 0s;
+}
+
+.visual-highlight {
+    @include visual-highlight;
+}
+.visual-highlight + dd {
+    @include visual-highlight;
+}
+
+
+
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -357,61 +465,6 @@ dt.display-code-id {
     .code-description {
     }
 }
-
-////////////////////////////////////////////////////////////////////////////////
-//
-// endnotes: citations and footnotes
-//
-////////////////////////////////////////////////////////////////////////////////
-
-#endnotes {
-    // border: dotted 1px gray;
-    // padding: 3px;
-
-    @include card-item;
-
-    opacity: 0.85;
-
-    font-size: $small-font-size;
-
-    margin-bottom: 20px;
-
-    dl {
-        margin-top: 0px;
-        margin-bottom: 0px;
-    }
-
-    dt {
-        font-style: normal;
-        min-width: 2.5em;
-        text-align: right;
-    }
-
-    dd {
-        margin-left: 5px;
-        margin-bottom: 0.4em;
-    }
-
-    dt, dd {
-        transition: background-color 0.5s;
-    }
-}
-
-$visual-highlight-color: rgba(255,255,0,1.0);
-
-@mixin visual-highlight {
-    background-color: $visual-highlight-color;
-    box-shadow: $visual-highlight-color 0px 0px 10px;
-    //transition: background-color 0s;
-}
-
-.visual-highlight {
-    @include visual-highlight;
-}
-.visual-highlight + dd {
-    @include visual-highlight;
-}
-
 
 
 ////////////////////////////////////////////////////////////////////////////////

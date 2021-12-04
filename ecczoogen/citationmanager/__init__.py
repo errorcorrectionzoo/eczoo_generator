@@ -72,6 +72,13 @@ class Citation:
         
         return True
 
+    def __repr__(self):
+        return (
+            f'Citation(arxiv={self.arxiv}, doi={self.doi}, '
+            f'manual_citation_minilatex={self.manual_citation_minilatex}, '
+            f'full_citation_text_minilatex={self.full_citation_text_minilatex})'
+        )
+
 
 def _get_single_kwarg(kwargs):
     # remove None values

@@ -2,6 +2,7 @@
 
 # note that this sub-module isn't markupsafe-aware, it only treats strings.
 
+import re
 import html
 
 def htmlescape(x):
@@ -180,6 +181,11 @@ def _make_lw_context():
                                         VerbatimLikeSingleArgumentParser(delimiters=('{','}')),
                                     )
                                 )),
+            macrospec.MacroSpec('eqref', args_parser=MacroVerbatimLikeArgumentArgsParser(
+                                    arg_spec_list=(
+                                        VerbatimLikeSingleArgumentParser(delimiters=('{','}')),
+                                    )
+                                )),
             # \label{...} for equations
             macrospec.MacroSpec('label', args_parser=MacroVerbatimLikeArgumentArgsParser(
                                     arg_spec_list=(
@@ -239,6 +245,10 @@ class HtmlRefContext:
         raise RuntimeError("Subclass must reimplement add_citation()")
 
 
+class _Paragraphs:
+    def __init__(self, paragraphs):
+        self.paragraphs = paragraphs
+
 
 class ToHtmlConverter:
     def __init__(self, refcontext):
@@ -250,17 +260,76 @@ class ToHtmlConverter:
             for e in _lw_context.iter_environment_specs(categories=['math-environments'])
         ]
 
-    def to_html(self, s):
-        lw = latexwalker.LatexWalker(s, latex_context=_lw_context, tolerant_parsing=False)
-        nodelist, _, _ = lw.get_latex_nodes()
-        html = self.nodelist_to_html(nodelist)
-        #logger_debug(f"HTML: ‘{s}’ → ‘{html}’")
-        return html
+    def to_html(self, s, what='(unknown)'):
+        """
+        Convert the given latex-like string `s` to HTML.  If `what` is non-None, it
+        is used in error messages.
+        """
+        if s is None:
+            logger.warning(f"Encountered None in to_html() when parsing ‘{what}’")
+            raise ValueError(f"Please don't use None in to_html().  In parsing ‘{what}’")
+        try:
+            lw = latexwalker.LatexWalker(s, latex_context=_lw_context, tolerant_parsing=False)
+            nodelist, _, _ = lw.get_latex_nodes()
+            html = self.nodelist_to_html(nodelist)
+            #logger_debug(f"HTML: ‘{s}’ → ‘{html}’")
+            return html
+        except Exception as e:
+            logger.error(f"Error parsing latex-like minilanguage ‘{what}’: {e}\n"
+                         f"Given text was:\n‘{s}’\n\n")
+            raise
 
     # --
 
     def nodelist_to_html(self, nodelist):
-        return "".join( self.node_to_html(node) for node in nodelist )
+        # There are two cases.  Either we have paragraph breaks --> we need to
+        # wrap each paragraph in <p>...</p>, or we don't have any paragraph
+        # breaks --> no wrapping in <p>.
+
+        #logger.debug(f"nodelist_to_html: {nodelist=}")
+
+        accum = {
+            'paragraphs': [],
+            'new_paragraph': ''
+        }
+
+        def _accum_part(x):
+            accum['new_paragraph'] += x
+
+        def _accum_flush():
+            new_para = accum['new_paragraph'].strip()
+            if new_para:
+                accum['paragraphs'].append(new_para)
+            accum['new_paragraph'] = ''
+ 
+        for node in nodelist:
+            htmlpart = self.node_to_html(node)
+            if isinstance(htmlpart, _Paragraphs):
+                first = True
+                for para in htmlpart.paragraphs:
+                    if first:
+                        first = False
+                    else:
+                        _accum_flush()
+                    _accum_part(para)
+            else:
+                _accum_part(htmlpart)
+        _accum_flush()
+
+        paragraphs = accum['paragraphs']
+
+        #logger.debug(f"nodelist_to_html: {nodelist=} -->\n {paragraphs=}")
+
+        # if we only have a single paragraph, i.e., without any paragraph
+        # break(s), then return the HTML content as is
+        if len(paragraphs) == 1:
+            return paragraphs[0]
+
+        # otherwise, wrap each paragraph in <p>...</p>.
+        full_html = "\n".join(['<p>'+p+'</p>' for p in paragraphs])
+        #logger.debug(f" --> {full_html=}")
+        return full_html
+
     
     def get_nodearglist(self, node, arg_i):
         if node.nodeargd is None:
@@ -278,7 +347,9 @@ class ToHtmlConverter:
         return [argnode]
 
     def nodearg_to_html(self, node, arg_i):
-        return self.nodelist_to_html( self.get_nodearglist(node, arg_i) )
+        nodelist = self.get_nodearglist(node, arg_i)
+        #logger.debug(f"nodearg_to_html: {nodelist=}")
+        return self.nodelist_to_html( nodelist )
 
 
     def html_wrap_in_tag(self, tagname, htmlcontent, *, attrs=None, class_=None):
@@ -328,7 +399,7 @@ class ToHtmlConverter:
         # x-reference macros
         if mn.macroname == 'ref':
             tgt = self.get_nodearglist(mn, 0)
-            if len(tgt) != 1:
+            if len(tgt) != 1 or not tgt[0].isNodeType(latexwalker.LatexCharsNode):
                 raise ValueError("Invalid \\ref invocation: expected single braced argument")
             reftarget = tgt[0].chars
             (target_html, target_href) = self._get_ref(reftarget)
@@ -338,6 +409,18 @@ class ToHtmlConverter:
                 target_html,
                 attrs={'href': htmlescape(target_href)},
                 class_='ref',
+            )
+        if mn.macroname == 'eqref':
+            # this one is an exception, as it is directly picked up by MathJax.
+            tgt = self.get_nodearglist(mn, 0)
+            #logger.debug(f"Got eqref; {tgt=}")
+            if len(tgt) != 1 or not tgt[0].isNodeType(latexwalker.LatexCharsNode):
+                raise ValueError("Invalid \\eqref invocation: expected single braced argument")
+            return self.html_wrap_in_tag(
+                'span',
+                r'\eqref{' + htmlescape(tgt[0].chars) + r'}'
+                ,
+                class_='inline-math eqref',
             )
 
         if mn.macroname == 'hyperref':
@@ -491,43 +574,46 @@ class ToHtmlConverter:
             )
 
         if mn.macroname == 'label':
-            raise ValueError(f"The x\\label macro needs to be placed "
-                             f"immediately inside the relevant environment: "
+            raise ValueError(f"The \\label macro needs to be placed "
+                             f"at the top level inside the relevant environment: "
                              f"‘{mn.verbatim_latex()}’")
         
         raise ValueError(f"Unknown macro: ‘\\{mn.macroname}’")
 
     def _scan_env_for_label(self, nodelist):
         labelnode = None
-        new_nodelist = []
+        #new_nodelist = []
         for j, n in enumerate(nodelist):
             if n.isNodeType(latexwalker.LatexMacroNode) and n.macroname == 'label':
                 # found label
                 labelnode = n
-                cn = None
-                
-                # fix following chars node, if any
-                if j < len(nodelist)-1 \
-                   and nodelist[j+1].isNodeType(latexwalker.LatexCharsNode):
-                    # remove leading '\n' from following chars node
-                    cn = nodelist[j+1]
-                    if cn.chars[:1] == '\n':
-                        new_nodelist.append(
-                            latexwalker.LatexCharsNode(
-                                parsing_state=cn.parsing_state,
-                                chars=cn.chars[1:],
-                                pos=cn.pos+1,
-                                len=cn.len-1,
-                            )
-                        )
-                        j += 1
 
-                new_nodelist += nodelist[j+1:]
+                # keep the label node there!!
                 break
-            else:
-                new_nodelist.append(n)
-                continue
-        return (labelnode, new_nodelist)
+            #     # fix following chars node, if any
+            #     cn = None
+            #     if j < len(nodelist)-1 \
+            #        and nodelist[j+1].isNodeType(latexwalker.LatexCharsNode):
+            #         # remove leading '\n' from following chars node
+            #         cn = nodelist[j+1]
+            #         if cn.chars[:1] == '\n':
+            #             new_nodelist.append(
+            #                 latexwalker.LatexCharsNode(
+            #                     parsing_state=cn.parsing_state,
+            #                     chars=cn.chars[1:],
+            #                     pos=cn.pos+1,
+            #                     len=cn.len-1,
+            #                 )
+            #             )
+            #             j += 1
+
+            #     new_nodelist += nodelist[j+1:]
+            #     break
+            # else:
+            #     new_nodelist.append(n)
+            #     continue
+
+        return (labelnode, nodelist)
                 
 
     def environment_node_to_html(self, en):
@@ -562,7 +648,7 @@ class ToHtmlConverter:
                 class_=htmlclass,
                 attrs=attrs,
             )
-            print(wrapped)
+            #print(wrapped)
             return wrapped
 
         logger_error(f"Environment not supported: ‘{node.environmentname}’")
@@ -582,6 +668,14 @@ class ToHtmlConverter:
             return htmlescape(s)
 
         if node.isNodeType(latexwalker.LatexCharsNode):
+            # special case for chars node that contain '\n\n' -- these are
+            # paragraph breaks (note: Future versions of latexwalker might be
+            # able to report paragraph breaks more smartly)
+            if '\n\n' in node.chars:
+                return _Paragraphs([
+                    htmlescape(x)
+                    for x in re.split(r'[\n]{2,}', node.chars)
+                ])
             return htmlescape(node.chars)
 
         if node.isNodeType(latexwalker.LatexCommentNode):
