@@ -140,15 +140,17 @@ class PagePrettyCodeGraph:
         kingdoms_positions = {}
         
         kingdom_sep = 100
+        domains_extra_sep = 300
+
         max_kingdoms_per_domain = max([ len(domain['kingdoms'])
                                         for domain in self.eczoo_domains ])
-        logger.debug(f"{max_kingdoms_per_domain=}")
+        #logger.debug(f"{max_kingdoms_per_domain=}")
 
         # add the domain nodes
         num_domains = len(self.eczoo_domains)
         for j_domain, domain in enumerate(self.eczoo_domains):
             dom_pos = {
-                'x': j_domain * (1+max_kingdoms_per_domain) * kingdom_sep,
+                'x': j_domain * (domains_extra_sep + max_kingdoms_per_domain * kingdom_sep),
                 'y': -100,
             }
             n = {
