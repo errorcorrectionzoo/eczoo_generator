@@ -150,7 +150,7 @@ class PagePrettyCodeGraph:
         num_domains = len(self.eczoo_domains)
         for j_domain, domain in enumerate(self.eczoo_domains):
             dom_pos = {
-                'x': j_domain * (domains_extra_sep + max_kingdoms_per_domain * kingdom_sep),
+                'x': (j_domain - num_domains/2) * (domains_extra_sep + max_kingdoms_per_domain * kingdom_sep),
                 'y': -100,
             }
             n = {
