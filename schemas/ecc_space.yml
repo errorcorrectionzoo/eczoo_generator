@@ -16,7 +16,6 @@ enum:
   - "groups"
   - "oscillators"
   - "rigid_bodies"
-  - "galois"
 
 
 
