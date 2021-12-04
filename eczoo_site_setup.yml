@@ -53,6 +53,10 @@ code_tree:
           name: 'Qu\emph{d}it Kingdom'
         - code_id: oscillators
           name: 'Oscillator Kingdom'
+        - code_id: fermions
+          name: 'Fermionic Kingdom'
         - code_id: group_quantum
           name: 'Group Kingdom'
+        - code_id: galois_into_galois
+          name: 'Galois Field Kingdom'
     

@@ -4,6 +4,37 @@ import json
 import random
 
 
+import logging
+logger = logging.getLogger(__name__)
+
+
+def is_abstract_code(code):
+    if not code.physical: # or not code.logical: # e.g. 'bosonic code' kingdom
+        return True
+    return False
+
+def node_id_code(code_id):
+    return 'c_' + code_id
+
+
+# explore parent relationship until we find a kingdom
+def _find_kingdom_parent(code, kingdom_ids):
+    parents_this_level = [ code ]
+    while parents_this_level:
+        m = next( (cobj
+                   for cobj in parents_this_level
+                   if cobj.code_id in kingdom_ids),
+                  None )
+        if m:
+            return m
+        # go one level up
+        parents_this_level = [
+            prel.code
+            for cobj in parents_this_level
+            for prel in cobj.relations.parents
+        ]
+    return None
+
 
 class PagePrettyCodeGraph:
     def __init__(self, *,
@@ -106,9 +137,20 @@ class PagePrettyCodeGraph:
 
         domain_nodes = []
 
+        kingdoms_positions = {}
+        
+        kingdom_sep = 100
+        max_kingdoms_per_domain = max([ len(domain['kingdoms'])
+                                        for domain in self.eczoo_domains ])
+        logger.debug(f"{max_kingdoms_per_domain=}")
+
         # add the domain nodes
         num_domains = len(self.eczoo_domains)
         for j_domain, domain in enumerate(self.eczoo_domains):
+            dom_pos = {
+                'x': j_domain * (1+max_kingdoms_per_domain) * kingdom_sep,
+                'y': -100,
+            }
             n = {
                 'data': {
                     'id': f"domain_{domain['domain_id']}",
@@ -119,17 +161,29 @@ class PagePrettyCodeGraph:
                     '_page_href':
                         self.site_gen_env.prefix_base_url(domain['htmlpage'].path()),
                 },
-                'position': {
-                    'x': 150 + j_domain * 300,
-                    'y': -500,
-                },
+                'position': dom_pos,
                 #'locked': True, # still let user move these nodes
             }
             domain_nodes.append(n)
             nodes.append(n)
-                        
+            
+            domain_id = domain['domain_id']
+
+            kingdoms_positions[domain_id] = {}
+
+            num_kingdoms = len(domain['kingdoms'])
+            for j_kingdom, kingdom in enumerate(domain['kingdoms']):
+                kingdompos = {
+                    'x': dom_pos['x'] + kingdom_sep * (j_kingdom - num_kingdoms/2),
+                    'y': 0
+                }
+                kingdoms_positions[kingdom['code_id']] = kingdompos
+
 
         code_nodes = []
+
+        parent_relationships = []
+
 
         for code_id, code in all_codes_dict.items():
 
@@ -149,25 +203,54 @@ class PagePrettyCodeGraph:
                 is_kingdom = True
                 (this_kingdoms_domain, kingdom) = \
                     domain_and_kingdom_by_kingdom_code_id[code_id]
+
+                kingdom_parent_code = None
+                kingdom_parent_code_id = None
+                parent_domain = None
+                parent_kingdom = None
+
+                pos = kingdoms_positions[code_id]
+
             else:
                 is_kingdom = False
                 this_kingdoms_domain = None
                 kingdom = None
 
+                kingdom_parent_code = _find_kingdom_parent(
+                    code,
+                    domain_and_kingdom_by_kingdom_code_id.keys()
+                )
+                if kingdom_parent_code is not None:
+                    kingdom_parent_code_id = kingdom_parent_code.code_id
+
+                    parent_domain, parent_kingdom = domain_and_kingdom_by_kingdom_code_id[
+                        kingdom_parent_code.code_id
+                    ]
+
+                    pos = {
+                        'x': kingdoms_positions[kingdom_parent_code_id]['x'],
+                        'y': 200*code.family_generation_level,
+                    }
+                else:
+                    pos = {
+                        'x': -400,
+                        'y': 500,
+                    }
+
+
             n = {
                 'data': {
-                    'id': f'c_{code_id}',
+                    'id': node_id_code(code_id),
                     'label': code.name,
 
+                    '_is_code': 1,
+                    '_is_abstract_code': \
+                        1 if is_abstract_code(code) else 0,
                     '_description': short_description,
                     '_code_href': self.htmlpagescollection.get_code_href(code_id),
                     '_family_generation_level': code.family_generation_level,
                 },
-                #'position': dict(position),
-                # 'position': {
-                #     'x': random.randint(250,750),
-                #     'y': random.randint(200,400),
-                # },
+                'position': pos,
             }
             if is_kingdom:
                 n['data'].update({
@@ -188,10 +271,10 @@ class PagePrettyCodeGraph:
                     {
                         'data': {
                             'id': kingdomtodomain_edge_id,
-                            'label': f'domain',
+                            #'label': f'domain',
                             '_rel_type': 'domain',
 
-                            'source': f"c_{code_id}",
+                            'source': node_id_code(code_id),
                             'target': f"domain_{the_domain_id}",
                         }
                     }
@@ -204,15 +287,22 @@ class PagePrettyCodeGraph:
                     {
                         'data': {
                             'id': edge_id,
-                            'label': f'parent',
+                            #'label': f'parent',
                             '_rel_type': 'parent',
 
-                            'source': f'c_{code_id}',
-                            'target': f'c_{parent.code.code_id}',
+                            'source': node_id_code(code_id),
+                            'target': node_id_code(parent.code.code_id),
                         }
                     }
                 )
                 parent_rel_counter += 1
+
+                parent_relationships.append({
+                    'edge_id': edge_id,
+                    'source_code_obj': code,
+                    'target_code_obj': parent.code,
+                })
+
 
             for cousin in code.relations.cousins:
                 edge_id = f'cousin_{code_id}_{cousin.code.code_id}__{cousin_rel_counter}'
@@ -220,11 +310,11 @@ class PagePrettyCodeGraph:
                     {
                         'data': {
                             'id': edge_id,
-                            'label': f'cousin',
+                            #'label': f'cousin',
                             '_rel_type': 'cousin',
 
-                            'source': f'c_{code_id}',
-                            'target': f'c_{cousin.code.code_id}',
+                            'source': node_id_code(code_id),
+                            'target': node_id_code(cousin.code.code_id),
                         }
                     }
                 )
@@ -232,7 +322,7 @@ class PagePrettyCodeGraph:
 
         # fixed_node_constraint = [
         #     {
-        #         'nodeId': f'c_{root_code_id}',
+        #         'nodeId': node_id_code(root_code_id),
         #         'position': {
         #             'x': j*200,
         #             'y': (-1)**(j%2) * 100,
@@ -252,22 +342,44 @@ class PagePrettyCodeGraph:
         alignment_constraint = {
             # 'horizontal': [
             #     [
-            #         f'c_{root_code_id}'
-            #         for root_code_id in self.zoo.root_codes().keys()
+            #         node_id_code(code.code_id)
+            #         for code in codelist
             #     ]
+            #     for codelist in (horizontal alignment constraints.......)
             # ]
         }
 
         first_domain_node_id = domain_nodes[0]['data']['id']
 
-        relative_placement_constraint = [
-            {
-                'top': first_domain_node_id,
-                'bottom': n['data']['id'],
-                'gap': 100
-            }
-            for n in code_nodes
-        ]
+        relative_placement_constraint = []
+
+        for n in code_nodes:
+            # all concrete codes must appear below domains (including kingdoms)
+            if not n['data']['_is_abstract_code']:
+                relative_placement_constraint.append({
+                    'top': first_domain_node_id,
+                    'bottom': n['data']['id'],
+                    'gap': 200
+                })
+            # but all abstract codes must appear ABOVE domains
+            else:
+                relative_placement_constraint.append({
+                    'bottom': first_domain_node_id,
+                    'top': n['data']['id'],
+                    'gap': 200
+                })
+
+
+        # all parent relations should point upwards (even for abstract code parents)
+        for prel in parent_relationships:
+            #if not is_abstract_code(prel['target_code_obj']):
+            relative_placement_constraint.append(
+                {
+                    'top': node_id_code(prel['target_code_obj'].code_id),
+                    'bottom': node_id_code(prel['source_code_obj'].code_id),
+                    'gap': 100,
+                }
+            )
 
         data = {
             'elements': {
@@ -280,7 +392,7 @@ class PagePrettyCodeGraph:
         }
 
         with open(output_data_js_fname, 'w', encoding='utf-8') as fw:
-            fw.write("pretty_code_graph_data = ")
+            fw.write("GENERATED_pretty_code_graph_data = ")
             json.dump(data, fw, indent=4)
             fw.write(";")
 
