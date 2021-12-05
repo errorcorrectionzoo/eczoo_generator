@@ -80,6 +80,8 @@ class Dirs:
     stylesheets_dir = os.path.join(_root_dir, 'stylesheets')
     javascripts_dir = os.path.join(_root_dir, 'javascripts')
 
+    jscomponents_dir = os.path.join(_root_dir, 'jscomponents')
+
     static_assets_dir = os.path.join(_root_dir, 'static_assets')
     static_favicon_files_dir = os.path.join(_root_dir, 'static_favicon_files')
 
@@ -346,6 +348,21 @@ for root_js, root_js_out in root_js_list:
     )
 
 
+logger.info("Inculding javascripts from jscomponents ...")
+
+jscomponents_dist_dir = os.path.join(Dirs.jscomponents_dir, 'dist')
+for jsname in os.listdir(jscomponents_dist_dir):
+    if not jsname.endswith('.js'):
+        logger.debug(f"Skipping non-JS file ‘{jsname}’")
+        continue
+
+    site_gen_env.copy_file(
+        source_dir=jscomponents_dist_dir,
+        fn_source=jsname,
+        fn_target=os.path.join(output_js_prefix, jsname)
+    )
+
+
 
 ################################################################################
 
@@ -543,14 +560,15 @@ htmlpgcoll.generate(
 
 logger.info("Generating JSON code dump ...")
 
+os.makedirs( os.path.join(Dirs.output_dir, 'dat'), exist_ok=True )
+
 all_codes_info = { code_id: codeobj.source_info
                    for code_id, codeobj in zoo.all_codes().items() }
 with open(os.path.join(Dirs.output_dir, 'dat', 'all_codes_info_dump.json'), 'w',
           encoding='utf-8') as fw:
     json.dump(all_codes_info, fw)
 
-
-with open(os.path.join(dirs.output_dir, 'dat', 'search_index_store.json'), 'w',
+with open(os.path.join(Dirs.output_dir, 'dat', 'search_index_store.json'), 'w',
           encoding='utf-8') as fw:
     json.dump(search_index_generator.get_store_dump(), fw)
 

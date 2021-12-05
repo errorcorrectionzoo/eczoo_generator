@@ -1,7 +1,10 @@
-import { EczooSearchFunction } from './searchfunction';
+import { EczooSearchWidget } from './searchwidget';
 
-export { EczooSearchFunction };
+export { EczooSearchWidget };
 
 export default {
-    EczooSearchFunction: EczooSearchFunction
+    EczooSearchWidget: EczooSearchWidget
 };
+
+
+

@@ -1,0 +1,16 @@
+
+@mixin visual-highlight {
+    background-color: $visual-highlight-color;
+    box-shadow: $visual-highlight-color 0px 0px 10px;
+    //transition: background-color 0s;
+}
+
+.visual-highlight {
+    @include visual-highlight;
+}
+.visual-highlight + dd {
+    @include visual-highlight;
+}
+
+
+

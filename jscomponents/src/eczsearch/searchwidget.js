@@ -1,7 +1,11 @@
 import lunr from 'lunr';
 
 
-const context_length = 40; // chars
+const default_context_length = 50; // chars
+
+const max_num_results_for_mathjax = 50;
+
+
 
 function _escapeHTML(str)
 {
@@ -10,18 +14,24 @@ function _escapeHTML(str)
     return p.innerHTML;
 }
 
-export class EczooSearchFunction
+
+
+export class EczooSearchWidget
 {
     constructor(a)
     {
-        this.search_box_obj = a.search_box_obj;
-        this.search_results_container = a.search_results_container;
+        this.search_widget_container = a.search_widget_container;
+
+        this.fields = a.fields;
 
         this.ref_field = a.ref_field;
         this.title_field = a.title_field;
-        this.fields = a.fields;
+        this.href_field = a.href_field;
 
-        this.context_length = a.context_length || context_length;
+        this.context_length = a.context_length;
+        if (typeof this.context_length == 'undefined') {
+            this.context_length = default_context_length;
+        }
 
         this.idx = a.idx;
 
@@ -51,6 +61,20 @@ export class EczooSearchFunction
             throw Error("EczooSearchFunction: no store specified or none found");
         }
 
+        // maybe we might need to auto-detect the list of fields
+        if (typeof this.fields == 'undefined' || this.fields.length == 0) {
+            var fields = [];
+            Object.keys(this.store).forEach( (store_key) => {
+                var store_obj = this.store[store_key];
+                Object.keys(store_obj).forEach( (field_key) => {
+                    if ( fields.indexOf(field_key) == -1 ) {
+                        fields.push(field_key);
+                    }
+                });
+            });
+            this.fields = fields;
+        }
+
         // this.idx
         if (typeof this.idx == 'undefined') {
             var _this = this;
@@ -71,9 +95,8 @@ export class EczooSearchFunction
             this.idx = lunr(buildidx);
         }
 
-        console.log('store =', this.store);
-
-        console.log('index is = ', this.idx);
+        //console.log('store =', this.store);
+        //console.log('index is = ', this.idx);
 
         this._do_install();
     }
@@ -81,17 +104,39 @@ export class EczooSearchFunction
     // private:
     _do_install()
     {
-        this.search_box_obj.placeholder = "search";
-        
-        this.search_results_container.innerHTML =
-            "<span style=\"font-style:italic\">(Search results will appear here.)</span>";
+        console.log("Installing the search widget in the page.");
 
-        this.search_box_obj.addEventListener('change', (event) => this._do_search(event));
+        // clear any existing content in the target app container
+        this.search_widget_container.innerHTML = '';
+
+        const inputbox = document.createElement('input');
+        inputbox.setAttribute('type', "text");
+        inputbox.classList.add("search-input");
+        inputbox.value = '';
+        inputbox.placeholder = 'type & hit RETURN to search';
+        this.search_widget_container.appendChild(inputbox);
+
+        this.search_input = inputbox;
+
+        const divresults = document.createElement('div');
+        divresults.classList.add('search-results');
+        this.search_widget_container.appendChild(divresults);
+
+        this.search_results_container = divresults;
+
+        this.search_input.addEventListener('change', (event) => this._do_search(event));
     }
 
     _do_search(event)
     {
+        this.search_results_container.innerHTML = '';
+
         const value = event.target.value;
+
+        if (!value || value.trim().length == 0) {
+            this._display_search_no_query_string();
+            return;
+        }
 
         console.log("Searching! value =", value);
 
@@ -111,23 +156,28 @@ export class EczooSearchFunction
 
         console.log('results =', results);
 
-        this.search_results_container.innerHTML = '';
-        results.forEach(
-            (r) => this._add_display_result(r, this.search_results_container)
-        );
+        this._display_search_results(value, results);
+    }
+
+    _display_search_no_query_string()
+    {
+        const p = document.createElement('p');
+        p.classList.add('search-no-query-string');
+        p.textContent =
+            'Type a few words above and hit “RETURN” to search the error correction zoo.';
+
+        this.search_results_container.appendChild(p);
     }
 
     _display_search_error(search_str, error)
     {
-        this.search_results_container.innerHTML = '';
-
         console.log("Error in search.", error);
 
         const p = document.createElement('p');
         p.classList.add('search-results-error');
         
         const s1 = document.createElement('span');
-        s1.textContent = 'Error in search query: ';
+        s1.textContent = 'Error in search query ‘'+search_str+'’: ';
         p.appendChild(s1);
         
         const s2 = document.createElement('span');
@@ -136,6 +186,7 @@ export class EczooSearchFunction
         p.appendChild(s2);
         
         const a = document.createElement('a');
+        a.classList.add('search-query-info');
         a.setAttribute("href", "https://lunrjs.com/guides/searching.html");
         a.setAttribute("target", "_blank");
         a.textContent = "(more information on search syntax)";
@@ -144,21 +195,59 @@ export class EczooSearchFunction
         this.search_results_container.appendChild(p);
     }
 
+    _display_search_results(search_str, results)
+    {
+        if (results.length == 0) {
+            this._display_search_no_results(search_str);
+        } else {
+            results.forEach(
+                (r) => this._add_display_result(r, this.search_results_container)
+            );
+
+            if ( (results.length < max_num_results_for_mathjax)
+                 && typeof MathJax != 'undefined') {
+                MathJax.typeset();
+            }
+        }
+    }
+
+    _display_search_no_results(search_str)
+    {
+        const p = document.createElement('p');
+        p.classList.add('search-no-results');
+        p.textContent = 'Your search for ‘' + search_str + '’ did not yield any results.';
+        const a = document.createElement('a');
+        a.classList.add('search-query-info');
+        a.setAttribute("href", "https://lunrjs.com/guides/searching.html");
+        a.setAttribute("target", "_blank");
+        a.textContent = "(more information on search syntax)";
+        p.appendChild(a);
+
+        this.search_results_container.appendChild(p);
+    }
+
+
     _add_display_result(result, container)
     {
-        console.log('store =', this.store);
+        //console.log('store =', this.store);
+        //console.log('result =', result);
 
-        console.log('result =', result);
         const doc = this.store[result.ref];
 
         const div = document.createElement('div');
         div.classList.add("search-result");
 
-        const srt = document.createElement('h2');
+        var srt = document.createElement('div');
         srt.classList.add("search-result-title");
-        srt.innerText = doc[this.title_field];
-
         div.appendChild(srt);
+        if (this.href_field) {
+            var a = document.createElement('a');
+            a.setAttribute('href', doc[this.href_field]);
+            a.classList.add("search-result-link");
+            srt.appendChild(a);
+            srt = a;
+        }
+        srt.innerText = doc[this.title_field];
 
         const hipos = {}; // hipos[field] = [ (list of highlight positions) ]
 
@@ -167,7 +256,7 @@ export class EczooSearchFunction
             Object.keys(wordmatches).forEach( (fieldname) => {
                 const fieldmatches = wordmatches[fieldname];
                 const poslist = fieldmatches.position;
-                console.log('word =', word, 'fieldname =', fieldname, 'poslist =', poslist);
+                //console.log('word =', word, 'fieldname =', fieldname, 'poslist =', poslist);
 
                 if ( ! hipos.hasOwnProperty(fieldname) ) {
                     hipos[fieldname] = [];
@@ -177,9 +266,8 @@ export class EczooSearchFunction
             });
         });
 
-        console.log('hipos =', hipos);
 
-        //Object.keys(hipos).forEach( (fieldname) => {
+        const context_length = this.context_length;
 
         // iterate over this.fields instead, to preserve field order
         for (const fieldname of this.fields) {
@@ -204,7 +292,7 @@ export class EczooSearchFunction
                 }
             });
 
-            console.log('fieldname =', fieldname, 'poslist =', poslist);
+            //console.log('fieldname =', fieldname, 'poslist =', poslist);
 
             const docfieldstr = doc[fieldname];
 
@@ -212,7 +300,8 @@ export class EczooSearchFunction
             var lastpos = 0;
 
             for (const pospair of poslist) {
-                if ( (pospair[0] - lastpos) < 2*context_length ) {
+                if ( (lastpos>0 && ((pospair[0] - lastpos) < 2*context_length))
+                     || (lastpos==0 && (pospair[0] < context_length) ) ) {
                     // close to previous match (or string start), do not elide
                     showhtml += _escapeHTML(docfieldstr.substr(lastpos, pospair[0]-lastpos));
                 } else {
@@ -242,9 +331,15 @@ export class EczooSearchFunction
                 );
             }
 
-            const p = document.createElement('p');
+            // field name
+            showhtml += '<span class="search-result-display-field-name">'
+                + _escapeHTML(fieldname)
+                + '</span>';
+
+            const p = document.createElement('div');
             p.classList.add('search-result-field-display');
-            p.classList.add('search-result-field-display--' + fieldname);
+            var fieldnameclsname = fieldname.replace(/[^a-zA-Z0-9_-]/g, "");
+            p.classList.add('search-result-field-display--' + fieldnameclsname);
             p.innerHTML = showhtml;
 
             div.appendChild(p);
@@ -254,3 +349,49 @@ export class EczooSearchFunction
     }
 
 };
+
+
+
+// -------------------------------------------------------------------
+
+// automatically install in the page, searching for the correct element by ID
+
+function init_search_widget()
+{
+    console.log("Initialization code for possible search widget.");
+
+    const elem = document.getElementById('EczooSearchWidget');
+    if (elem) {
+
+        console.log("Initializing search widget.");
+
+        var fields = elem.dataset.searchWidgetFields;
+        if (fields) {
+            fields = fieldsval.split(',').map(
+                (s) => s.trim()
+            );
+        }
+        var the_context_length = elem.dataset.searchWidgetContextLength;
+        if (the_context_length) {
+            the_context_length = Number.parseInt(the_context_length);
+        }
+
+        window.eczoo_search_widget = new EczooSearchWidget({
+            search_widget_container: elem,
+            store_fetch_json: elem.dataset.searchWidgetStoreFetchJson,
+            fields: fields,
+            ref_field: elem.dataset.searchWidgetRefField,
+            title_field: elem.dataset.searchWidgetTitleField,
+            href_field: elem.dataset.searchWidgetHrefField,
+            context_length: the_context_length,
+        });
+
+    }
+}
+
+if (document.readyState === "complete") {
+    init_search_widget();
+} else {
+    console.log('window = ', window);
+    window.addEventListener('load', init_search_widget);
+}

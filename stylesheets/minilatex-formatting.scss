@@ -1,0 +1,58 @@
+
+.emph, .textit {
+    font-style: italic;
+}
+.textbf {
+    font-weight: bold;
+}
+
+
+@mixin fixbaseline-superscript-text {
+    font-size: $endnote-superscript-font-size;
+
+    // "vertical-align: super" shifts the entire baseline downwards, not nice
+    // vertical-align: top;
+
+    display: inline-block;
+    
+    // shift upwards to make superscript, without shifting the baseline
+    // downwards.
+    vertical-align: 0.3em;
+    margin-top: -0.3em;
+}
+
+.cite {
+    @include fixbaseline-superscript-text;
+}
+.footnote {
+    @include fixbaseline-superscript-text;
+}
+
+
+.paragraph-in-list {
+    display: block;
+    margin-top: $parskip-half-length;
+    margin-bottom: $parskip-half-length;
+    margin-left: 1rem;
+}
+.paragraph-in-list:first-child {
+    margin-top: 0px;
+}
+.paragraph-in-list:last-child {
+    margin-bottom: 0px;
+}
+
+.paragraph-in-list::before {
+    content: '\25b9';
+    font-size: 0.65rem;
+    float: left;
+    margin-left: -0.8rem;
+    color: $text-dim-color;
+}
+
+.paragraph-in-list:only-child {
+    margin-left: 0px;
+}
+.paragraph-in-list:only-child::before {
+    display: none;
+}

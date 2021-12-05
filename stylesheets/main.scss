@@ -9,6 +9,13 @@
 @import url('https://fonts.googleapis.com/css2?family=Source+Sans+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&display=swap');
 
 
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// Basic page grid
+//
+////////////////////////////////////////////////////////////////////////////////
+
 @import 'pagegrid.scss';
 
 
@@ -166,6 +173,22 @@ dd {
 }
 
 
+////////////////////////////////////////////////////////////////////////////////
+//
+// footer styling
+//
+////////////////////////////////////////////////////////////////////////////////
+
+#footer {
+    font-style: italic;
+    font-size: $tiny-fine-print-font-size;
+    font-color: $text-dim-color;
+    padding: 4px;
+
+    margin-bottom: 20px;
+}
+
+
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -304,64 +327,19 @@ dd.code-name {
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-
-.emph, .textit {
-    font-style: italic;
-}
-.textbf {
-    font-weight: bold;
-}
+@import 'minilatex-formatting.scss';
 
 
-@mixin fixbaseline-superscript-text {
-    font-size: $endnote-superscript-font-size;
 
-    // "vertical-align: super" shifts the entire baseline downwards, not nice
-    // vertical-align: top;
+////////////////////////////////////////////////////////////////////////////////
+//
+// visual highlight for links to anchors within page
+//
+////////////////////////////////////////////////////////////////////////////////
 
-    display: inline-block;
-    
-    // shift upwards to make superscript, without shifting the baseline
-    // downwards.
-    vertical-align: 0.3em;
-    margin-top: -0.3em;
-}
-
-.cite {
-    @include fixbaseline-superscript-text;
-}
-.footnote {
-    @include fixbaseline-superscript-text;
-}
+@import 'visual-highlight.scss';
 
 
-.paragraph-in-list {
-    display: block;
-    margin-top: $parskip-half-length;
-    margin-bottom: $parskip-half-length;
-    margin-left: 1rem;
-}
-.paragraph-in-list:first-child {
-    margin-top: 0px;
-}
-.paragraph-in-list:last-child {
-    margin-bottom: 0px;
-}
-
-.paragraph-in-list::before {
-    content: '\25b9';
-    font-size: 0.65rem;
-    float: left;
-    margin-left: -0.8rem;
-    color: $text-dim-color;
-}
-
-.paragraph-in-list:only-child {
-    margin-left: 0px;
-}
-.paragraph-in-list:only-child::before {
-    display: none;
-}
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -410,25 +388,6 @@ dd.code-name {
 
 }
 
-$visual-highlight-color: rgba(255,255,0,1.0);
-
-@mixin visual-highlight {
-    background-color: $visual-highlight-color;
-    box-shadow: $visual-highlight-color 0px 0px 10px;
-    //transition: background-color 0s;
-}
-
-.visual-highlight {
-    @include visual-highlight;
-}
-.visual-highlight + dd {
-    @include visual-highlight;
-}
-
-
-
-
-
 ////////////////////////////////////////////////////////////////////////////////
 //
 // code info short version
@@ -473,17 +432,11 @@ $visual-highlight-color: rgba(255,255,0,1.0);
 }
 
 
+
 ////////////////////////////////////////////////////////////////////////////////
 //
-// footer styling
+// Search page
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#footer {
-    font-style: italic;
-    font-size: $tiny-fine-print-font-size;
-    font-color: $text-dim-color;
-    padding: 4px;
-
-    margin-bottom: 20px;
-}
+@import 'search-page.scss'

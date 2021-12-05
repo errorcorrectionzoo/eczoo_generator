@@ -5,7 +5,6 @@
 
   <script type="text/javascript" src="/dist/eczsearch.js"></script>
   <script>
-
 // var test_documents = {
 //     Lunr: {
 //         "name": "Lunr",
@@ -20,23 +19,20 @@
 //         "text": "A modern JavaScript utility library delivering modularity, performance & extras."
 //     }
 // };
-    
-    window.addEventListener("load", function() {
-        var i = document.getElementById("search-text-box");
-        console.log('i=', i);
-        var r = document.getElementById("search-results-container");
-        var w = new eczsearch.EczooSearchFunction({
-            search_box_obj: i,
-            search_results_container: r,
-            //store: test_documents,
-            store_fetch_json: '/minitestdocuments.json',
-            fields: ['name', 'text'],
-            ref_field: 'name',
-            title_field: 'name'
-        });
-    });
+    // window.addEventListener("load", function() {
+    //     var w = new eczsearch.EczooSearchWidget({
+    //         search_widget_container: document.getElementById("search-widget"),
+    //         //store: test_documents,
+    //         store_fetch_json: '/minitestdocuments.json',
+    //         fields: ['name', 'text'],
+    //         ref_field: 'name',
+    //         title_field: 'name'
+    //     });
+    // });
   </script>
   <style>
+    .search-results { padding: 1rem; border: dotted 1px gray; }
+
     .search-result { margin-top: 1em; border: solid 1px green; }
     .sr-highlight { background-color: yellow; }
     .search-results-error { color: red; }
@@ -44,9 +40,14 @@
 </head>
 <body>
 <h1>Hello</h1>
-<input type="text" id="search-text-box" value="initial value" />
 
-<div style="border: dotted 2px grey" id="search-results-container">
+<div
+  id="EczooSearchWidget"
+  data-search-widget-store-fetch-json="/minitestdocuments.json"
+  data-search-widget-fields--COMMENT-OUT-FIGURE-OUT-FROM-STORE="name, text"
+  data-search-widget-ref-field="name"
+  data-search-widget-title-field="name"
+>
 </div>
 
 </body>

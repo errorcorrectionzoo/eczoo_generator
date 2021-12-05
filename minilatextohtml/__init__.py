@@ -326,7 +326,7 @@ class ToHtmlConverter:
             return paragraphs[0]
 
         # otherwise, wrap each paragraph in <p>...</p>.
-        full_html = "\n".join(['<p>'+p+'</p>' for p in paragraphs])
+        full_html = "\n".join([ self.html_wrap_in_tag('p', p) for p in paragraphs])
         #logger.debug(f" --> {full_html=}")
         return full_html
 
@@ -704,14 +704,14 @@ class ToHtmlConverter:
             return self.specials_node_to_html(node)
 
         if node.isNodeType(latexwalker.LatexMathNode):
-            return (
-                f'<span class="{node.displaytype}-math">'
-                + htmlescape(
+            return self.html_wrap_in_tag(
+                'span',
+                htmlescape(
                     node.delimiters[0]
                     + "".join(n.latex_verbatim() for n in node.nodelist)
                     + node.delimiters[1]
-                )
-                + '</span>'
+                ),
+                class_=f"{node.displaytype}-math"
             )
 
         raise ValueError(f"Invalid node type: {node!r}")

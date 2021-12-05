@@ -1,0 +1,30 @@
+{% extends 'layout/base_page.html' %}
+
+{% block block_page_title %}Search{% endblock %}
+
+{% block contents %}
+
+{# <h1>Search the error correction zoo</h1> #}
+
+<div
+  id="EczooSearchWidget"
+  data-search-widget-store-fetch-json="{{ 'dat/search_index_store.json' | prebaseurl }}"
+  data-search-widget-ref-field="_page_id"
+  data-search-widget-title-field="name"
+  data-search-widget-href-field="_href"
+  data-search-widget-context-length="200"
+  >
+<span style="font-style: italic">loading …</span>
+</div>
+
+
+<script type="text/javascript">
+// load our site search engine
+(function () {
+  var script = document.createElement('script');
+  script.src = "{{ 'js/eczsearch.js' | prebaseurl }}";
+  script.async = true;
+  document.head.appendChild(script);
+})();
+</script>
+{% endblock contents %}
