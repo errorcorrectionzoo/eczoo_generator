@@ -65,6 +65,35 @@ class Code:
         self.family_generation_level = None
         self.family_root_code = None
 
+
+    def fields_as_text_for_indexing(self, _minilatextotext):
+
+        def _value_to_text(val):
+            if not val:
+                return ''
+            if isinstance(val, str):
+                return _minilatextotext(val)
+            if isinstance(val, list):
+                return '\n\n'.join(_value_to_text(x) for x in val)
+            if isinstance(val, dict):
+                return ';\n\n'.join( (_minilatextotext(k)+': '+_value_to_text(v))
+                                     for k,v in val.items() )
+            raise ValueError(f"Not sure how to handle value ‘{val!r}’ for indexing!")
+
+        d = {
+            k: _value_to_text( getattr(self, k, None) )
+            for k in (
+                    'name', 'description', 'protection',
+                    'features',
+                    'realizations', 'notes'
+            )
+        }
+        d.update({
+            reltype: [ _minilatextotext(relobj.detail)
+                       for relobj in getattr(self.relations, reltype) ]
+            for reltype in ('parents', 'cousins')
+        })
+
     def __str__(self):
         return self.name
 

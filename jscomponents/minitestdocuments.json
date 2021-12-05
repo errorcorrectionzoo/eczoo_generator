@@ -1,0 +1,14 @@
+{
+    "Lunr": {
+        "name": "Lunr",
+        "text": "Like Solr, but much smaller, and not as bright. Again like Solr, but much smaller, and not as bright. Hello hello hello hello hello hello hello hello. Again like Solr, but much smaller, and not as bright."
+    },
+    "React": {
+        "name": "React",
+        "text": "A JavaScript library for building user interfaces."
+    },
+    "Lodash": {
+        "name": "Lodash",
+        "text": "A modern JavaScript utility library delivering modularity, performance & extras."
+    }
+}

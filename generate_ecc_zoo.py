@@ -20,7 +20,8 @@ from ecczoogen import (
     htmlpagecollectiongen,
     sitegenerationenvironment,
     server,
-    citationmanager
+    citationmanager,
+    searchindexgen
 )
 
 logger = logging.getLogger()
@@ -172,6 +173,10 @@ htmlpgcoll = htmlpagecollectiongen.HtmlPageCollection(
     site_gen_env,
 )
 
+
+search_index_generator = searchindexgen.SearchIndexGenerator()
+
+
 ################################################################################
 
 logger.info("Setting up ecc list pages ...")
@@ -199,6 +204,8 @@ for code_id, code in zoo.all_codes().items():
     )
 
     htmlpgcoll.create_page( page )
+
+    search_index_generator.add_code_page(code, page.path())
 
 
 #
@@ -472,7 +479,7 @@ for c in citation_scanner.get_encountered_citations():
                      f"‘{c.encountered_where}’:\n{e}")
         raise
 
-cache_citation_fetched_data_filename = 'cache_citation_fetched_data.json'
+cache_citation_fetched_data_filename = 'dat/cache_citation_fetched_data.json'
 
 for path in (Dirs.output_dir, 'https://errorcorrectionzoo.org'):
     cachefile = os.path.join(path, cache_citation_fetched_data_filename)
@@ -500,7 +507,13 @@ for path in (Dirs.output_dir, 'https://errorcorrectionzoo.org'):
 
 citation_manager.fetch_citation_info()
 
-with open(os.path.join(Dirs.output_dir, cache_citation_fetched_data_filename), 'w') as fw:
+output_citation_cache_fetched_data_filename = \
+    os.path.join(Dirs.output_dir, cache_citation_fetched_data_filename)
+
+os.makedirs( os.path.dirname(output_citation_cache_fetched_data_filename),
+             exist_ok=True )
+
+with open(output_citation_cache_fetched_data_filename, 'w') as fw:
     citation_manager.save_db_json(fw)
 
 citation_manager.build_full_citation_text_database()
@@ -532,8 +545,14 @@ logger.info("Generating JSON code dump ...")
 
 all_codes_info = { code_id: codeobj.source_info
                    for code_id, codeobj in zoo.all_codes().items() }
-with open(os.path.join(Dirs.output_dir, 'all_codes_info_dump.json'), 'w', encoding='utf-8') as fw:
+with open(os.path.join(Dirs.output_dir, 'dat', 'all_codes_info_dump.json'), 'w',
+          encoding='utf-8') as fw:
     json.dump(all_codes_info, fw)
+
+
+with open(os.path.join(dirs.output_dir, 'dat', 'search_index_store.json'), 'w',
+          encoding='utf-8') as fw:
+    json.dump(search_index_generator.get_store_dump(), fw)
 
 
 ################################################################################

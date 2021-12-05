@@ -1,0 +1,53 @@
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <script type="text/javascript" src="/dist/eczsearch.js"></script>
+  <script>
+
+// var test_documents = {
+//     Lunr: {
+//         "name": "Lunr",
+//         "text": "Like Solr, but much smaller, and not as bright. Again like Solr, but much smaller, and not as bright. Hello hello hello hello hello hello hello hello. Again like Solr, but much smaller, and not as bright."
+//     },
+//     React: {
+//         "name": "React",
+//         "text": "A JavaScript library for building user interfaces."
+//     },
+//     Lodash: {
+//         "name": "Lodash",
+//         "text": "A modern JavaScript utility library delivering modularity, performance & extras."
+//     }
+// };
+    
+    window.addEventListener("load", function() {
+        var i = document.getElementById("search-text-box");
+        console.log('i=', i);
+        var r = document.getElementById("search-results-container");
+        var w = new eczsearch.EczooSearchFunction({
+            search_box_obj: i,
+            search_results_container: r,
+            //store: test_documents,
+            store_fetch_json: '/minitestdocuments.json',
+            fields: ['name', 'text'],
+            ref_field: 'name',
+            title_field: 'name'
+        });
+    });
+  </script>
+  <style>
+    .search-result { margin-top: 1em; border: solid 1px green; }
+    .sr-highlight { background-color: yellow; }
+    .search-results-error { color: red; }
+  </style>
+</head>
+<body>
+<h1>Hello</h1>
+<input type="text" id="search-text-box" value="initial value" />
+
+<div style="border: dotted 2px grey" id="search-results-container">
+</div>
+
+</body>
+</html>
