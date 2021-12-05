@@ -1,0 +1,72 @@
+
+#EczooSearchWidget {
+
+    .search-input {
+        padding: 0.5em 1em;
+        font-size: 1.2rem;
+
+        box-sizing: border-box;
+        width: 100%;
+    }
+
+    // div with all search results
+    .search-results {
+    }
+
+
+    .search-no-results, .search-no-query-string,
+    .search-results-error
+    {
+        padding: 2em 0px;
+    }
+
+    .search-no-query-string {
+        font-style: italic;
+    }
+
+    .search-results-error {
+        padding: 2em 0px;
+        color: rgb(180,0,0);
+    }
+    .search-query-info {
+        display: block;
+        margin-top: 0.5em;
+    }
+
+    // a single search result
+    .search-result {
+        @include card-item;
+
+        .search-result-title {
+            font-style: bold;
+            display: block;
+        }
+        // .search-result-link:hover {
+        //     background-color: rgba(200,200,200,1.0);
+        // }
+
+        .search-result-display-field-name {
+            color: rgba(0,0,0,0.6);
+            //display: inline-block;
+            //margin-left: 0.7rem;
+            font-size: $small-font-size;
+        }
+        .search-result-display-field-name::before {
+            content: ' — ';
+        }
+        .search-result-display-field-name::after {
+            //content: ')';
+        }
+
+        .search-result-field-display {
+            display: block;
+            font-style: italic;
+        }
+
+
+        .sr-highlight {
+            background-color: $visual-highlight-color;
+        }
+    }
+
+}

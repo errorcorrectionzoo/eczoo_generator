@@ -1,0 +1,70 @@
+#######################################################
+## This is a code entry in the error correction zoo. ##
+##       https://github.com/errorcorrectionzoo       ##
+#######################################################
+
+code_id: testcode
+physical: qubits
+logical: qubits
+
+name: 'My Test Code'
+introduced: '\cite{arXiv:1911.00099}'
+
+description: |
+  Here is the code's description.  It can span multiple, hard-wrapped lines.
+  You can have math like \(a+b\) or \(\int_0^\infty f(x)\,dx\).  You can also
+  write \(\ket\psi = \sum_k \braket{e_k|\phi}\ket{e_k}\).
+  
+  The description field can contain multiple paragraphs, like this.  Each
+  \textbf{paragraph} can contain \emph{formatted text}, including
+  \href{https://phfaist.com/}{hyperlinks} and direct URLs:
+  \url{https://arxiv.org/}.  The stabilizers are given in \eqref{eq:stabilizers}.
+
+  Have fun\textbf{!!}
+
+protection: |
+  Detects errors on \(d-1\) qubits, corrects errors on \(\left\lfloor (d-1)/2
+  \right\rfloor\) qubits.
+
+# An error should be reported for ref{invalid-references} (ok), as well as for
+# \eqref{invalid-eqn-keys} (doesn't work yet).
+
+notes:
+  - |
+      A first note goes here, which includes a \textbf{\emph{cross}-reference} to
+      the \hyperref[code:css]{CSS code}.
+      
+      Multiple paragraphs here.\footnote{Do these paragraph breaks work?  Here's
+      a \textit{footnote}, by the way.}
+
+  - |
+      A second note goes here.  This one contains a display equation:
+      \begin{align}
+        S_1 &= I\,Z\,X\,X\,Z\ ;  \nonumber\\
+        S_2, \ldots, S_4 &= \text{cyclical permutations of \(S_1\)}\ .
+        \label{eq:stabilizers}
+      \end{align}
+      Note that the last cyclical permutation of \(S_1\) is not included, as it is
+      given by \(S_1S_2S_3S_4\).
+
+      Yeah!
+
+      Use of the \textit{gather} environment:
+      \begin{gather}
+         A = B + C\\
+         x = y + z
+      \end{gather}
+
+      Use of the \textit{split} environment inside align:
+      \begin{align}
+        \begin{split}
+          A &= B + C\\
+          x &= y + z
+        \end{split}
+      \end{align}
+
+relations:
+  parents:
+    - code_id: stabilizer
+      detail: 'Description of how this code relates to stabilizer codes.'
+  

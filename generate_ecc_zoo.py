@@ -20,7 +20,8 @@ from ecczoogen import (
     htmlpagecollectiongen,
     sitegenerationenvironment,
     server,
-    citationmanager
+    citationmanager,
+    searchindexgen
 )
 
 logger = logging.getLogger()
@@ -78,6 +79,8 @@ class Dirs:
 
     stylesheets_dir = os.path.join(_root_dir, 'stylesheets')
     javascripts_dir = os.path.join(_root_dir, 'javascripts')
+
+    jscomponents_dir = os.path.join(_root_dir, 'jscomponents')
 
     static_assets_dir = os.path.join(_root_dir, 'static_assets')
     static_favicon_files_dir = os.path.join(_root_dir, 'static_favicon_files')
@@ -172,6 +175,10 @@ htmlpgcoll = htmlpagecollectiongen.HtmlPageCollection(
     site_gen_env,
 )
 
+
+search_index_generator = searchindexgen.SearchIndexGenerator()
+
+
 ################################################################################
 
 logger.info("Setting up ecc list pages ...")
@@ -187,7 +194,7 @@ for code_id, code in zoo.all_codes().items():
     page = htmlpagecollectiongen.HtmlPage(
         name=f'c/{code_id}',
         info={
-            'page_title': htmlpgcoll.minilatex_to_html(code.name),
+            'page_title': htmlpgcoll.minilatex_to_html(code.name, f"name of ‘{code_id}’"),
             'page_title_text': code.name,
         },
         code_id_list=[ code_id ],
@@ -199,6 +206,8 @@ for code_id, code in zoo.all_codes().items():
     )
 
     htmlpgcoll.create_page( page )
+
+    search_index_generator.add_code_page(code, page.path())
 
 
 #
@@ -240,7 +249,10 @@ for domain in eczoo_domains:
         kingdom_page = htmlpagecollectiongen.HtmlPage(
             name=f'kingdom/{root_code_id}',
             info={
-                'page_title': htmlpgcoll.minilatex_to_html(kingdom['name']),
+                'page_title': htmlpgcoll.minilatex_to_html(
+                    kingdom['name'],
+                    f"name of kingdom ‘{root_code_id}’"
+                ),
                 'page_title_text': kingdom['name'],
             },
             code_id_list=sorted_code_id_list,
@@ -261,7 +273,10 @@ for domain in eczoo_domains:
     domain_page = htmlpagecollectiongen.HtmlPage(
         name=f'domain/{domain_id}',
         info={
-            'page_title': htmlpgcoll.minilatex_to_html(domain['name']),
+            'page_title': htmlpgcoll.minilatex_to_html(
+                domain['name'],
+                f"name of domain ‘{domain_id}’"
+            ),
             'page_title_text': domain['name'],
         },
         code_id_list=[ ],
@@ -321,6 +336,7 @@ os.makedirs(os.path.join(Dirs.output_dir, output_js_prefix), exist_ok=True)
 root_js_list = [
     ('misc.js', 'misc.js'),
     ('edit_code.js', 'edit_code.js'),
+    ('mathjaxinit.js', 'mathjaxinit.js'),
 ]
 
 for root_js, root_js_out in root_js_list:
@@ -329,6 +345,21 @@ for root_js, root_js_out in root_js_list:
         source_dir=Dirs.javascripts_dir,
         fn_source=root_js,
         fn_target=os.path.join(output_js_prefix, root_js_out)
+    )
+
+
+logger.info("Inculding javascripts from jscomponents ...")
+
+jscomponents_dist_dir = os.path.join(Dirs.jscomponents_dir, 'dist')
+for jsname in os.listdir(jscomponents_dist_dir):
+    if not jsname.endswith('.js'):
+        logger.debug(f"Skipping non-JS file ‘{jsname}’")
+        continue
+
+    site_gen_env.copy_file(
+        source_dir=jscomponents_dist_dir,
+        fn_source=jsname,
+        fn_target=os.path.join(output_js_prefix, jsname)
     )
 
 
@@ -465,7 +496,7 @@ for c in citation_scanner.get_encountered_citations():
                      f"‘{c.encountered_where}’:\n{e}")
         raise
 
-cache_citation_fetched_data_filename = 'cache_citation_fetched_data.json'
+cache_citation_fetched_data_filename = 'dat/cache_citation_fetched_data.json'
 
 for path in (Dirs.output_dir, 'https://errorcorrectionzoo.org'):
     cachefile = os.path.join(path, cache_citation_fetched_data_filename)
@@ -493,7 +524,13 @@ for path in (Dirs.output_dir, 'https://errorcorrectionzoo.org'):
 
 citation_manager.fetch_citation_info()
 
-with open(os.path.join(Dirs.output_dir, cache_citation_fetched_data_filename), 'w') as fw:
+output_citation_cache_fetched_data_filename = \
+    os.path.join(Dirs.output_dir, cache_citation_fetched_data_filename)
+
+os.makedirs( os.path.dirname(output_citation_cache_fetched_data_filename),
+             exist_ok=True )
+
+with open(output_citation_cache_fetched_data_filename, 'w') as fw:
     citation_manager.save_db_json(fw)
 
 citation_manager.build_full_citation_text_database()
@@ -523,10 +560,17 @@ htmlpgcoll.generate(
 
 logger.info("Generating JSON code dump ...")
 
+os.makedirs( os.path.join(Dirs.output_dir, 'dat'), exist_ok=True )
+
 all_codes_info = { code_id: codeobj.source_info
                    for code_id, codeobj in zoo.all_codes().items() }
-with open(os.path.join(Dirs.output_dir, 'all_codes_info_dump.json'), 'w', encoding='utf-8') as fw:
+with open(os.path.join(Dirs.output_dir, 'dat', 'all_codes_info_dump.json'), 'w',
+          encoding='utf-8') as fw:
     json.dump(all_codes_info, fw)
+
+with open(os.path.join(Dirs.output_dir, 'dat', 'search_index_store.json'), 'w',
+          encoding='utf-8') as fw:
+    json.dump(search_index_generator.get_store_dump(), fw)
 
 
 ################################################################################

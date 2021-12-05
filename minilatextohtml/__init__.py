@@ -2,6 +2,7 @@
 
 # note that this sub-module isn't markupsafe-aware, it only treats strings.
 
+import re
 import html
 
 def htmlescape(x):
@@ -10,6 +11,9 @@ def htmlescape(x):
 
 import logging
 logger = logging.getLogger(__name__)
+logger_debug = logger.debug
+logger_error = logger.error
+
 
 from pylatexenc import latexwalker, macrospec
 
@@ -139,48 +143,81 @@ class MacroVerbatimLikeArgumentArgsParser(macrospec.MacroStandardArgsParser):
         return (parsed, start_pos, pos-start_pos)
 
 
-_lw_context = macrospec.LatexContextDb()
-_lw_context.add_context_category(
-    'base-formatting',
-    macros=[
-        macrospec.MacroSpec('textbackslash', ''),
-        macrospec.MacroSpec('%', ''),
-        macrospec.MacroSpec('#', ''),
-        macrospec.MacroSpec('&', ''),
-        macrospec.MacroSpec('$', ''),
-        macrospec.MacroSpec(' ', ''),
-        macrospec.MacroSpec('{', ''),
-        macrospec.MacroSpec('}', ''),
+def _make_lw_context():
+    lw_context = macrospec.LatexContextDb()
+    lw_context.add_context_category(
+        'base-formatting',
+        macros=[
+            macrospec.MacroSpec('textbackslash', ''),
+            macrospec.MacroSpec('%', ''),
+            macrospec.MacroSpec('#', ''),
+            macrospec.MacroSpec('&', ''),
+            macrospec.MacroSpec('$', ''),
+            macrospec.MacroSpec(' ', ''),
+            macrospec.MacroSpec('{', ''),
+            macrospec.MacroSpec('}', ''),
 
-        macrospec.MacroSpec('emph', '{'),
-        macrospec.MacroSpec('textit', '{'),
-        macrospec.MacroSpec('textbf', '{'),
-    ]
-)
-_lw_context.add_context_category(
-    'x-refs',
-    macros=[
-        macrospec.MacroSpec('ref', '{'),
-        macrospec.MacroSpec('cite',
-                            args_parser=MacroVerbatimLikeArgumentArgsParser(
-                                arg_spec_list=(
-                                    '[',
-                                    VerbatimLikeSingleArgumentParser(delimiters=('{','}')),
-                                )
-                            )),
-        macrospec.MacroSpec('footnote', '{'),
-        macrospec.MacroSpec('href',
-                            args_parser=MacroVerbatimLikeArgumentArgsParser(
-                                arg_spec_list=(
-                                    VerbatimLikeSingleArgumentParser(delimiters=('{','}')),
-                                    '{',
-                                )
-                            )),
-        macrospec.MacroSpec('hyperref', '[{'),
-        macrospec.MacroSpec('url', '{'),
-    ]
-)
+            macrospec.MacroSpec('emph', '{'),
+            macrospec.MacroSpec('textit', '{'),
+            macrospec.MacroSpec('textbf', '{'),
+        ]
+    )
+    lw_context.add_context_category(
+        'math-environments',
+        environments=[
+            macrospec.EnvironmentSpec('align', ''),
+            macrospec.EnvironmentSpec('align*', ''),
+            macrospec.EnvironmentSpec('gather', ''),
+            macrospec.EnvironmentSpec('gather*', ''),
+            macrospec.EnvironmentSpec('split', ''),
+            macrospec.EnvironmentSpec('split*', ''),
+        ]
+    )
+    lw_context.add_context_category(
+        'x-refs',
+        macros=[
+            macrospec.MacroSpec('ref', args_parser=MacroVerbatimLikeArgumentArgsParser(
+                                    arg_spec_list=(
+                                        VerbatimLikeSingleArgumentParser(delimiters=('{','}')),
+                                    )
+                                )),
+            macrospec.MacroSpec('eqref', args_parser=MacroVerbatimLikeArgumentArgsParser(
+                                    arg_spec_list=(
+                                        VerbatimLikeSingleArgumentParser(delimiters=('{','}')),
+                                    )
+                                )),
+            # \label{...} for equations
+            macrospec.MacroSpec('label', args_parser=MacroVerbatimLikeArgumentArgsParser(
+                                    arg_spec_list=(
+                                        VerbatimLikeSingleArgumentParser(delimiters=('{','}')),
+                                    )
+                                )),
+            macrospec.MacroSpec('cite',
+                                args_parser=MacroVerbatimLikeArgumentArgsParser(
+                                    arg_spec_list=(
+                                        '[',
+                                        VerbatimLikeSingleArgumentParser(delimiters=('{','}')),
+                                    )
+                                )),
+            macrospec.MacroSpec('footnote', '{'),
+            macrospec.MacroSpec('href',
+                                args_parser=MacroVerbatimLikeArgumentArgsParser(
+                                    arg_spec_list=(
+                                        VerbatimLikeSingleArgumentParser(delimiters=('{','}')),
+                                        '{',
+                                    )
+                                )),
+            macrospec.MacroSpec('hyperref', '[{'),
+            macrospec.MacroSpec('url', args_parser=MacroVerbatimLikeArgumentArgsParser(
+                                    arg_spec_list=(
+                                        VerbatimLikeSingleArgumentParser(delimiters=('{','}')),
+                                    )
+                                )),
+        ]
+    )
+    return lw_context
 
+_lw_context = _make_lw_context()
 
 
 # ----------------------------
@@ -208,23 +245,91 @@ class HtmlRefContext:
         raise RuntimeError("Subclass must reimplement add_citation()")
 
 
+class _Paragraphs:
+    def __init__(self, paragraphs):
+        self.paragraphs = paragraphs
+
 
 class ToHtmlConverter:
     def __init__(self, refcontext):
         super().__init__()
         self.refcontext = refcontext
 
-    def to_html(self, s):
-        lw = latexwalker.LatexWalker(s, latex_context=_lw_context, tolerant_parsing=False)
-        nodelist, _, _ = lw.get_latex_nodes()
-        html = self.nodelist_to_html(nodelist)
-        #logger.debug(f"HTML: ‘{s}’ → ‘{html}’")
-        return html
+        self._math_environmentnames = [
+            e.environmentname
+            for e in _lw_context.iter_environment_specs(categories=['math-environments'])
+        ]
+
+    def to_html(self, s, what='(unknown)'):
+        """
+        Convert the given latex-like string `s` to HTML.  If `what` is non-None, it
+        is used in error messages.
+        """
+        if s is None:
+            logger.warning(f"Encountered None in to_html() when parsing ‘{what}’")
+            raise ValueError(f"Please don't use None in to_html().  In parsing ‘{what}’")
+        try:
+            lw = latexwalker.LatexWalker(s, latex_context=_lw_context, tolerant_parsing=False)
+            nodelist, _, _ = lw.get_latex_nodes()
+            html = self.nodelist_to_html(nodelist)
+            #logger_debug(f"HTML: ‘{s}’ → ‘{html}’")
+            return html
+        except Exception as e:
+            logger.error(f"Error parsing latex-like minilanguage ‘{what}’: {e}\n"
+                         f"Given text was:\n‘{s}’\n\n")
+            raise
 
     # --
 
     def nodelist_to_html(self, nodelist):
-        return "".join( self.node_to_html(node) for node in nodelist )
+        # There are two cases.  Either we have paragraph breaks --> we need to
+        # wrap each paragraph in <p>...</p>, or we don't have any paragraph
+        # breaks --> no wrapping in <p>.
+
+        #logger.debug(f"nodelist_to_html: {nodelist=}")
+
+        accum = {
+            'paragraphs': [],
+            'new_paragraph': ''
+        }
+
+        def _accum_part(x):
+            accum['new_paragraph'] += x
+
+        def _accum_flush():
+            new_para = accum['new_paragraph'].strip()
+            if new_para:
+                accum['paragraphs'].append(new_para)
+            accum['new_paragraph'] = ''
+ 
+        for node in nodelist:
+            htmlpart = self.node_to_html(node)
+            if isinstance(htmlpart, _Paragraphs):
+                first = True
+                for para in htmlpart.paragraphs:
+                    if first:
+                        first = False
+                    else:
+                        _accum_flush()
+                    _accum_part(para)
+            else:
+                _accum_part(htmlpart)
+        _accum_flush()
+
+        paragraphs = accum['paragraphs']
+
+        #logger.debug(f"nodelist_to_html: {nodelist=} -->\n {paragraphs=}")
+
+        # if we only have a single paragraph, i.e., without any paragraph
+        # break(s), then return the HTML content as is
+        if len(paragraphs) == 1:
+            return paragraphs[0]
+
+        # otherwise, wrap each paragraph in <p>...</p>.
+        full_html = "\n".join([ self.html_wrap_in_tag('p', p) for p in paragraphs])
+        #logger.debug(f" --> {full_html=}")
+        return full_html
+
     
     def get_nodearglist(self, node, arg_i):
         if node.nodeargd is None:
@@ -232,7 +337,7 @@ class ToHtmlConverter:
         if node.nodeargd.argnlist is None:
             return []
         if arg_i >= len(node.nodeargd.argnlist):
-            logger.error(f"Invalid argument #{arg_i} for macro ‘\\{node.macroname}’")
+            logger_error(f"Invalid argument #{arg_i} for macro ‘\\{node.macroname}’")
             raise ValueError(f"Invalid argument #{arg_i} for macro ‘\\{node.macroname}’")
         argnode = node.nodeargd.argnlist[arg_i]
         if argnode is None:
@@ -242,7 +347,9 @@ class ToHtmlConverter:
         return [argnode]
 
     def nodearg_to_html(self, node, arg_i):
-        return self.nodelist_to_html( self.get_nodearglist(node, arg_i) )
+        nodelist = self.get_nodearglist(node, arg_i)
+        #logger.debug(f"nodearg_to_html: {nodelist=}")
+        return self.nodelist_to_html( nodelist )
 
 
     def html_wrap_in_tag(self, tagname, htmlcontent, *, attrs=None, class_=None):
@@ -255,7 +362,7 @@ class ToHtmlConverter:
         s += '>'
         s += str(htmlcontent)
         s += f'</{tagname}>'
-        #logger.debug(f"html_wrap_in_tag: code is ‘{s}’")
+        #logger_debug(f"html_wrap_in_tag: code is ‘{s}’")
         return s
 
     def _get_ref(self, reftarget):
@@ -292,16 +399,28 @@ class ToHtmlConverter:
         # x-reference macros
         if mn.macroname == 'ref':
             tgt = self.get_nodearglist(mn, 0)
-            if len(tgt) != 1:
+            if len(tgt) != 1 or not tgt[0].isNodeType(latexwalker.LatexCharsNode):
                 raise ValueError("Invalid \\ref invocation: expected single braced argument")
             reftarget = tgt[0].chars
             (target_html, target_href) = self._get_ref(reftarget)
-            logger.debug(f"Ref: ‘{mn.latex_verbatim()}’ → ‘{target_html}’")
+            logger_debug(f"Ref: ‘{mn.latex_verbatim()}’ → ‘{target_html}’")
             return self.html_wrap_in_tag(
                 'a',
                 target_html,
                 attrs={'href': htmlescape(target_href)},
                 class_='ref',
+            )
+        if mn.macroname == 'eqref':
+            # this one is an exception, as it is directly picked up by MathJax.
+            tgt = self.get_nodearglist(mn, 0)
+            #logger.debug(f"Got eqref; {tgt=}")
+            if len(tgt) != 1 or not tgt[0].isNodeType(latexwalker.LatexCharsNode):
+                raise ValueError("Invalid \\eqref invocation: expected single braced argument")
+            return self.html_wrap_in_tag(
+                'span',
+                r'\eqref{' + htmlescape(tgt[0].chars) + r'}'
+                ,
+                class_='inline-math eqref',
             )
 
         if mn.macroname == 'hyperref':
@@ -309,7 +428,7 @@ class ToHtmlConverter:
             disphtml = self.nodearg_to_html(mn, 1)
             (target_html, target_href) = self._get_ref(reftarget)
             # ignore target_html
-            logger.debug(f"Ref: ‘{mn.latex_verbatim()}’ → ‘{target_html}’")
+            logger_debug(f"Ref: ‘{mn.latex_verbatim()}’ → ‘{target_html}’")
             return self.html_wrap_in_tag(
                 'a',
                 disphtml,
@@ -330,8 +449,8 @@ class ToHtmlConverter:
 
             citekeylist_nodelist = self.get_nodearglist(mn, 1)
 
-            #logger.debug(f"Parsing citation command: {citekeylist_nodelist=}")
-            #logger.debug(f"  {optional_cite_extra_html_nodelist=}")
+            #logger_debug(f"Parsing citation command: {citekeylist_nodelist=}")
+            #logger_debug(f"  {optional_cite_extra_html_nodelist=}")
 
             if not citekeylist_nodelist:
                 raise ValueError("Expected single {...} argument to ‘\\cite’") 
@@ -346,25 +465,25 @@ class ToHtmlConverter:
             # and group nodes; anything else points to an internal parsing
             # error.
             for n in citekeylist_nodelist:
-                #logger.debug(f"{cite_key_split_nodelist=}")
+                #logger_debug(f"{cite_key_split_nodelist=}")
                 if n.isNodeType(latexwalker.LatexCharsNode):
                     parts = n.chars.split(',')
                     if parts[0]:
-                        cite_key_split_nodelist[-1].append(parts[0])
+                        cite_key_split_nodelist[len(cite_key_split_nodelist)-1].append(parts[0])
                     parts = parts[1:]
                     if not parts:
                         # string didn't contain any comma
                         continue
                     for p in parts:
                         cite_key_split_nodelist.append( [p] )
-                    #logger.debug(f"  now {cite_key_split_nodelist=}")
+                    #logger_debug(f"  now {cite_key_split_nodelist=}")
                     continue
                 if n.isNodeType(latexwalker.LatexGroupNode):
-                    cite_key_split_nodelist[-1].append(n)
+                    cite_key_split_nodelist[len(cite_key_split_nodelist)-1].append(n)
                     continue
                 raise ValueError(f"Unexpected node {n!r}, expected char node or group node in citation argument")
                         
-            #logger.debug(f"Citation keys are split: {cite_key_split_nodelist=}")
+            #logger_debug(f"Citation keys are split: {cite_key_split_nodelist=}")
 
             s = ''
             for citekeynodes in cite_key_split_nodelist:
@@ -416,7 +535,7 @@ class ToHtmlConverter:
                     },
                     class_='cite',
                 )
-            #logger.debug(f"Citation: ‘{mn.latex_verbatim()}’ → ‘{s}’")
+            #logger_debug(f"Citation: ‘{mn.latex_verbatim()}’ → ‘{s}’")
             return s
 
         if mn.macroname == 'footnote':
@@ -453,15 +572,90 @@ class ToHtmlConverter:
                 attrs={'href': url, 'target': '_blank'},
                 class_='href url',
             )
+
+        if mn.macroname == 'label':
+            raise ValueError(f"The \\label macro needs to be placed "
+                             f"at the top level inside the relevant environment: "
+                             f"‘{mn.verbatim_latex()}’")
         
         raise ValueError(f"Unknown macro: ‘\\{mn.macroname}’")
 
-    def environment_node_to_html(self, node):
-        logger.error(f"Environments not supported! ‘{node.environmentname}’")
-        raise ValueError(f"LaTeX environments are not supported: ‘%{node.environmentname}’")
+    def _scan_env_for_label(self, nodelist):
+        labelnode = None
+        #new_nodelist = []
+        for j, n in enumerate(nodelist):
+            if n.isNodeType(latexwalker.LatexMacroNode) and n.macroname == 'label':
+                # found label
+                labelnode = n
+
+                # keep the label node there!!
+                break
+            #     # fix following chars node, if any
+            #     cn = None
+            #     if j < len(nodelist)-1 \
+            #        and nodelist[j+1].isNodeType(latexwalker.LatexCharsNode):
+            #         # remove leading '\n' from following chars node
+            #         cn = nodelist[j+1]
+            #         if cn.chars[:1] == '\n':
+            #             new_nodelist.append(
+            #                 latexwalker.LatexCharsNode(
+            #                     parsing_state=cn.parsing_state,
+            #                     chars=cn.chars[1:],
+            #                     pos=cn.pos+1,
+            #                     len=cn.len-1,
+            #                 )
+            #             )
+            #             j += 1
+
+            #     new_nodelist += nodelist[j+1:]
+            #     break
+            # else:
+            #     new_nodelist.append(n)
+            #     continue
+
+        return (labelnode, nodelist)
+                
+
+    def environment_node_to_html(self, en):
+
+        if en.environmentname in self._math_environmentnames:
+
+            labelnode, new_nodelist = self._scan_env_for_label(en.nodelist)
+
+            envname_safer = en.environmentname.replace("*","-star")
+
+            label = None
+            htmlclass = f'display-math env-{envname_safer}'
+            attrs = {}
+            label_safer = None
+            if labelnode:
+                label = self.nodearg_to_html(labelnode, 0)
+                label_safer = label.replace(':', '--')
+                attrs['id'] = label_safer
+
+            eqn_contents = htmlescape(
+                "".join(n.latex_verbatim() for n in new_nodelist)
+            )
+            # remove trailing spaces, eg. left after \label{}
+            eqn_contents = eqn_contents.rstrip(' ')
+
+            wrapped = self.html_wrap_in_tag(
+                'span',
+                r"\begin{"+en.environmentname+"}"
+                + eqn_contents
+                + r"\end{"+en.environmentname+"}"
+                ,
+                class_=htmlclass,
+                attrs=attrs,
+            )
+            #print(wrapped)
+            return wrapped
+
+        logger_error(f"Environment not supported: ‘{node.environmentname}’")
+        raise ValueError(f"LaTeX environment is not supported: ‘{node.environmentname}’")
 
     def specials_node_to_html(self, node):
-        raise ValueError(f"Unknown specials: ‘{mn.macroname}’")
+        raise ValueError(f"Unknown specials: ‘{node.macroname}’")
 
     def node_to_html(self, node):
 
@@ -474,10 +668,18 @@ class ToHtmlConverter:
             return htmlescape(s)
 
         if node.isNodeType(latexwalker.LatexCharsNode):
+            # special case for chars node that contain '\n\n' -- these are
+            # paragraph breaks (note: Future versions of latexwalker might be
+            # able to report paragraph breaks more smartly)
+            if '\n\n' in node.chars:
+                return _Paragraphs([
+                    htmlescape(x)
+                    for x in re.split(r'[\n]{2,}', node.chars)
+                ])
             return htmlescape(node.chars)
 
         if node.isNodeType(latexwalker.LatexCommentNode):
-            logger.error(
+            logger_error(
                 f"You cannot use LaTeX comments (‘%{node.comment}’). "
                 f"To type a percent sign, use ‘\\%’"
             )
@@ -502,14 +704,14 @@ class ToHtmlConverter:
             return self.specials_node_to_html(node)
 
         if node.isNodeType(latexwalker.LatexMathNode):
-            return (
-                f'<span class="{node.displaytype}-math">'
-                + htmlescape(
+            return self.html_wrap_in_tag(
+                'span',
+                htmlescape(
                     node.delimiters[0]
                     + "".join(n.latex_verbatim() for n in node.nodelist)
                     + node.delimiters[1]
-                )
-                + '</span>'
+                ),
+                class_=f"{node.displaytype}-math"
             )
 
         raise ValueError(f"Invalid node type: {node!r}")

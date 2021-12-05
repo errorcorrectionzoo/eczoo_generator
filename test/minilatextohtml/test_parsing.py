@@ -7,7 +7,7 @@ from pylatexenc import latexwalker
 class TestParsing(unittest.TestCase):
 
     def _get_lw(self, s):
-        from ecczoogen.minilatextohtml import _lw_context
+        from minilatextohtml import _lw_context
         return latexwalker.LatexWalker(s, latex_context=_lw_context, tolerant_parsing=False)
 
 
