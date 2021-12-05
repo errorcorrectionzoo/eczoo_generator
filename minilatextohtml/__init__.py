@@ -169,8 +169,8 @@ def _make_lw_context():
             macrospec.EnvironmentSpec('align*', ''),
             macrospec.EnvironmentSpec('gather', ''),
             macrospec.EnvironmentSpec('gather*', ''),
-            macrospec.EnvironmentSpec('equation', ''),
-            macrospec.EnvironmentSpec('equation*', ''),
+            macrospec.EnvironmentSpec('split', ''),
+            macrospec.EnvironmentSpec('split*', ''),
         ]
     )
     lw_context.add_context_category(

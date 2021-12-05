@@ -49,6 +49,20 @@ notes:
 
       Yeah!
 
+      Use of the \textit{gather} environment:
+      \begin{gather}
+         A = B + C\\
+         x = y + z
+      \end{gather}
+
+      Use of the \textit{split} environment inside align:
+      \begin{align}
+        \begin{split}
+          A &= B + C\\
+          x &= y + z
+        \end{split}
+      \end{align}
+
 relations:
   parents:
     - code_id: stabilizer
