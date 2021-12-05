@@ -28,31 +28,3 @@
     @include fixbaseline-superscript-text;
 }
 
-
-.paragraph-in-list {
-    display: block;
-    margin-top: $parskip-half-length;
-    margin-bottom: $parskip-half-length;
-    margin-left: 1rem;
-}
-.paragraph-in-list:first-child {
-    margin-top: 0px;
-}
-.paragraph-in-list:last-child {
-    margin-bottom: 0px;
-}
-
-.paragraph-in-list::before {
-    content: '\25b9';
-    font-size: 0.65rem;
-    float: left;
-    margin-left: -0.8rem;
-    color: $text-dim-color;
-}
-
-.paragraph-in-list:only-child {
-    margin-left: 0px;
-}
-.paragraph-in-list:only-child::before {
-    display: none;
-}

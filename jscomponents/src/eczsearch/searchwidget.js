@@ -3,7 +3,7 @@ import lunr from 'lunr';
 
 const default_context_length = 50; // chars
 
-const max_num_results_for_mathjax = 50;
+const max_num_results_for_mathjax = 100;
 
 
 

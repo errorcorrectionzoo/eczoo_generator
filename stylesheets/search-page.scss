@@ -47,12 +47,12 @@
 
         .search-result-display-field-name {
             color: rgba(0,0,0,0.6);
-            display: inline-block;
+            //display: inline-block;
             //margin-left: 0.7rem;
             font-size: $small-font-size;
         }
         .search-result-display-field-name::before {
-            content: ' — ';
+            content: ' — ';
         }
         .search-result-display-field-name::after {
             //content: ')';
