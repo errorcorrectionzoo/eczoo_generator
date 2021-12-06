@@ -135,6 +135,16 @@ class PagePrettyCodeGraph:
             for kingdom in domain['kingdoms']
         }
 
+        all_kingdoms = [
+            {
+                'domain': domain,
+                'kingdom': kingdom,
+                'kingdom_code': kingdom['code'],
+            }
+            for domain in self.eczoo_domains
+            for kingdom in domain['kingdoms']
+        ]
+
         domain_nodes = []
 
         kingdoms_positions = {}
@@ -148,10 +158,14 @@ class PagePrettyCodeGraph:
 
         # add the domain nodes
         num_domains = len(self.eczoo_domains)
+        domains_sep = (domains_extra_sep + max_kingdoms_per_domain * kingdom_sep)
+        shift_x = 0 #((num_domains-1)/2) * domains_sep
         for j_domain, domain in enumerate(self.eczoo_domains):
             dom_pos = {
-                'x': (j_domain - num_domains/2) * (domains_extra_sep + max_kingdoms_per_domain * kingdom_sep),
-                'y': -100,
+                'x': int(
+                    shift_x + (j_domain - (num_domains-1)/2) * domains_sep
+                ),
+                'y': 0,
             }
             n = {
                 'data': {
@@ -176,8 +190,10 @@ class PagePrettyCodeGraph:
             num_kingdoms = len(domain['kingdoms'])
             for j_kingdom, kingdom in enumerate(domain['kingdoms']):
                 kingdompos = {
-                    'x': dom_pos['x'] + kingdom_sep * (j_kingdom - num_kingdoms/2),
-                    'y': 0
+                    'x': int(
+                        shift_x + dom_pos['x'] + kingdom_sep * (j_kingdom - num_kingdoms/2)
+                    ),
+                    'y': 100
                 }
                 kingdoms_positions[kingdom['code_id']] = kingdompos
 
@@ -186,6 +202,7 @@ class PagePrettyCodeGraph:
 
         parent_relationships = []
 
+        outside_pos_counter = 0
 
         for code_id, code in all_codes_dict.items():
 
@@ -200,6 +217,8 @@ class PagePrettyCodeGraph:
             #     root_code_id = code_id
             # position['x'] = root_codes_x_positions[root_code_id] + xpos_rnd_shift()
             # position['y'] = 100*code.family_generation_level + ypos_rnd_shift()
+
+            code_is_abstract = is_abstract_code(code)
 
             if code_id in domain_and_kingdom_by_kingdom_code_id:
                 is_kingdom = True
@@ -231,12 +250,19 @@ class PagePrettyCodeGraph:
 
                     pos = {
                         'x': kingdoms_positions[kingdom_parent_code_id]['x'],
-                        'y': 200*code.family_generation_level,
+                        'y': 120*code.family_generation_level,
+                    }
+                elif code_is_abstract:
+                    pos = {
+                        'x': shift_x,
+                        'y': -300 - 5*outside_pos_counter,
                     }
                 else:
                     pos = {
-                        'x': -400,
-                        'y': 500,
+                        'x': int(
+                            shift_x - domains_sep*((num_domains-1)/2) - 10*outside_pos_counter
+                        ),
+                        'y': 500 + 5*outside_pos_counter,
                     }
 
 
@@ -247,7 +273,7 @@ class PagePrettyCodeGraph:
 
                     '_is_code': 1,
                     '_is_abstract_code': \
-                        1 if is_abstract_code(code) else 0,
+                        1 if code_is_abstract else 0,
                     '_description': short_description,
                     '_code_href': self.htmlpagescollection.get_code_href(code_id),
                     '_family_generation_level': code.family_generation_level,
@@ -322,16 +348,6 @@ class PagePrettyCodeGraph:
                 )
                 cousin_rel_counter += 1
 
-        # fixed_node_constraint = [
-        #     {
-        #         'nodeId': node_id_code(root_code_id),
-        #         'position': {
-        #             'x': j*200,
-        #             'y': (-1)**(j%2) * 100,
-        #         }
-        #     }
-        #     for j, root_code_id in enumerate( self.zoo.root_codes().keys() )
-        # ]
         fixed_node_constraint = [
             {
                 'nodeId': dom_node['data']['id'],
@@ -339,16 +355,14 @@ class PagePrettyCodeGraph:
             }
             for dom_node in domain_nodes
         ]
-        #fixed_node_constraint = []
 
         alignment_constraint = {
-            # 'horizontal': [
-            #     [
-            #         node_id_code(code.code_id)
-            #         for code in codelist
-            #     ]
-            #     for codelist in (horizontal alignment constraints.......)
-            # ]
+            'horizontal': [
+                [
+                    node_id_code(kdic['kingdom_code'].code_id)
+                    for kdic in all_kingdoms
+                ]
+            ]
         }
 
         first_domain_node_id = domain_nodes[0]['data']['id']
@@ -358,30 +372,40 @@ class PagePrettyCodeGraph:
         for n in code_nodes:
             # all concrete codes must appear below domains (including kingdoms)
             if not n['data']['_is_abstract_code']:
+                gap = 200
+                if n['data'].get('_is_kingdom'):
+                    gap = 100 # kingdoms get to go closer to the domains
                 relative_placement_constraint.append({
                     'top': first_domain_node_id,
                     'bottom': n['data']['id'],
-                    'gap': 200
+                    'gap': gap
                 })
             # but all abstract codes must appear ABOVE domains
             else:
                 relative_placement_constraint.append({
                     'bottom': first_domain_node_id,
                     'top': n['data']['id'],
-                    'gap': 200
+                    'gap': 100
                 })
+            pass
 
-
-        # all parent relations should point upwards (even for abstract code parents)
+        # all parent relations should point upwards (even between abstract code parents)
         for prel in parent_relationships:
-            #if not is_abstract_code(prel['target_code_obj']):
-            relative_placement_constraint.append(
-                {
-                    'top': node_id_code(prel['target_code_obj'].code_id),
-                    'bottom': node_id_code(prel['source_code_obj'].code_id),
-                    'gap': 100,
-                }
-            )
+            if is_abstract_code(prel['source_code_obj']) \
+               and not is_abstract_code(prel['target_code_obj']):
+                # allow pointing downwards if an abstract code has a concrete
+                # code as a parent (e.g., a kingdom).
+                #
+                # FIXME: We need to define what the concept of an abstract code
+                # is.  Is it that it doesn't have a physical space defined, or
+                # is it that it doesn't belong to a kingdom?
+                continue
+
+            relative_placement_constraint.append( {
+                'top': node_id_code(prel['target_code_obj'].code_id),
+                'bottom': node_id_code(prel['source_code_obj'].code_id),
+                'gap': 100,
+            } )
 
         data = {
             'elements': {

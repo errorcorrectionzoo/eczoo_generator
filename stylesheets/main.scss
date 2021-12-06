@@ -45,16 +45,21 @@ h1 {
     font-weight: 350;
     line-height: 1.6em;
 }
+h2 {
+    font-size: 20px;
+    font-weight: 550;
+    line-height: 1.6em;
+}
 
 p, ul, ol {
     margin-top: $parskip-half-length;
     margin-bottom: $parskip-half-length;
 }
 p:first-child, ul:first-child, ol:first-child {
-    margin-top: 0px;
+    margin-top: 0px !important;
 }
 p:last-child, ul:last-child, ol:last-child {
-    margin-bottom: 0px;
+    margin-bottom: 0px !important;
 }
 
 
@@ -214,6 +219,11 @@ dd {
 
 .ecc-code {
     @include card-item;
+
+    p, ul, ol {
+        margin-top: $inner-parskip-half-length;
+        margin-bottom: $inner-parskip-half-length;
+    }
 }
 .ecc-code.ecc-code-page {
     border: none 0px;
@@ -325,8 +335,8 @@ dd.code-name {
 
 .paragraph-in-list {
     display: block;
-    margin-top: $parskip-half-length;
-    margin-bottom: $parskip-half-length;
+    margin-top: $inner-parskip-half-length;
+    margin-bottom: $inner-parskip-half-length;
     margin-left: 1rem;
 }
 .paragraph-in-list:first-child {
