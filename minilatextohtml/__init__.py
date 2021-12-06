@@ -260,7 +260,7 @@ class ToHtmlConverter:
             for e in _lw_context.iter_environment_specs(categories=['math-environments'])
         ]
 
-    def to_html(self, s, what='(unknown)'):
+    def to_html(self, s, *, what='(unknown)'):
         """
         Convert the given latex-like string `s` to HTML.  If `what` is non-None, it
         is used in error messages.

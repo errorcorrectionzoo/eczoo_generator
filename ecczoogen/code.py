@@ -68,34 +68,41 @@ class Code:
 
     def fields_as_text_for_indexing(self, _minilatextotext):
 
-        def _value_to_text(val):
+        def _value_to_text(val, *, where):
             if not val:
                 return ''
             if isinstance(val, str):
-                return _minilatextotext(val)
+                return _minilatextotext(val, where=where)
             if isinstance(val, list):
-                return '\n\n'.join(_value_to_text(x) for x in val)
+                return '\n\n'.join(_value_to_text(x, where=f'{where}[{j}]')
+                                   for j, x in enumerate(val))
             # if isinstance(val, dict):
             #     return '\n\n'.join( (_minilatextotext(k)+': '+_value_to_text(v))
             #                          for k,v in val.items() )
             raise ValueError(f"Not sure how to handle value ‘{val!r}’ for indexing!")
 
         d = {
-            k: _value_to_text( getattr(self, k, None) )
+            k: _value_to_text( getattr(self, k, None), 
+                               where=f'{self!r}.{k}')
             for k in (
                     'name', 'description', 'protection',
                     'realizations', 'notes'
             )
         }
         d.update({
-            f'feature {featurename}': _value_to_text( self.features[featurename] )
-            for featurename in self.features
+            f'feature {featurename}': _value_to_text(
+                featuredata,
+                where=f'{self!r}.features[{featurename!r}]'
+            )
+            for featurename, featuredata in self.features.items()
         })
 
         d.update({
             f'{reltype} detail': '\n\n'.join([
-                _minilatextotext(relobj.detail)
-                for relobj in getattr(self.relations, reltype+'s') # "self.relations.parents"
+                _minilatextotext(relobj.detail, where=f'{self!r}.relations.{reltype}s[{j}]')
+                for j, relobj in enumerate(
+                        getattr(self.relations, reltype+'s') # "self.relations.parents"
+                )
             ])
             for reltype in ('parent', 'cousin')
         })

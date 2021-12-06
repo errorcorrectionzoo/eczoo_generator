@@ -66,6 +66,8 @@ notes:
       Test a manual citation \cite{manual:{A. Smith et al., \emph{Textbook of
       fancy stuff}, Taylor \& Francis, 1999}}.
 
+# An error: \alpha.
+
 relations:
   parents:
     - code_id: stabilizer

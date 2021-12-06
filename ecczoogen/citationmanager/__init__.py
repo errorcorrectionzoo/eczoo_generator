@@ -556,7 +556,7 @@ class MiniLatexCitationScanner:
     def scan(self, s, where):
         #logger.debug(f"Scanning for citations: ‘{s}’")
         self.refcontext.cur_where = where
-        dummy = self.tohtmlconverter.to_html(s)
+        dummy = self.tohtmlconverter.to_html(s, what=f'scanning for citations / {where}')
         # we can ignore dummy, our add_citation() callback will have fired for
         # any encountered citation.
 

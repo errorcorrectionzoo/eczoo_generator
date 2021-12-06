@@ -24,8 +24,8 @@ class MiniLatexToTextConverter(minilatextohtml.ToHtmlConverter):
     def __init__(self):
         super().__init__( DummyRefContext() )
 
-    def to_text(self, x):
-        htmlval = self.to_html(x)
+    def to_text(self, x, *, what='(unknown)'):
+        htmlval = self.to_html(x, what=what)
         return html.unescape(htmlval)
 
     def html_wrap_in_tag(self, tagname, htmlcontent, **kwargs):
@@ -39,11 +39,11 @@ class SearchIndexGenerator:
 
         self.ml2t = MiniLatexToTextConverter()
 
-    def _minilatextotext(self, x):
+    def _minilatextotext(self, x, where='(unknown)'):
         #logger.debug(f"minilatex-to-text: {x=}")
         if x is None:
             return ''
-        return self.ml2t.to_text(x)
+        return self.ml2t.to_text(x, what=where)
 
     def add_code_page(self, code, href):
         d = code.fields_as_text_for_indexing(self._minilatextotext)
