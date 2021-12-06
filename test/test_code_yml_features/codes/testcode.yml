@@ -63,6 +63,9 @@ notes:
         \end{split}
       \end{align}
 
+      Test a manual citation \cite{manual:{A. Smith et al., \emph{Textbook of
+      fancy stuff}, Taylor \& Francis, 1999}}.
+
 relations:
   parents:
     - code_id: stabilizer

@@ -41,17 +41,17 @@ class Citation:
     def __init__(self, *,
                  arxiv=None,
                  doi=None,
-                 manual_citation_minilatex=None):
+                 manual=None):
         self.arxiv = arxiv
         self.doi = doi
-        self.manual_citation_minilatex = manual_citation_minilatex
+        self.manual = manual # manual citation with minilatex formatting
 
         if len([ x
-                 for x in (self.arxiv, self.doi, self.manual_citation_minilatex,)
+                 for x in (self.arxiv, self.doi, self.manual,)
                  if x is not None ]) != 1:
             raise ValueError(f"Can only specify one of arxiv (‘{arxiv}’), doi"
-                             f" (‘{doi}’), or manual_citation_minilatex "
-                             f"(‘{manual_citation_minilatex}’)")
+                             f" (‘{doi}’), or manual "
+                             f"(‘{manual}’)")
 
         self.full_citation_text_minilatex = None
 
@@ -65,9 +65,9 @@ class Citation:
         if (self.doi is None) != (other.doi is None) \
            or self.doi != other.doi:
             return False
-        if (self.manual_citation_minilatex is None) \
-               != (other.manual_citation_minilatex is None) \
-           or self.manual_citation_minilatex != other.manual_citation_minilatex:
+        if (self.manual is None) \
+               != (other.manual is None) \
+           or self.manual != other.manual:
             return False
         
         return True
@@ -75,7 +75,7 @@ class Citation:
     def __repr__(self):
         return (
             f'Citation(arxiv={self.arxiv}, doi={self.doi}, '
-            f'manual_citation_minilatex={self.manual_citation_minilatex}, '
+            f'manual={self.manual}, '
             f'full_citation_text_minilatex={self.full_citation_text_minilatex})'
         )
 
@@ -88,7 +88,7 @@ def _get_single_kwarg(kwargs):
 
     if len(kwargs) != 1:
         raise ValueError("Must specify exactly one of the fields "
-                         "arxiv=..., doi=..., or manual_citation_minilatex=...")
+                         "arxiv=..., doi=..., or manual=...")
 
     (fld, val),  = kwargs.items()
     return (fld, val)
@@ -101,7 +101,7 @@ class CitationTextManager:
         self._citations_by_field = {
             'arxiv': {},
             'doi': {},
-            'manual_citation_minilatex': {},
+            'manual': {},
         }
 
         self._fetched_info = {
@@ -409,11 +409,11 @@ class CitationTextManager:
             logger.debug(f"Citation doi:{doi} → {full_citation_text}")
         
         #
-        # Now also process manual_citation_minilatex entries
+        # Now also process manual entries
         #
 
-        for manual_citation_minilatex, citeobj in self._citations_by_field['manual_citation_minilatex'].items():
-            citeobj.full_citation_text_minilatex = citeobj.manual_citation_minilatex
+        for manual, citeobj in self._citations_by_field['manual'].items():
+            citeobj.full_citation_text_minilatex = citeobj.manual
 
 
 
