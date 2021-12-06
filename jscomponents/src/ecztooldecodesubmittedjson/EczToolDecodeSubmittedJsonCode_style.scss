@@ -1,0 +1,28 @@
+
+.EczToolDecodeSubmittedJsonCode {
+
+    input[type="file"]
+    {
+        display: block;
+        width: 100%;
+        box-sizing: border-box;
+
+        border: solid 1px #aaa;
+        background-color: #ddd;
+
+        padding: 1em;
+    }
+
+    textarea {
+        display: block;
+
+        box-sizing: border-box;
+
+        width: 100%;
+        min-width: 100%;
+        max-width: 100%;
+        height: 20em;
+
+        padding: 1em;
+    }
+}
