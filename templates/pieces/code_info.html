@@ -12,7 +12,7 @@ Expected context variables:
 <dl class="ecc-code ecc-code-page" id="ecc_{{code.code_id}}">
 
 
-<dt>Name</dt>
+<dt class="code-name">Name</dt>
 <dd class="code-name">
   {{code.name}}
   {%- if code.introduced -%}
@@ -24,11 +24,11 @@ Expected context variables:
 </dd>
 
 
-<dt>Description</dt>
+<dt class="code-description">Description</dt>
 <dd class="code-description">{{code.description}}</dd>
 
 {% if code.protection %}
-<dt>Protection</dt>
+<dt class="code-protection">Protection</dt>
 <dd class="code-protection">{{code.protection}}</dd>
 {% endif %}
 
@@ -40,8 +40,8 @@ Expected context variables:
 
 {% macro disp_feature_field(featurename, label) -%}
   {%- if code.features[featurename] -%}
-  <dt>{{label}}</dt>
-  <dd class="code-feature-{{featurename}}">
+  <dt class="code-feature code-feature-{{featurename}}">{{label}}</dt>
+  <dd class="code-feature code-feature-{{featurename}}">
     {{- code.features[featurename] -}}
   </dd>
   {% endif %}
@@ -52,7 +52,7 @@ Expected context variables:
 
 {{ disp_feature_field('encoders', 'Encoder') }}
 
-{{ disp_feature_field('transversal_gates', 'Transversal Gates') }}
+{{ disp_feature_field('transversal_gates', 'Transversal Gates') }} {# note NON-BREAKING SPACE #}
 
 {{ disp_feature_field('general_gates', 'Gates') }}
 
@@ -64,26 +64,16 @@ Expected context variables:
 
 {{ disp_feature_field('threshold', 'Threshold') }}
 
-{#
-{% if code.features %}
-{% for featurename, featuretext in code.features.items() %}
-<dt class="code-feature code-feature-{{featurename}}">{{featurename}}</dt>
-<dd class="code-feature code-feature-{{featurename}}">
-  {{featuretext}}
-</dd>
-{% endfor %}
-{% endif %}
-#}
 
 {% if code.realizations %}
-<dt>Realizations</dt>
+<dt class="code-realizations">Realizations</dt>
 <dd class="code-realizations">
   {{code.realizations}}
 </dd>
 {% endif %}
 
 {% if code.notes %}
-<dt>Notes</dt>
+<dt class="code-notes">Notes</dt>
 <dd class="code-notes">
   {{code.notes}}
 </dd>
@@ -93,7 +83,7 @@ Expected context variables:
 <!-- Relationships to other codes -->
 
 {% if code.relations.parents %}
-<dt>Parent(s)</dt>
+<dt class="code-parents">Parent(s)</dt>
 <dd class="code-parents">
   {% set use_relation_type = 'parents' %}
   {% set use_relations = code.relations.parents %}
@@ -102,7 +92,7 @@ Expected context variables:
 {% endif %}
 
 {% if code.relations.parent_of %}
-<dt>Parent of</dt>
+<dt class="code-parent-of">Parent of</dt>
 <dd class="code-parent-of">
   {% set use_relation_type = 'parent-of' %}
   {% set use_relations = code.relations.parent_of %}
@@ -111,7 +101,7 @@ Expected context variables:
 {% endif %}
 
 {% if code.relations.cousins %}
-<dt>Cousin(s)</dt>
+<dt class="code-cousins">Cousin(s)</dt>
 <dd class="code-cousins">
   {% set use_relation_type = 'cousins' %}
   {% set use_relations = code.relations.cousins %}
@@ -120,7 +110,7 @@ Expected context variables:
 {% endif %}
 
 {% if code.relations.cousin_of %}
-<dt>Cousin of</dt>
+<dt class="code-cousin-of">Cousin of</dt>
 <dd class="code-cousin-of">
   {% set use_relation_type = 'cousin-of' %}
   {% set use_relations = code.relations.cousin_of %}

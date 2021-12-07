@@ -229,9 +229,11 @@ dd {
     border: none 0px;
 }
 
-//$ecc-dl-left-column-width: 120px;
-$ecc-dl-left-column-width: 90px;
+$ecc-dl-left-column-width: 120px;
 
+@mixin ecc-label-dt-word-wrap {
+    max-width: $ecc-dl-left-column-width;
+}
 
 .ecc-code {
     > dt {
@@ -240,7 +242,7 @@ $ecc-dl-left-column-width: 90px;
     }
     
     > dt.dt-wrap-label {
-        max-width: $ecc-dl-left-column-width;
+        @include ecc-label-dt-word-wrap;
     }
 
     > dd {
@@ -252,23 +254,30 @@ $ecc-dl-left-column-width: 90px;
         padding: 2px 0px;
         margin-bottom: 10px;
     }
+
+
+    .na {
+        font-style: italic;
+        color: $text-dim-color;
+    }
+
+    .code-relations-list {
+        list-style: none;
+        padding: 0px;
+        margin: 0px;
+    }
+
+    span.code-introduced {
+        display: inline-block;
+        margin-left: 0.3em;
+    }
+
+    dt.code-feature-code_capacity_threshold {
+        @include ecc-label-dt-word-wrap;
+    }
+
 }
 
-.na {
-    font-style: italic;
-    color: $text-dim-color;
-}
-
-.code-relations-list {
-    list-style: none;
-    padding: 0px;
-    margin: 0px;
-}
-
-.code-introduced {
-    display: inline-block;
-    margin-left: 0.5em;
-}
 
 a.code-info-corner-icon {
     display: inline-block;
