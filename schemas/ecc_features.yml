@@ -53,6 +53,12 @@ properties:
       type: string
       _minilatex: 'full'
 
+  code_capacity_threshold: 
+    type: array
+    items:
+      type: string
+      _minilatex: 'full'
+
 
   # We can decide to add new standard feature fields here.
   #

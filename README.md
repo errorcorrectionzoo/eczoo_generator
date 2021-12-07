@@ -76,3 +76,11 @@ The command should display something like `Serving HTTP on 0.0.0.0 port 8000
 view the generated site (or [try to click this link](http://localhost:8000/)
 after you've started the python http server).
 
+
+## Building the Javascript Components
+
+Check out the README file in `jscomponents/` for instructions on how to rebuild
+the javascript-based components of the site (such as the search tool).  The
+compiled javascript components are committed into git (might change in the
+future), so you do not have to worry about installing a JavaScript environment
+to build the site.
