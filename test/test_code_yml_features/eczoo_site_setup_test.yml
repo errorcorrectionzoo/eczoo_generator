@@ -24,6 +24,11 @@ dirs:
   codes_dir: test/test_code_yml_features/codes
 
   #
+  # Where to find additional info to help building the citations
+  #
+  citation_extras: ../eczoo_data/citation_extras
+
+  #
   # Where to OUTPUT THE EC ZOO WEBSITE FILES.  Given as an absolute path or as a
   # path relative to root_source_dir.
   #

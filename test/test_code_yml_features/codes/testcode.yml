@@ -38,6 +38,13 @@ notes:
       a \textit{footnote}, by the way.}
 
   - |
+      Test citation to book \cite{doi:10.1017/CBO9780511976667}.  Test citation
+      to arXiv entry with incomplete DOI (issue \#43) \cite{arXiv:1604.04062}.
+      Test citing a preset: \cite{preset:PreskillLectureNotesQuComputation}.
+      Test citing a preset with citation note:
+      \cite[Chap.~6]{preset:PreskillLectureNotesQuComputation}.
+
+  - |
       A second note goes here.  This one contains a display equation:
       \begin{align}
         S_1 &= I\,Z\,X\,X\,Z\ ;  \nonumber\\

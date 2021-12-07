@@ -160,6 +160,9 @@ def _make_lw_context():
             macrospec.MacroSpec('emph', '{'),
             macrospec.MacroSpec('textit', '{'),
             macrospec.MacroSpec('textbf', '{'),
+        ],
+        specials=[
+            macrospec.SpecialsSpec('~'),
         ]
     )
     lw_context.add_context_category(
@@ -655,7 +658,9 @@ class ToHtmlConverter:
         raise ValueError(f"LaTeX environment is not supported: ‘{node.environmentname}’")
 
     def specials_node_to_html(self, node):
-        raise ValueError(f"Unknown specials: ‘{node.macroname}’")
+        if node.specials_chars == '~':
+            return ' ' # non-breaking space
+        raise ValueError(f"Unknown specials: ‘{node.specials_chars}’")
 
     def node_to_html(self, node):
 

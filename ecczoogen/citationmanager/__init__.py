@@ -26,7 +26,8 @@ logger = logging.getLogger(__name__)
 
 # ------------------------------------------------
 
-_rx_id_from_entryid = re.compile(
+_rx_arxiv_id_from_entryid = re.compile(
+    # note: <arxivid> does NOT include the version number
     'https?://arxiv.org/abs/(?P<arxivid>.*?)(?P<versionnumstr>v(?P<versionnum>\d+))?$',
     flags=re.IGNORECASE
 )
@@ -41,17 +42,26 @@ class Citation:
     def __init__(self, *,
                  arxiv=None,
                  doi=None,
+                 preset=None,
                  manual=None):
+
         self.arxiv = arxiv
+
         self.doi = doi
-        self.manual = manual # manual citation with minilatex formatting
+
+        # a predetermined standard entry that doesn't have an arXiv or DOI
+        # identifier
+        self.preset = preset 
+
+        # manual citation (can contain minilatex formatting)
+        self.manual = manual
 
         if len([ x
-                 for x in (self.arxiv, self.doi, self.manual,)
+                 for x in (self.arxiv, self.doi, self.preset, self.manual,)
                  if x is not None ]) != 1:
-            raise ValueError(f"Can only specify one of arxiv (‘{arxiv}’), doi"
-                             f" (‘{doi}’), or manual "
-                             f"(‘{manual}’)")
+            raise ValueError(f"Must specify exactly one of arxiv (‘{self.arxiv}’), doi"
+                             f" (‘{self.doi}’), preset (‘{self.preset}’) or manual "
+                             f"(‘{self.manual}’)")
 
         self.full_citation_text_minilatex = None
 
@@ -65,8 +75,10 @@ class Citation:
         if (self.doi is None) != (other.doi is None) \
            or self.doi != other.doi:
             return False
-        if (self.manual is None) \
-               != (other.manual is None) \
+        if (self.preset is None) != (other.preset is None) \
+           or self.preset != other.preset:
+            return False
+        if (self.manual is None) != (other.manual is None) \
            or self.manual != other.manual:
             return False
         
@@ -74,9 +86,9 @@ class Citation:
 
     def __repr__(self):
         return (
-            f'Citation(arxiv={self.arxiv}, doi={self.doi}, '
-            f'manual={self.manual}, '
-            f'full_citation_text_minilatex={self.full_citation_text_minilatex})'
+            f'Citation(arxiv={self.arxiv!r}, doi={self.doi!r}, preset={self.preset!r}'
+            f'manual={self.manual!r}, '
+            f'full_citation_text_minilatex={self.full_citation_text_minilatex!r})'
         )
 
 
@@ -96,11 +108,12 @@ def _get_single_kwarg(kwargs):
 
 
 class CitationTextManager:
-    def __init__(self):
+    def __init__(self, citation_hints):
         self._citations_db = []
         self._citations_by_field = {
             'arxiv': {},
             'doi': {},
+            'preset': {},
             'manual': {},
         }
 
@@ -116,6 +129,14 @@ class CitationTextManager:
             'fetched_date': datetime.datetime.now().isoformat(),
         }
 
+        self._citation_hints = citation_hints
+        self._preset_citations = self._citation_hints['presets']
+        self._arxiv_to_doi_override = self._citation_hints['arxiv_to_doi_override']
+
+        logger.debug(f"Initialized citation manager.\n\n"
+                     f"{self._preset_citations=}\n\n"
+                     f"{self._arxiv_to_doi_override=}\n")
+
 
     def save_db_json(self, fw):
         json.dump(self._fetched_info, fw)
@@ -127,9 +148,8 @@ class CitationTextManager:
         self.load_db_obj( json.loads(s) )
 
     def load_db_obj(self, obj):
-        assert ('arxiv' in obj)
-        assert ('doi' in obj)
-        assert ('fetched_date' in obj)
+        if not (('arxiv' in obj) and ('doi' in obj) and ('fetched_date' in obj)):
+            raise ValueError(f"Error in citation data, abort read: ‘{repr(obj)[:100]}’")
         t = datetime.datetime.fromisoformat(obj['fetched_date'])
         if (datetime.datetime.now() - t) > datetime.timedelta(days=30):
             logger.debug(f"Not using the requested cache file, it's too old.")
@@ -163,51 +183,6 @@ class CitationTextManager:
             raise ValueError(f"Citation not found for {kwargs=} in internally "
                              f"constructed database!")
         return citation
-        
-        # # give direct access to assign 'matches' from within nested function
-        # p = {'matches': None}
-
-        # def _refine_with(fld, value):
-        #     if value is None:
-        #         return
-
-        #     new_matches = self._citations_by_field[fld].get(value, set())
-        #     if p['matches'] is None:
-        #         p['matches'] = new_matches
-        #         return
-        #     p['matches'].intersection_update(new_matches)
-
-        # for fld, value in kwargs.items():
-        #     _refine_with(fld, value)
-        #     if p['matches'] is not None and len(p['matches']) == 0:
-        #         # no matches
-        #         raise ValueError(f"Citation not found for {kwargs=} in internally "
-        #                          f"constructed database!")
-
-        # if len(p['matches']) > 1:
-        #     logger.warning(f"Warning: multiple citations found for {kwargs=}. "
-        #                    f"How is this even possible??  Probable bug in code.")
-
-        # return p['matches'].pop() # pick any element, should be a single element anyways
-
-
-    # def _has_fetched_info_for_arxivid(self, arxividstr):
-    #     m = _rx_arxivid.match(arxividstr)
-    #     if m is None:
-    #         raise ValueError(
-    #             f"Error parsing arXiv ID w/ possible version number: {arxividstr!r}"
-    #         )
-
-    #     arxivid = m.group('arxivid').lower()
-    #     versionnum = m.group('versionnum')
-
-    #     if arxivid not in self._fetched_info['arxiv']:
-    #         return False
-    #     if not versionnum:
-    #         return True
-    #     if versionnum in self._fetched_info['arxiv'][arxivid]:
-    #         return True
-    #     return False
         
 
     #
@@ -251,7 +226,7 @@ class CitationTextManager:
                 # build citation from the arxiv meta-information
                 #
 
-                m = _rx_id_from_entryid.match(result.entry_id)
+                m = _rx_arxiv_id_from_entryid.match(result.entry_id)
                 if m is None:
                     logger.warning(f"Unable to parse arXiv ID from {result.entry_id!r}")
                     continue
@@ -260,9 +235,21 @@ class CitationTextManager:
                 versionnum = m.group('versionnum')
                 arxivver = int(versionnum) if versionnum else None
 
+                logger.debug(
+                    f"Processing received information for ‘{arxivid}’ (got v{arxivver})")
+
                 doi = None
                 if result.doi is not None and result.doi:
                     doi = str(result.doi)
+
+                # override the given DOI in exceptional cases where it might be
+                # missing, incomplete, or incorrect:
+                if arxivid in self._arxiv_to_doi_override:
+                    override_doi = self._arxiv_to_doi_override[arxivid]
+                    logger.debug(f"Overriding reported DOI (‘{doi}’) for arXiv "
+                                 f"item ‘{arxivid}’ with manually specified DOI "
+                                 f"‘{override_doi}’ given in citation hints")
+                    doi = override_doi
 
                 result_d = dict(
                     entry_id=result.entry_id,
@@ -277,7 +264,7 @@ class CitationTextManager:
                 if not versionnum:
                     self._fetched_info['arxiv'][arxivid] = result_d
                 else:
-                    self._fetched_info['arxiv'][arxivid+versionnum] = result_d
+                    self._fetched_info['arxiv'][f"{arxivid}v{versionnum}"] = result_d
                     if arxivid not in self._fetched_info['arxiv'] \
                        or self._fetched_info['arxiv'][arxivid].arxivver is None \
                        or self._fetched_info['arxiv'][arxivid].arxivver < arxivver:
@@ -408,6 +395,17 @@ class CitationTextManager:
             
             logger.debug(f"Citation doi:{doi} → {full_citation_text}")
         
+        #
+        # Process preset entries
+        #
+
+        for preset, citeobj in self._citations_by_field['preset'].items():
+            try:
+                citeobj.full_citation_text_minilatex = self._preset_citations[citeobj.preset]
+            except KeyError:
+                logger.error(f"Unknown preset citation: ‘{citeobj.preset}’")
+                raise
+
         #
         # Now also process manual entries
         #

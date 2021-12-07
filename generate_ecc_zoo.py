@@ -40,6 +40,11 @@ args_parser.add_argument("--eczoo-site-setup", action='store',
                          help="Specify alternative settings file instead "
                          "of ‘./eczoo_site_setup.yml’")
 
+args_parser.add_argument("--skip-citation-cache", action='store_true', default=False,
+                         help="Do not read any citation caches and force fetching "
+                         "all citation information from arXiv (arXiv ID) or "
+                         "crossref.org (DOI)")
+
 args_parser.add_argument("--run-server", action='store_true', default=False,
                          help="Run the test server")
 args_parser.add_argument("--run-server-host", action='store',
@@ -66,11 +71,24 @@ _root_dir = os.path.abspath(eczoo_site_setup['dirs']['root_dir'])
 class Dirs:
     root_dir = _root_dir
 
+    #
+    # dirs for reading data that will be used to populate the zoo
+    #
+
     codes_dir = os.path.join(_root_dir, eczoo_site_setup['dirs']['codes_dir'])
+
+    citation_extras = os.path.join(_root_dir, eczoo_site_setup['dirs']['citation_extras'])
+
+    #
+    # Where to output the website files:
+    #
 
     output_dir = os.path.join(_root_dir, eczoo_site_setup['dirs']['output_dir'])
 
-    # dirs for specific types of source files:
+    #
+    # Where to find various template resources and web components in order to
+    # build the website:
+    #
 
     templates_dir = os.path.join(_root_dir, 'templates')
     pages_dir = os.path.join(_root_dir, 'templates', 'pages')
@@ -480,6 +498,9 @@ for SpecialPageClass in special_pages:
 
 logger.info("Generating citation database ...")
 
+with open(os.path.join(Dirs.citation_extras, 'citations_hints.yml'), encoding='utf-8') as f:
+    citation_hints = yaml.safe_load(f)
+
 citation_scanner = citationmanager.MiniLatexCitationScanner()
 
 for code_id, code in zoo.all_codes().items():
@@ -487,7 +508,7 @@ for code_id, code in zoo.all_codes().items():
     # look in the code.source_info field, where we kept the original YML structure
     citation_scanner.scan_dict_tree(code.source_info, f'<Code id={code_id}>')
 
-citation_manager = citationmanager.CitationTextManager()
+citation_manager = citationmanager.CitationTextManager(citation_hints)
 for c in citation_scanner.get_encountered_citations():
     try:
         citation_manager.add_citation(**{c.citation_key_prefix.lower(): c.citation_key})
@@ -498,29 +519,31 @@ for c in citation_scanner.get_encountered_citations():
 
 cache_citation_fetched_data_filename = 'dat/cache_citation_fetched_data.json'
 
-for path in (Dirs.output_dir, 'https://errorcorrectionzoo.org'):
-    cachefile = os.path.join(path, cache_citation_fetched_data_filename)
-    logger.debug(f"Try to read cache from ‘{cachefile}’ ...")
-    if cachefile.startswith( ('https://', 'http://') ):
-        r = requests.get(cachefile)
-        if r.status_code == 200:
-            r.encoding = 'utf-8'
-            try:
-                citation_manager.load_db_json_s(r.text)
-                logger.debug(f"Cache read from ‘{cachefile}’")
-                break
-            except Exception as e:
-                logger.debug(f"Ignoring exception -> {e}")
-                continue
-    elif os.path.exists(cachefile):
-        with open(cachefile, 'r') as f:
-            try:
-                citation_manager.load_db_json(f)
-                logger.debug(f"Cache read from ‘{cachefile}’")
-                break
-            except Exception as e:
-                logger.debug(f"Ignoring exception -> {e}")
-                continue
+if not args.skip_citation_cache:
+
+    for path in (Dirs.output_dir, 'https://errorcorrectionzoo.org'):
+        cachefile = os.path.join(path, cache_citation_fetched_data_filename)
+        logger.debug(f"Try to read cache from ‘{cachefile}’ ...")
+        if cachefile.startswith( ('https://', 'http://') ):
+            r = requests.get(cachefile)
+            if r.status_code == 200:
+                r.encoding = 'utf-8'
+                try:
+                    citation_manager.load_db_json_s(r.text)
+                    logger.debug(f"Cache read from ‘{cachefile}’")
+                    break
+                except Exception as e:
+                    logger.info(f"Failed to load cache ‘{cachefile}’: {e!r}")
+                    continue
+        elif os.path.exists(cachefile):
+            with open(cachefile, 'r') as f:
+                try:
+                    citation_manager.load_db_json(f)
+                    logger.debug(f"Cache read from ‘{cachefile}’")
+                    break
+                except Exception as e:
+                    logger.info(f"Failed to load cache ‘{os.path.relpath(cachefile)}’: {e!r}")
+                    continue
 
 citation_manager.fetch_citation_info()
 

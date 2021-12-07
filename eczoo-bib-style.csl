@@ -10,6 +10,7 @@
     <author>
       <name>Jonas Lähnemann</name>
       <email>jonas@pdi-berlin.de</email>
+      <!-- ADAPTED BY Philippe Faist (2021) -->
     </author>
     <category citation-format="numeric"/>
     <category field="physics"/>
@@ -95,7 +96,7 @@
       <group delimiter=", "><!-- added -->
       <text macro="author" />
       <choose>
-        <if type="bill book graphic legal_case legislation motion_picture report song" match="any">
+        <if type="bill book monograph graphic legal_case legislation motion_picture report song" match="any">
           <group delimiter=" ">
             <group delimiter=", ">
               <text variable="title" text-case="title" font-style="italic"/>
