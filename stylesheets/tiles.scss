@@ -1,0 +1,34 @@
+
+$tile-margin: 5px;
+$tile-image-size: 50px;
+$tile-image-gap: 10px;
+
+.tiles-collection {
+
+    margin-bottom: 1rem;
+
+    display: grid;
+    grid: auto-flow / repeat(1, 1fr); // only a single column
+    grid-row-gap: $tile-margin;
+    grid-column-gap: $tile-margin;
+    
+    .tile {
+        padding: $tile-margin $tile-margin $tile-margin;
+        padding-left: ($tile-image-size + $tile-margin + $tile-image-gap);
+        min-height: $tile-image-size;
+
+        border: solid 1px rgba($text-dim-color,0.15);
+
+        background-position: $tile-margin 50%;
+        background-repeat: no-repeat;
+
+        background-size: $tile-image-size;
+
+        display: grid;
+
+        > span {
+            grid-row: 2;
+        }
+    }
+
+}
