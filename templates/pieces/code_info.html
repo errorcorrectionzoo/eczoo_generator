@@ -100,20 +100,11 @@ Expected context variables:
 </dd>
 {% endif %}
 
-{% if code.relations.cousins %}
+{% if code.relations.cousins or code.relations.cousin_of %}
 <dt class="code-cousins">Cousin(s)</dt>
 <dd class="code-cousins">
   {% set use_relation_type = 'cousins' %}
-  {% set use_relations = code.relations.cousins %}
-  {% include 'pieces/list_code_relations.html' %}
-</dd>
-{% endif %}
-
-{% if code.relations.cousin_of %}
-<dt class="code-cousin-of">Cousin of</dt>
-<dd class="code-cousin-of">
-  {% set use_relation_type = 'cousin-of' %}
-  {% set use_relations = code.relations.cousin_of %}
+  {% set use_relations = [] + code.relations.cousins|list + code.relations.cousin_of|list %}
   {% include 'pieces/list_code_relations.html' %}
 </dd>
 {% endif %}
