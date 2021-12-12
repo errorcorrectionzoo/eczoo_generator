@@ -337,9 +337,21 @@ span.code-name {
 
 // info popup frames & detail
 
+dd.code-name {
+    display: grid;
+    grid-template-columns: 10fr auto;
+    gap: 1rem;
+}
+
+.code-name-cell
+{
+    grid-column: 1;
+}
+
 .info-popup-button-container
 {
-    float: right;
+    grid-column: 2;
+    //float: right;
     //margin-top: 8px;
 }
 
