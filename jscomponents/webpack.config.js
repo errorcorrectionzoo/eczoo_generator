@@ -3,6 +3,73 @@ const webpack = require("webpack");
 
 
 //
+// Code used on the home page.  e.g. show random code
+//
+
+const EczHomeStuffJSComponent = {
+    entry: {
+        "eczhomestuff": [
+            "./src/eczrandomcode/index.js"
+        ],
+    },
+    module: {
+        rules: [
+            {
+                test: /(\~)$/,
+                loader: "ignore-loader"
+            },
+            {
+                test: /\.(js|jsx)$/,
+                exclude: /(node_modules|bower_components)/,
+                loader: "babel-loader",
+                options: {
+                    presets: [
+                        [
+                            "@babel/preset-env",
+                            {
+                                targets: "> 5%"
+                            }
+                        ]
+                    ],
+                    plugins: [
+                        "@babel/plugin-proposal-export-default-from",
+                        "@babel/plugin-proposal-class-properties"
+                        //,
+                        //"@babel/plugin-syntax-top-level-await"
+                    ],
+                    sourceMaps: true
+                }
+            },
+            {
+                test: /\.css$/,
+                use: ["style-loader", "css-loader"]
+            },
+            {
+                test: /\.s[ac]ss$/i,
+                use: [
+                    // Creates `style` nodes from JS strings
+                    'style-loader',
+                    // Translates CSS into CommonJS
+                    'css-loader',
+                    // Compiles Sass to CSS
+                    'sass-loader'
+                ]
+            }
+        ]
+    },
+    resolve: {
+        extensions: ["*", ".js", ".jsx"]
+    },
+    output: {
+        path: path.resolve(__dirname, "dist/"),
+        publicPath: "/dist/",
+        filename: "[name].js",
+        library: "[name]",
+    }
+};
+
+
+//
 // Code that is used in individual code information pages (collect together
 // the necessary components in one single webpack)
 //
@@ -205,6 +272,7 @@ const EczToolDecodeSubmittedJsonCodeComponent = {
 };
 
 module.exports = [
+    EczHomeStuffJSComponent,
     EczCodePageStuffJSComponent,
     EczSearchJSComponent,
     EczToolDecodeSubmittedJsonCodeComponent

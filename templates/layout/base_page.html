@@ -24,10 +24,14 @@
 
   <link type="text/css" rel="stylesheet" href="{{ 'css/main.css' | prebaseurl }}" />
 
+  {# Some JS components need to know where to look for data files #}
+  <script type="text/javascript">
+    window.ecz_baseurl = '{{ ''|prebaseurl }}';
+  </script>
+
   <script type="text/javascript" async
 	  src="{{ 'js/misc.js' | prebaseurl }}">
   </script>
-
   <script type="text/javascript" src="{{ 'js/mathjaxinit.js' | prebaseurl }}" async>
   </script>
 

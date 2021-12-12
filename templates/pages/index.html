@@ -1,6 +1,9 @@
 {% set page_no_sidebar = True %}
 {% set div_bodycontents_classes = ['page-index'] %}
+{% set extra_js = [ 'js/eczhomestuff.js' | prebaseurl ] %}
+
 {% extends 'layout/base_page.html' %}
+
 {% block block_page_title %}Welcome to the error correction zoo{% endblock %}
 
 {% block contents %}
@@ -58,6 +61,20 @@
     <li><a href="{{ 'additional_resources' | prebaseurl }}">Additional resources</a></li>
     <li><a href="{{ 'about' | prebaseurl }}">About</a></li>
   </ul>
+</nav>
+
+<nav class="page-index-box page-index-box-span-2" id="random-code-box">
+  <span style="font-style:italic">(Random code loading …)</span>
+</nav>
+
+{% set stat_num_kingdoms = domains | map(attribute='kingdoms') | map('length') | sum %}
+{% set num_codes = zoo.all_codes() | length %}
+
+<nav class="page-index-box" id="quick-stats-box">
+  Stats at a glance:
+  <span class="stat-number">{{ num_codes }}</span>&nbsp;codes,
+  <span class="stat-number">{{ stat_num_kingdoms }}</span>&nbsp;kingdoms, 
+  <span class="stat-number">{{ domains | list | length }}</span>&nbsp;domains.
 </nav>
 
 

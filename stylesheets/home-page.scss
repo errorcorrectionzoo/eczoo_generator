@@ -6,7 +6,7 @@
     gap: 1rem;
     
     .page-index-box {
-        grid-column-span: 1;
+        grid-column: span 1;
 
         @include sidebar-panel-style;
 
@@ -42,7 +42,14 @@
             }
         }
 
+        .stat-number {
+            font-weight: bold;
+        }
+
     }
-    
+
+    .page-index-box-span-2 {
+        grid-column: span 2;
+    }
 }
 
