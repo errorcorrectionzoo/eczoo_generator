@@ -43,24 +43,7 @@ export class EczPopupInfoTool
                 interactiveBorder: 30,
                 maxWidth: '450px',
                 popperOptions: {
-
-    strategy: 'fixed',
-    modifiers: [
-      {
-        name: 'flip',
-        options: {
-          fallbackPlacements: ['bottom', 'right'],
-        },
-      },
-      {
-        name: 'preventOverflow',
-        options: {
-          altAxis: true,
-          tether: false,
-        },
-      },
-    ],
-                    // placement: 'bottom',
+                    placement: 'bottom',
                 },
                 theme: 'light',
             }
