@@ -1,10 +1,65 @@
+{% set page_no_sidebar = True %}
+{% set div_bodycontents_classes = ['page-index'] %}
 {% extends 'layout/base_page.html' %}
-{% block block_page_title %}Error Correction Zoo — Home{% endblock %}
+{% block block_page_title %}Welcome to the error correction zoo{% endblock %}
 
 {% block contents %}
 
-<h1>Welcome to the error correction zoo</h1>
+{% for domain in domains %}
 
-<p>Select a page to visit in the navigation bar.</p>
+{% set max_num_codes = 3 %}
+{% set max_num_codes_later = 1 %}
+
+<nav class="page-index-box">
+  <h1><a href="{{domain.htmlpage.path() | prebaseurl}}">{{domain.name}}</a></h1>
+  <ul class="page-index-box-links">
+    {% for kingdom in domain.kingdoms %}
+      <li>
+        <a class="page-index-box-links-head"
+           href="{{ kingdom.htmlpage.path() | prebaseurl }}">{{kingdom.name}}</a>:
+        {% set codes = zoo.get_code_family_tree(kingdom.code_id) | sort(attribute='family_generation_level') %}
+        {# after two kingdoms, only show one code per kingdom in the same domain #}
+        {% set this_max_num_codes = max_num_codes if loop.index0 < 2 else max_num_codes_later %}
+        {% set num_codes = codes | length %}
+        {%- for codeobj in codes[:this_max_num_codes] -%}
+          {%- set code = codeobj | wrap_minilatex -%}
+          <a href="{{ code|code_ref_href }}">{{code.name}}</a>
+          {%- if not loop.last -%}
+            , {# space after comma #}
+          {%- endif -%}
+        {%- endfor -%}
+        {%- if num_codes > this_max_num_codes -%}
+          , <span class="spacer">…</span>
+        {%- else -%}
+          <span class="spacer">.</span>
+        {%- endif -%}
+      </li>
+    {% endfor %}
+  </ul>
+</nav>
+{% endfor %}
+
+<nav class="page-index-box">
+  <h1><a href="{{ '' | prebaseurl }}">Home Page</a></h1>
+  <ul class="navlinks">
+    <li><a href="{{ 'code_graph' | prebaseurl }}">Code graph</a></li>
+    <li><a href="{{ 'all' | prebaseurl }}">All codes</a></li>
+    <!--<li><a href="{{ 'search' | prebaseurl }}">Search</a></li>-->
+    <li>
+      <form action="{{ 'search'|prebaseurl }}" method="GET">
+        <input type="text" class="navbar-search" name="q" placeholder="search"></input>
+      </form>
+    </li>
+  </ul>
+
+  <h1>More</h1>
+  <ul class="navlinks">
+    <li><a href="{{ 'edit_code' | prebaseurl }}">Add new code</a></li>
+    <li><a href="{{ 'additional_resources' | prebaseurl }}">Additional resources</a></li>
+    <li><a href="{{ 'about' | prebaseurl }}">About</a></li>
+  </ul>
+</nav>
+
+
 
 {% endblock contents %}

@@ -1,0 +1,13 @@
+.search-instructions-tip {
+    p {
+        font-size: 14px;
+        font-style: italic;
+    }
+    p.search-instructions-item::before {
+        content: '• ';
+    }
+    code {
+        font-size: 12.5px;
+        font-family: monospace;
+    }
+}

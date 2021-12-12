@@ -42,9 +42,21 @@
 
 </head>
 <body>
+
+{% if not div_bodycontents_classes %}
+  {% set div_bodycontents_classes = [] %}
+{% endif %}
+{% if page_app_full_width %}
+  {% set div_bodycontents_classes = div_bodycontents_classes + ['app-full-width'] %}
+{% endif %}
+{% if page_no_sidebar %}
+  {% set div_bodycontents_classes = div_bodycontents_classes + ['page-no-sidebar'] %}
+{% endif %}
 <div
   id="bodycontents"
-  class="{{ 'app-full-width' if page_app_full_width else '' }}"
+  {% if div_bodycontents_classes %}
+    class="{{ ' '.join(div_bodycontents_classes) }}"
+  {% endif %}
   >
 
   <header id="header">

@@ -1,0 +1,48 @@
+#bodycontents.page-index > main
+{
+    
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    
+    .page-index-box {
+        grid-column-span: 1;
+
+        @include sidebar-panel-style;
+
+        padding: 8px;
+
+        h1:first-child {
+            margin-top: 0px;
+        }
+        h1 {
+            margin-bottom: 5px;
+        }
+
+        ul.page-index-box-links {
+            display: inline;
+
+            list-style: none;
+            padding: 0px 0px 0px 1px;
+            margin: 0px;
+
+            .page-index-box-links-head {
+                display: inline-block; // no line break within the 'head' item
+                font-weight: 550;
+            }
+
+            > li {
+                display: inline;
+                padding: 2px 0px;
+            }
+
+            .spacer {
+                display: inline-block;
+                padding-right: 8px;
+            }
+        }
+
+    }
+    
+}
+

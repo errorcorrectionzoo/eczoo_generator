@@ -337,6 +337,7 @@ htmlpgcoll.create_page(
 
 global_context = {
     'domains': htmlpgcoll.wrap_object_with_minilatex_properties(eczoo_domains),
+    'zoo': zoo,
 }
 
 

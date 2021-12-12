@@ -14,6 +14,8 @@ import minilatextohtml
 
 # ------------------------------------------------------------------------------
 
+_id_fields = ('code_id', )
+
 class _HtmlObjectWrapper:
     def __init__(self, obj, tohtmlconverter, whatobject):
         super().__init__()
@@ -52,10 +54,15 @@ class _HtmlObjectWrapper:
             yield self._wrap_obj(a, '{}[{}]'.format(self.whatobject, j))
 
     def __getattr__(self, attr):
+        # special exception for internal identificator fields (e.g., code_id)
+        if attr in _id_fields:
+            return getattr(self.obj, attr)
         return self._wrap_obj( getattr(self.obj, attr) ,
                                '{}.{}'.format(self.whatobject, attr))
 
     def __getitem__(self, key):
+        if key in _id_fields:
+            return self.obj[key]
         return self._wrap_obj( self.obj[key] ,
                               '{}[{!r}]'.format(self.whatobject, key) )
 
@@ -360,6 +367,10 @@ class HtmlPageCollection:
             lambda foot_no: markupsafe.Markup( self.format_footnote_label_html(foot_no) )
         self.jinja2env.filters['format_citation_label_html'] = \
             lambda cite_no: markupsafe.Markup( self.format_citation_label_html(cite_no) )
+
+        # explicitly wrap attributes for minilatex rendering
+        self.jinja2env.filters['wrap_minilatex'] = \
+            lambda obj: self.wrap_object_with_minilatex_properties(obj)
 
         # access raw minilatex code on objects wrapped as _HtmlObjectWrapper
         self.jinja2env.filters['raw_minilatex_code'] = \

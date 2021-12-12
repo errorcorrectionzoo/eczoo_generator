@@ -36,6 +36,11 @@ body {
     margin-left: 0px;
 }
 
+#bodycontents.page-no-sidebar #sidebar {
+    display: none;
+}
+
+
 
 // rules to collapse sidebar below the page
 @media (max-width: $page-main-width+2*$page-main-margins) {

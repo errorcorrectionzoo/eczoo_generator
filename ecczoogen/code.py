@@ -94,7 +94,7 @@ class Code:
             )
         }
         d.update({
-            f'feature {featurename}': _value_to_text(
+            f'feature_{featurename}': _value_to_text(
                 featuredata,
                 where=f'{self!r}.features[{featurename!r}]'
             )
@@ -102,7 +102,7 @@ class Code:
         })
 
         d.update({
-            f'{reltype} detail': '\n\n'.join([
+            f'{reltype}_detail': '\n\n'.join([
                 _minilatextotext(relobj.detail, where=f'{self!r}.relations.{reltype}s[{j}]')
                 for j, relobj in enumerate(
                         getattr(self.relations, reltype+'s') # "self.relations.parents"

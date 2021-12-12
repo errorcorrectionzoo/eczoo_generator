@@ -1,5 +1,11 @@
 import lunr from 'lunr';
 
+import tippy from 'tippy.js';
+
+import 'tippy.js/dist/tippy.css'; // for styling
+import 'tippy.js/themes/light.css';
+
+import './searchwidget.scss';
 
 const default_context_length = 50; // chars
 
@@ -9,10 +15,12 @@ const max_num_results_for_mathjax = 100;
 
 function _escapeHTML(str)
 {
-    var p = document.createElement("p");
+    let p = document.createElement("p");
     p.appendChild(document.createTextNode(str));
     return p.innerHTML;
 }
+
+
 
 
 
@@ -24,9 +32,14 @@ export class EczooSearchWidget
 
         this.fields = a.fields;
 
+        this.initial_search_query = a.initial_search_query;
+
         this.ref_field = a.ref_field;
         this.title_field = a.title_field;
         this.href_field = a.href_field;
+
+        this.auto_fuzz_distance = a.auto_fuzz_distance || 1;
+        console.log("Auto fuzz distance is = ", this.auto_fuzz_distance);
 
         this.context_length = a.context_length;
         if (typeof this.context_length == 'undefined') {
@@ -63,9 +76,9 @@ export class EczooSearchWidget
 
         // maybe we might need to auto-detect the list of fields
         if (typeof this.fields == 'undefined' || this.fields.length == 0) {
-            var fields = [];
+            let fields = [];
             Object.keys(this.store).forEach( (store_key) => {
-                var store_obj = this.store[store_key];
+                let store_obj = this.store[store_key];
                 Object.keys(store_obj).forEach( (field_key) => {
                     if ( fields.indexOf(field_key) == -1 ) {
                         fields.push(field_key);
@@ -77,11 +90,11 @@ export class EczooSearchWidget
 
         // this.idx
         if (typeof this.idx == 'undefined') {
-            var _this = this;
+            let _this = this;
 
             const buildidx = function ()
             {
-                var obj = this;
+                let obj = this;
                 obj.ref(_this.ref_field);
                 _this.fields.forEach( (fldname) => obj.field(fldname) );
                 obj.metadataWhitelist = [ 'position' ];
@@ -112,7 +125,7 @@ export class EczooSearchWidget
         const inputbox = document.createElement('input');
         inputbox.setAttribute('type', "text");
         inputbox.classList.add("search-input");
-        inputbox.value = '';
+        inputbox.value = (this.initial_search_query ? this.initial_search_query : '');
         inputbox.placeholder = 'type & hit RETURN to search';
         this.search_widget_container.appendChild(inputbox);
 
@@ -124,39 +137,122 @@ export class EczooSearchWidget
 
         this.search_results_container = divresults;
 
-        this.search_input.addEventListener('change', (event) => this._do_search(event));
+        this.search_input.addEventListener(
+            'change',
+            (event) => this._do_search_event(event)
+        );
+        
+        let display_fields_html =
+            this.fields.filter( (fld) => (fld.substr(0,1) != '_') )
+            .map( (fld) => '<code>'+fld+'</code>' )
+            .join(', ');
+
+        // create a simple instructions widget
+        let instructions_widget = document.createElement('div');
+        instructions_widget.classList.add('search-instructions-tip');
+        instructions_widget.innerHTML = 
+           `<p>Type query terms and hit RETURN to search. </p>
+            <p>Advanced usage:</p>
+            <p class="search-instructions-item">
+                <code>+term</code> or <code>-term</code> to force the presence
+                or the abscence of a term;
+            </p>
+            <p class="search-instructions-item">
+              <code>field:term</code> to restrict the search term to within
+              the given <i>field</i>. Possible fields: ${display_fields_html}.
+            </p>
+            <p class="search-instructions-item">
+              <code>term~4</code> to include all terms
+              with edit distance 4 from the given term (use
+              <code>term~0</code> to cancel default fuzziness);
+            </p>
+            <p class="search-instructions-item">
+              <code>term^10</code> to &quot;boost&quot; the term, i.e., to make
+              it contribute more to the final match score.
+            </p>`;
+
+        // add a tippy widget for some simple instructions
+        this.tippy_instance = tippy(
+            this.search_input,
+            {
+                content: instructions_widget,
+                allowHTML: true,
+                trigger: 'focus',
+                interactive: true,
+                interactiveBorder: 30,
+                maxWidth: '450px',
+                popperOptions: {
+                    placement: 'bottom',
+                },
+                theme: 'light',
+            }
+        );
+
+        if (this.initial_search_query) {
+            this.do_search(this.initial_search_query);
+        }
     }
 
-    _do_search(event)
+    _do_search_event(event)
     {
+        const value = event.target.value;
+        this.do_search(value);
+    }
+
+    do_search(search_str)
+    {
+        if (typeof MathJax != 'undefined') {
+            MathJax.typesetClear(this.search_results_container);
+        }
         this.search_results_container.innerHTML = '';
 
-        const value = event.target.value;
+        this.tippy_instance.hide();
 
-        if (!value || value.trim().length == 0) {
+        if (!search_str || search_str.trim().length == 0) {
             this._display_search_no_query_string();
             return;
         }
 
-        console.log("Searching! value =", value);
+        console.log("Searching! search_str =", search_str);
 
-        var results;
+        let _auto_fuzz_distance = this.auto_fuzz_distance;
+
+
+        let results;
         try {
 
-            results = this.idx.search(value);
+            //results = this.idx.search(search_str);
+
+            let q = function (query) {
+                let parser = new lunr.QueryParser(search_str, query);
+                let qq = parser.parse();
+                console.log("Query = ", qq);
+                // tweak the query to add an edit distance to all terms
+                qq.clauses.forEach( (clause) => {
+                    console.log("Processing clause: ", clause,
+                                " auto_fuzz_distance = ", _auto_fuzz_distance);
+                    if (typeof clause.editDistance === 'undefined') {
+                        clause.editDistance = _auto_fuzz_distance;
+                    }
+                } );
+                console.log("Done processing clauses.");
+                return qq;
+            };
+
+            results = this.idx.query(q);
 
         } catch (e) {
             if (e instanceof lunr.QueryParseError) {
-                this._display_search_error(value, e)
+                this._display_search_error(search_str, e);
                 return
             } else {
-                throw e
+                throw e;
             }
         }
 
         console.log('results =', results);
 
-        this._display_search_results(value, results);
+        this._display_search_results(search_str, results);
     }
 
     _display_search_no_query_string()
@@ -185,12 +281,12 @@ export class EczooSearchWidget
         s2.textContent = error.message;
         p.appendChild(s2);
         
-        const a = document.createElement('a');
-        a.classList.add('search-query-info');
-        a.setAttribute("href", "https://lunrjs.com/guides/searching.html");
-        a.setAttribute("target", "_blank");
-        a.textContent = "(more information on search syntax)";
-        p.appendChild(a);
+        // const a = document.createElement('a');
+        // a.classList.add('search-query-info');
+        // a.setAttribute("href", "https://lunrjs.com/guides/searching.html");
+        // a.setAttribute("target", "_blank");
+        // a.textContent = "(more information on search syntax)";
+        // p.appendChild(a);
 
         this.search_results_container.appendChild(p);
     }
@@ -206,7 +302,18 @@ export class EczooSearchWidget
 
             if ( (results.length < max_num_results_for_mathjax)
                  && typeof MathJax != 'undefined') {
-                MathJax.typeset();
+
+                // reset equation numbering & disable numbers (to avoid
+                // potentially multiply-defined labels)
+                MathJax.texReset();
+
+                // Setting tags to null here doesn't work, probably need to do
+                // this before loading MathJax
+                //
+                //MathJax.config.tex.tags = null;
+
+                // typeset the math in our results
+                MathJax.typesetPromise();
             }
         }
     }
@@ -216,12 +323,12 @@ export class EczooSearchWidget
         const p = document.createElement('p');
         p.classList.add('search-no-results');
         p.textContent = 'Your search for ‘' + search_str + '’ did not yield any results.';
-        const a = document.createElement('a');
-        a.classList.add('search-query-info');
-        a.setAttribute("href", "https://lunrjs.com/guides/searching.html");
-        a.setAttribute("target", "_blank");
-        a.textContent = "(more information on search syntax)";
-        p.appendChild(a);
+        // const a = document.createElement('a');
+        // a.classList.add('search-query-info');
+        // a.setAttribute("href", "https://lunrjs.com/guides/searching.html");
+        // a.setAttribute("target", "_blank");
+        // a.textContent = "(more information on search syntax)";
+        // p.appendChild(a);
 
         this.search_results_container.appendChild(p);
     }
@@ -237,11 +344,11 @@ export class EczooSearchWidget
         const div = document.createElement('div');
         div.classList.add("search-result");
 
-        var srt = document.createElement('div');
+        let srt = document.createElement('div');
         srt.classList.add("search-result-title");
         div.appendChild(srt);
         if (this.href_field) {
-            var a = document.createElement('a');
+            let a = document.createElement('a');
             a.setAttribute('href', doc[this.href_field]);
             a.classList.add("search-result-link");
             srt.appendChild(a);
@@ -296,8 +403,8 @@ export class EczooSearchWidget
 
             const docfieldstr = doc[fieldname];
 
-            var showhtml = '';
-            var lastpos = 0;
+            let showhtml = '';
+            let lastpos = 0;
 
             for (const pospair of poslist) {
                 if ( (lastpos>0 && ((pospair[0] - lastpos) < 2*context_length))
@@ -338,7 +445,7 @@ export class EczooSearchWidget
 
             const p = document.createElement('div');
             p.classList.add('search-result-field-display');
-            var fieldnameclsname = fieldname.replace(/[^a-zA-Z0-9_-]/g, "");
+            let fieldnameclsname = fieldname.replace(/[^a-zA-Z0-9_-]/g, "");
             p.classList.add('search-result-field-display--' + fieldnameclsname);
             p.innerHTML = showhtml;
 
@@ -349,49 +456,3 @@ export class EczooSearchWidget
     }
 
 };
-
-
-
-// -------------------------------------------------------------------
-
-// automatically install in the page, searching for the correct element by ID
-
-function init_search_widget()
-{
-    console.log("Initialization code for possible search widget.");
-
-    const elem = document.getElementById('EczooSearchWidget');
-    if (elem) {
-
-        console.log("Initializing search widget.");
-
-        var fields = elem.dataset.searchWidgetFields;
-        if (fields) {
-            fields = fieldsval.split(',').map(
-                (s) => s.trim()
-            );
-        }
-        var the_context_length = elem.dataset.searchWidgetContextLength;
-        if (the_context_length) {
-            the_context_length = Number.parseInt(the_context_length);
-        }
-
-        window.eczoo_search_widget = new EczooSearchWidget({
-            search_widget_container: elem,
-            store_fetch_json: elem.dataset.searchWidgetStoreFetchJson,
-            fields: fields,
-            ref_field: elem.dataset.searchWidgetRefField,
-            title_field: elem.dataset.searchWidgetTitleField,
-            href_field: elem.dataset.searchWidgetHrefField,
-            context_length: the_context_length,
-        });
-
-    }
-}
-
-if (document.readyState === "complete") {
-    init_search_widget();
-} else {
-    console.log('window = ', window);
-    window.addEventListener('load', init_search_widget);
-}

@@ -122,7 +122,7 @@ $header-bgimage-width-mobile: 80px;
     background-image: url(prebaseurl('static/icons/eczoo-main-logo.svg'));
     background-repeat: no-repeat;
 
-    background-position-x: right $header-padding;
+    background-position-x: calc(100% - #{$header-padding});
     background-position-y: center;
     background-size: $header-bgimage-width auto;
 
@@ -161,28 +161,33 @@ $header-bgimage-width-mobile: 80px;
 
 // sidebar contents
 
-#sidebar h1 {
-    //font-size: 1.1rem;
-    font-size: 1rem;
-    font-weight: bold;
-    margin-bottom: 0.5em;
-}
-#sidebar .sidebarbox {
+@mixin sidebar-panel-style {
+
     //border: dotted 1px gray; /*rgba(127,0,0,0.25);*/
-
     border: none 0px;
-    background-color: rgba(245,245,255,1.0);
 
-    z-index: 90;
+    background-color: $sidebar-panel-background-color;
     box-shadow: rgba(0,0,0,0.08) 3px 3px 6px;
 
     padding: 5px;
+}
+
+#sidebar .sidebarbox {
+    @include sidebar-panel-style;
+
+    z-index: 90;
 }
 .app-full-width #sidebar .sidebarbox {
     box-shadow: none;
 }
 
 
+nav h1 {
+    //font-size: 1.1rem;
+    font-size: 1rem;
+    font-weight: bold;
+    margin-bottom: 0.5em;
+}
 .navlinks {
     list-style: none;
     padding: 0px 0px 0px 1px;
@@ -190,6 +195,17 @@ $header-bgimage-width-mobile: 80px;
 }
 .navlinks > li {
     padding: 2px 0px;
+}
+
+
+input.navbar-search {
+    border: solid 1px rgba($text-dim-color,0.5);
+    border-radius: 3px;
+
+    padding: 6px 3px;
+    margin: 2px -3px;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 
@@ -209,6 +225,15 @@ $header-bgimage-width-mobile: 80px;
 }
 
 
+
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// home page stuff
+//
+////////////////////////////////////////////////////////////////////////////////
+
+@import 'home-page.scss';
 
 
 ////////////////////////////////////////////////////////////////////////////////
