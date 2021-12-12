@@ -53,3 +53,15 @@
     }
 }
 
+
+
+@media (max-width: 600px) {
+    #bodycontents.page-index > main {
+        grid-template-columns: 1fr;
+
+        .page-index-box-span-2 {
+            grid-column: span 1;
+        }
+
+    }
+}
