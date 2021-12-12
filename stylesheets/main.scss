@@ -217,6 +217,11 @@ dd {
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+
+//
+// Code info "table" fields appearance
+//
+
 .ecc-code {
     @include card-item;
 
@@ -237,7 +242,6 @@ $ecc-dl-left-column-width: 120px;
 
 .ecc-code {
     > dt {
-        //min-width: 120px;
         min-width: $ecc-dl-left-column-width;
     }
     
@@ -277,6 +281,36 @@ $ecc-dl-left-column-width: 120px;
     }
 
 }
+
+// adjustments for small screens
+@media (max-width: $page-main-width+2*$page-main-margins) {
+    dl.ecc-code {
+        display: block;
+
+        > dt {
+            // in particular, override "display: grid" in .code-name
+            display: block;
+
+            margin-bottom: 3px;
+        }
+        > dd {
+            display: block;
+            margin-left: 0px;
+        }
+
+        .info-popup-button-container {
+            display: block;
+            margin-top: 1rem;
+            //text-align: right;
+        }
+
+    }
+}
+
+
+//
+// Elements displayed on the code info page
+//
 
 a.code-link-with-icon {
     display: inline-block;
