@@ -30,6 +30,8 @@ class _HtmlObjectWrapper:
         if isinstance(val, _HtmlObjectWrapper):
             # already wrapped (?!)
             return val
+        if isinstance(val, (int, float, bool)):
+            return val # don't wrap ints, floats, or bools
         if isinstance(val, str):
             return _HtmlStringWrapper(val, self.tohtmlconverter, whatobject)
         if isinstance(val, list):
@@ -359,6 +361,10 @@ class HtmlPageCollection:
         self.jinja2env.filters['format_citation_label_html'] = \
             lambda cite_no: markupsafe.Markup( self.format_citation_label_html(cite_no) )
 
+        # access raw minilatex code on objects wrapped as _HtmlObjectWrapper
+        self.jinja2env.filters['raw_minilatex_code'] = \
+            lambda wrapperobj: wrapperobj.obj
+
 
     def create_page(self, htmlpage):
         if htmlpage.name in self.pages:
@@ -390,9 +396,14 @@ class HtmlPageCollection:
             logger.error(f"Referenced code with ID ‘{code_id}’ is not included in any page",
                          exc_info=True)
             raise
-        page_path = self.pages[page_name].path()
+        page = self.pages[page_name]
+        page_path = page.path()
         full_page_path = self.site_generation_environment.prefix_base_url(page_path)
-        return f'{full_page_path}#ecc_{code_id}'
+        if len(page.code_id_list) > 1:
+            # there are multiple codes on this page, need #xxx anchor
+            return f'{full_page_path}#ecc_{code_id}'
+        # url suffices
+        return full_page_path
 
 
     def set_citation_manager(self, citation_manager):

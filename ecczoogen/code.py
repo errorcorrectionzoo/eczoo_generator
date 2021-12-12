@@ -11,6 +11,10 @@ class Code:
         # source file (the zoo sets this relative to the codes_dir folder)
         self.source_info_filename = None
 
+        self.citation_info = {
+            'year': 2021 # FIXME: WHAT YEAR SHOULD WE SET?  FIND FILE/GIT MODIFICATION DATE?
+        }
+
         # parse the data structure.
         try:
             kw = dict(info)

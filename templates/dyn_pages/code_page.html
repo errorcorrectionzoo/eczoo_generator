@@ -1,4 +1,31 @@
+{% set extra_js = [ 'js/eczcodepagestuff.js'|prebaseurl ] %}
 {% extends 'layout/base_page.html' %}
+
+
+{% block extra_meta %}
+
+{# see https://scholar.google.com/intl/en/scholar/inclusion.html#indexing #}
+{# also https://github.com/zotero/translators/blob/0d435d8a952639d4e7489263b3a40c89377ecd31/Embedded%20Metadata.js#L42 #}
+
+<meta name="citation_language" content="en" />
+<meta name="citation_book_title" content="The Error Correction Zoo" />
+<meta name="citation_inbook_title" content="The Error Correction Zoo" />
+<meta name="citation_title" content="{{code.name|raw_minilatex_code}}" />
+<meta name="citation_publication_date" content="{{code.citation_info.year}}" />
+<meta name="citation_date" content="{{code.citation_info.year}}" />
+<meta name="citation_editor" content="Albert, Victor V." />
+<meta name="citation_editor" content="Faist, Philippe" />
+
+<!--<meta name="citation_doi" content="10.zzzz/wwwwww"/>-->
+
+<meta name="DC.title" content="{{code.name|raw_minilatex_code}}" />
+<meta name="DC.issued" content="{{code.citation_info.year}}" />
+<meta name="DC.relation.ispartof" content="The Error Correction Zoo (V. V. Albert, Ph. Faist, eds.)"/>
+
+{% endblock %}
+
+
+
 
 {% block contents %}
 

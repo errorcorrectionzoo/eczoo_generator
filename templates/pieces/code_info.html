@@ -9,18 +9,19 @@ Expected context variables:
 
 ################################################################################}
 
-<dl class="ecc-code ecc-code-page" id="ecc_{{code.code_id}}">
+<dl class="ecc-code ecc-code-page info-popup-button-zone" id="ecc_{{code.code_id}}">
 
 
 <dt class="code-name">Name</dt>
 <dd class="code-name">
-  {{code.name}}
+  <span class="code-name">{{code.name}}</span>
   {%- if code.introduced -%}
     <span class="code-introduced">{{code.introduced}}</span>
   {%- endif -%}
-  <a class="code-info-corner-icon code-self-permalink"
-     title="permanent link to this code (click and then copy the location in the address bar)"
-     href="{{code|code_ref_href}}">&nbsp;</a>
+  <!--<a class="code-info-corner-icon code-self-permalink"
+   title="permanent link to this code (click and then copy the location in the address bar)"
+   href="{{code|code_ref_href}}">&nbsp;</a>-->
+  <div class="info-popup-button-container"></div>
 </dd>
 
 
@@ -112,25 +113,51 @@ Expected context variables:
 
 <!-- zoo-related information and how to edit -->
 
-<dt class="display-code-id dt-wrap-label">
+<dt class="display-code-id dt-wrap-label redundant-if-info-popup-button-installed">
   {# Error correction #}
   Zoo code information
 </dt>
-<dd class="display-code-id">
+<dd class="display-code-id redundant-if-info-popup-button-installed">
   <div>
     <span class="display-code-id-label">Internal code ID:</span>
     {{code.code_id}}
   </div>{#
-#}<div>
-    <a class="code-link-with-icon code-show-github"
+#}<div class="code-popup-info-frame"
+       data-is-code-info-popup="1"
+       data-popup-button-label="cite"
+       data-popup-button-class-list="code-show-citation">
+    <dl class="show-citation">
+      <dt>Cite as:</dt>
+      <dd>“{{code.name|raw_minilatex_code}}”, The Error Correction Zoo (V. V. Albert & P. Faist, eds.), {{code.citation_info.year}}. https://errorcorrectionzoo.org{{code|code_ref_href}}</dd>
+      <dt>BibTeX:</dt>
+      <dd class="bibtex">{#
+#}@incollection{{ '{' }}eczoo_{{code.code_id}},
+  title={{'{'}}{{ code.name|raw_minilatex_code }}{{'}'}},
+  booktitle={The Error Correction Zoo},
+  year={{'{'}}{{code.citation_info.year}}{{'}'}},
+  editor={Albert, Victor V. and Faist, Philippe},
+  url={{'{'}}https://errorcorrectionzoo.org{{code|code_ref_href}}{{'}'}}
+{{ '}' }}{#
+    #}</dd>
+      <dt>Permanent link:</dt>
+      <dd>https://errorcorrectionzoo.org{{code|code_ref_href}}</dd>
+    </dl>
+  </div>{#
+#}<div class="code-popup-info-frame"
+       data-is-code-info-popup="1"
+       data-popup-button-label="edit"
+       data-popup-button-class-list="code-self-edit">{#
+    #}<h2>Your contribution is welcome!</h2>{#
+    #}<p><a class="code-link-with-icon code-show-github"
        target="_blank"
        title="Edit code information directly on github.com"
-       href="https://github.com/errorcorrectionzoo/eczoo_data/tree/main/codes/{{code.source_info_filename}}">code information on github.com</a>{#
-  #}<a class="code-link-with-icon code-self-edit"
+       href="https://github.com/errorcorrectionzoo/eczoo_data/tree/main/codes/{{code.source_info_filename}}">on github.com (edit &amp; pull request)</a></p>{#
+    #}<p><a class="code-link-with-icon code-self-edit"
        target="_blank"
        title="edit code information on this site without using github"
-       href="{{ ('edit_code?code_id='+code.code_id) | prebaseurl }}">edit on this site</a>
-  </div>
+       href="{{ ('edit_code?code_id='+code.code_id) | prebaseurl }}">edit on this site</a></p>{#
+    #}<p class="zoo-code-id">Zoo Code ID: <code>{{code.code_id}}</code>{#
+  #}</div>
 </dd>
 
 </dl>

@@ -3,6 +3,7 @@
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1">
+{% block extra_meta %}{% endblock %}
 
   <title>
     {% block block_page_title %}
@@ -21,7 +22,6 @@
   <meta name="theme-color" content="#ffffff">
   <!-- end favicon code -->
 
-
   <link type="text/css" rel="stylesheet" href="{{ 'css/main.css' | prebaseurl }}" />
 
   <script type="text/javascript" async
@@ -37,6 +37,8 @@
 {% for js in extra_js %}
   <script type="text/javascript" async src="{{ js }}"></script>
 {% endfor %}
+
+{% block extra_head %}{% endblock %}
 
 </head>
 <body>
