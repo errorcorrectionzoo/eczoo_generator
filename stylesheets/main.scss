@@ -352,6 +352,11 @@ dl.ecc-code {
             margin-left: 0px;
         }
 
+        // hide label "Name:" on narrow screens
+        dt.code-name {
+            display: none;
+        }
+
         .info-popup-button-container {
             display: block;
             //margin-top: 1rem;
