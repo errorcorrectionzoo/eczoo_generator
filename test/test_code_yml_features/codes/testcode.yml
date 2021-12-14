@@ -22,6 +22,9 @@ description: |
 
   Have fun\textbf{!!}
 
+  Check this citation that doesn't resolve with crossref
+  \cite{doi:10.7907/059V-MG69}.
+
 protection: |
   Detects errors on \(d-1\) qubits, corrects errors on \(\left\lfloor (d-1)/2
   \right\rfloor\) qubits.

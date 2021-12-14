@@ -297,6 +297,8 @@ class CitationTextManager:
                 'User-Agent':
                     f"ecczoogen-bibliography-build-script/0.1 "
                     f"(https://github.com/errorcorrectionzoo; mailto:{addr})",
+                # when querying https://doi.org/<DOI> with accept csl+json type-->
+                'Accept': 'application/vnd.citationstyles.csl+json',
             }
             req_session.headers.update(headers)
 
@@ -372,7 +374,7 @@ class CitationTextManager:
         for doi, citeobj in self._citations_by_field['doi'].items():
 
             if doi not in self._fetched_info['doi']:
-                logger.warning(f"No crossref info retreived for ‘{doi}’")
+                logger.warning(f"No crossref/doi info retreived for ‘{doi}’")
                 continue
             d = {'id': doi}
             d.update({k : v
@@ -486,10 +488,15 @@ def _get_crossref_citeproc_json_object(doi, req_session):
 
     doi_escaped = urlquote(doi)
 
+    # r = req_session.get(
+    #     f"https://api.crossref.org/works/{doi_escaped}/"
+    #       f"transform/application/vnd.citationstyles.csl+json"
+    # )
     r = req_session.get(
-        f"https://api.crossref.org/works/{doi_escaped}/"
-          f"transform/application/vnd.citationstyles.csl+json"
+        f"https://doi.org/{doi_escaped}"
     )
+
+    # The "Accept" header already set when setting up the session.
 
     if not r.ok:
         # raise errors
