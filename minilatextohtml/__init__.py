@@ -372,6 +372,11 @@ class ToHtmlConverter:
         refprefix = None
         if ':' in reftarget:
             (refprefix, reftarget) = reftarget.split(':', 1)
+
+        # normalize refprefix to allow for surrounding spaces as well
+        # as case tolerance e.g. 'code' vs 'Code' etc.
+        refprefix = refprefix.strip().lower()
+
         (target_html, target_href) = self.refcontext.get_ref(refprefix, reftarget)
         return (target_html, target_href)
 
@@ -521,6 +526,11 @@ class ToHtmlConverter:
                     # have a prefix
                     citation_key_prefix = citekey_prefix
                     citation_key = after_prefix_verbatim
+
+                    # normalize citation_key_prefix to allow for surrounding spaces as well
+                    # as case tolerance e.g. 'arxiv' vs 'arXiv' etc.
+                    citation_key_prefix = citation_key_prefix.strip().lower()
+
                 else:
                     # didn't have a prefix
                     citation_key_prefix = None

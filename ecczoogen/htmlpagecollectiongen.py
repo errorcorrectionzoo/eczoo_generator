@@ -253,7 +253,7 @@ class RefContextForHtmlConverter(minilatextohtml.HtmlRefContext):
     def _get_citation_obj(self, citation_key_prefix, citation_key):
 
         citation_obj = self.htmlpagecollection.citation_manager.get_citation(
-            **{citation_key_prefix.lower(): citation_key}
+            **{citation_key_prefix: citation_key}
         )
 
         citation = HtmlCitation(citation_obj=citation_obj)

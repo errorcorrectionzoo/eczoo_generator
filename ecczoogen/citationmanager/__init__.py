@@ -526,7 +526,7 @@ class CitationScannerRefContext(minilatextohtml.HtmlRefContext):
     def __init__(self, *args, where=None, **kwargs):
         super().__init__(*args, **kwargs)
 
-        # list of (citation_key_prefix.lower(), citation_key, where)
+        # list of (citation_key_prefix [lower-case], citation_key, where)
         self.encountered_citations = []
         self.cur_where = where
 
@@ -543,7 +543,7 @@ class CitationScannerRefContext(minilatextohtml.HtmlRefContext):
         # return (citelabel_html, citehref)
         self.encountered_citations.append(
             EncounteredCitation(
-                citation_key_prefix=citation_key_prefix.lower(),
+                citation_key_prefix=citation_key_prefix,
                 citation_key=citation_key,
                 encountered_where=self.cur_where
             )
