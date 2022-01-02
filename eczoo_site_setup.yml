@@ -64,3 +64,5 @@ code_tree:
           name: 'Fermionic Kingdom'
         - code_id: group_quantum
           name: 'Group Kingdom'
+        - code_id: category_quantum
+          name: 'Category Kingdom'

@@ -13,11 +13,10 @@ enum:
   - "qudits"
   - "galois"
   - "fermions"
-  - "groups"
   - "oscillators"
   - "rigid_bodies"
-
-
+  - "groups"
+  - "categories"
 
 # type: string
 # pattern: '^[a-z0-9_.-]+$'
