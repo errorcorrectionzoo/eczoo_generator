@@ -127,27 +127,6 @@ Expected context variables:
   </div>{#
 #}<div class="code-popup-info-frame"
        data-is-code-info-popup="1"
-       data-popup-button-label="cite"
-       data-popup-button-class-list="code-show-citation">
-    <dl class="show-citation">
-      <dt>Cite as:</dt>
-      <dd>“{{code.name|raw_minilatex_code}}”, The Error Correction Zoo (V. V. Albert & P. Faist, eds.), {{code.citation_info.year}}. https://errorcorrectionzoo.org{{code|code_ref_href}}</dd>
-      <dt>BibTeX:</dt>
-      <dd class="bibtex">{#
-#}@incollection{{ '{' }}eczoo_{{code.code_id}},
-  title={{'{'}}{{ code.name|raw_minilatex_code }}{{'}'}},
-  booktitle={The Error Correction Zoo},
-  year={{'{'}}{{code.citation_info.year}}{{'}'}},
-  editor={Albert, Victor V. and Faist, Philippe},
-  url={{'{'}}https://errorcorrectionzoo.org{{code|code_ref_href}}{{'}'}}
-{{ '}' }}{#
-    #}</dd>
-      <dt>Permanent link:</dt>
-      <dd>https://errorcorrectionzoo.org{{code|code_ref_href}}</dd>
-    </dl>
-  </div>{#
-#}<div class="code-popup-info-frame"
-       data-is-code-info-popup="1"
        data-popup-button-label="edit"
        data-popup-button-class-list="code-self-edit">{#
     #}<h2>Your contribution is welcome!</h2>{#
@@ -160,7 +139,28 @@ Expected context variables:
        title="edit code information on this site without using github"
        href="{{ ('edit_code?code_id='+code.code_id) | prebaseurl }}">edit on this site</a></p>{#
     #}<p class="zoo-code-id">Zoo Code ID: <code>{{code.code_id}}</code>{#
-  #}</div>
+  #}</div>{#
+#}<div class="code-popup-info-frame"
+     data-is-code-info-popup="1"
+     data-popup-button-label="cite"
+     data-popup-button-class-list="code-show-citation">
+  <dl class="show-citation">
+    <dt>Cite as:</dt>
+    <dd>“{{code.name|raw_minilatex_code}}”, The Error Correction Zoo (V. V. Albert & P. Faist, eds.), {{code.citation_info.year}}. https://errorcorrectionzoo.org{{code|code_ref_href}}</dd>
+    <dt>BibTeX:</dt>
+    <dd class="bibtex">{#
+#}@incollection{{ '{' }}eczoo_{{code.code_id}},
+title={{'{'}}{{ code.name|raw_minilatex_code }}{{'}'}},
+booktitle={The Error Correction Zoo},
+year={{'{'}}{{code.citation_info.year}}{{'}'}},
+editor={Albert, Victor V. and Faist, Philippe},
+url={{'{'}}https://errorcorrectionzoo.org{{code|code_ref_href}}{{'}'}}
+{{ '}' }}{#
+  #}</dd>
+    <dt>Permanent link:</dt>
+    <dd>https://errorcorrectionzoo.org{{code|code_ref_href}}</dd>
+  </dl>
+</div>
 </dd>
 
 </dl>
