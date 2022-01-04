@@ -52,7 +52,7 @@ unicode_backport = ["unicodedata2"]
 
 [[package]]
 name = "citeproc-py"
-version = "0.6.0-1-g6a34987"
+version = "0.6.0-2-g9d4f00c"
 description = "Citations and bibliography formatter"
 category = "main"
 optional = false
@@ -66,7 +66,7 @@ lxml = "*"
 type = "git"
 url = "https://github.com/phfaist/citeproc-py.git"
 reference = "master"
-resolved_reference = "6a349878e05d6dc5558132cd2774de3f92cab60d"
+resolved_reference = "9d4f00c789233c2ac47cbb305589555843d5fee8"
 
 [[package]]
 name = "colorama"

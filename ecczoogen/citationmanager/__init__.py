@@ -38,6 +38,10 @@ _rx_arxivid = re.compile(
 
 
 
+
+_citation_prefix_list = [ 'arXiv', 'doi', 'preset', 'manual' ]
+_citation_prefix_lower_list = [ fld.lower() for fld in _citation_prefix_list ]
+
 class Citation:
     def __init__(self, *,
                  arxiv=None,
@@ -111,10 +115,8 @@ class CitationTextManager:
     def __init__(self, citation_hints):
         self._citations_db = []
         self._citations_by_field = {
-            'arxiv': {},
-            'doi': {},
-            'preset': {},
-            'manual': {},
+            fld: {}
+            for fld in _citation_prefix_lower_list
         }
 
         self._fetched_info = {
@@ -173,6 +175,23 @@ class CitationTextManager:
 
         self._citations_by_field[fld][val] = cit
             
+
+    def add_encountered_citation(self, c):
+        r"""
+        Tool to add a citation as it was encountered when scanning minilatex text.
+        The argument `c` is expected to be a `EncounteredCitation` instance (see
+        below).
+        """
+        citation_key_prefix = c.citation_key_prefix
+        citation_key = c.citation_key
+        if citation_key_prefix not in _citation_prefix_lower_list:
+            valid_prefix_list = ", ".join(f"‘{fld}:’"
+                                          for fld in _citation_prefix_list)
+            raise ValueError(f"Invalid citation prefix ‘{citation_key_prefix}’.  All "
+                             f"citation keys must begin with one of the prefixes "
+                             f"{valid_prefix_list}.")
+        self.add_citation(**{citation_key_prefix.lower(): citation_key})
+
 
     def get_citation(self, **kwargs):
 

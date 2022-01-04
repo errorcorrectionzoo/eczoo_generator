@@ -88,6 +88,8 @@ export class EczooSearchWidget
             this.fields = fields;
         }
 
+        /// TODO: add a suitable "boost" to name and description fields
+
         // this.idx
         if (typeof this.idx == 'undefined') {
             let _this = this;
