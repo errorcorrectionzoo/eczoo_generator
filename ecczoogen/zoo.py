@@ -88,6 +88,13 @@ class Zoo:
     def get_code(self, *args, **kwargs):
         return self._collection.get_code(*args, **kwargs)
 
+    def get_code_or_None(self, *args, **kwargs):
+        try:
+            return self.get_code(*args, **kwargs)
+        except code_collection.InvalidCodeReference:
+            return None
+
+
     # def get_code_ids_by_physical_logial(self, *args, **kwargs):
     #     return self._collection.get_code_ids_by_physical_logial(*args, **kwargs)
 

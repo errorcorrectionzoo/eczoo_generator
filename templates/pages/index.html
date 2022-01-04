@@ -74,7 +74,27 @@
   Stats at a glance:
   <span class="stat-number">{{ num_codes }}</span>&nbsp;codes,
   <span class="stat-number">{{ stat_num_kingdoms }}</span>&nbsp;kingdoms, 
-  <span class="stat-number">{{ domains | list | length }}</span>&nbsp;domains.
+  <span class="stat-number">{{ domains | list | length }}</span>&nbsp;domains,
+{# manually select some code categories to highlight for the quick stats #}
+{% for (code_id, show_code_type) in [
+  ['topological', 'topological'],
+  ['css', 'CSS'],
+  ['quantum_ldpc','quantum LDPC'],
+  ['oscillators', 'bosonic'],
+] %}
+  {% set the_code = zoo.get_code_or_None(code_id) %}
+  {% set for_loop_last = loop.last %}
+  {% if the_code -%}
+    {#- use “length(full family tree) - 1” to remove the ‘topological code’ code itself. -#}
+    <span class="stat-number">{{ zoo.get_code_family_tree(code_id)|length - 1 }}</span>{#
+    #}&nbsp;{#<a href="{{ the_code|code_ref_href }}">#}{{show_code_type}} codes{#</a>#}
+    {%- if for_loop_last -%}
+      .
+    {% else -%}
+      ,
+    {% endif %}
+  {% endif %}
+{% endfor %}
 </nav>
 
 
