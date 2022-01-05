@@ -55,7 +55,7 @@ code_tree:
         - code_id: qubits_into_qubits
           name: 'Qubit Kingdom'
         - code_id: qudits_into_qudits
-          name: 'Cyclic-qudit Kingdom'
+          name: 'Modular-qudit Kingdom'
         - code_id: galois_into_galois
           name: 'Galois-qudit Kingdom'
         - code_id: oscillators
