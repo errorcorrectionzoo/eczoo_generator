@@ -512,10 +512,14 @@ for code_id, code in zoo.all_codes().items():
 citation_manager = citationmanager.CitationTextManager(citation_hints)
 for c in citation_scanner.get_encountered_citations():
     try:
-        citation_manager.add_citation(**{c.citation_key_prefix.lower(): c.citation_key})
+        citation_manager.add_encountered_citation(c)
     except Exception as e:
-        logger.error(f"Invalid citation ‘{c.citation_key_prefix}:{c.citation_key}’ in "
-                     f"‘{c.encountered_where}’:\n{e}")
+        if c.citation_key_prefix is not None:
+            full_cit_key = f"{c.citation_key_prefix}:{c.citation_key}"
+        else:
+            full_cit_key = c.citation_key
+        logger.error(f"Invalid citation key ‘{full_cit_key}’ in ‘{c.encountered_where}’:\n"
+                     f"{e}")
         raise
 
 cache_citation_fetched_data_filename = 'dat/cache_citation_fetched_data.json'
