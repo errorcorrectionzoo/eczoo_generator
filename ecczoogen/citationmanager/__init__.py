@@ -111,6 +111,9 @@ def _get_single_kwarg(kwargs):
 
 
 
+CACHE_MAX_AGE_DAYS = 90
+
+
 class CitationTextManager:
     def __init__(self, citation_hints):
         self._citations_db = []
@@ -153,7 +156,7 @@ class CitationTextManager:
         if not (('arxiv' in obj) and ('doi' in obj) and ('fetched_date' in obj)):
             raise ValueError(f"Error in citation data, abort read: ‘{repr(obj)[:100]}’")
         t = datetime.datetime.fromisoformat(obj['fetched_date'])
-        if (datetime.datetime.now() - t) > datetime.timedelta(days=30):
+        if (datetime.datetime.now() - t) > datetime.timedelta(days=CACHE_MAX_AGE_DAYS):
             logger.debug(f"Not using the requested cache file, it's too old.")
             raise RuntimeError("Cache is too old, not using it.")
         self._fetched_info = obj
@@ -500,7 +503,7 @@ def _backoff_fatal_code(e):
 
 @backoff.on_exception(backoff.expo,
                       requests.exceptions.RequestException,
-                      max_tries=8,
+                      max_tries=12,
                       on_backoff=_backoff_handler,
                       giveup=_backoff_fatal_code)
 def _get_crossref_citeproc_json_object(doi, req_session):
