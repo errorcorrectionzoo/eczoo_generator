@@ -19,6 +19,10 @@ properties:
     type: string
     _minilatex: 'full'
 
+  magic_scaling_exponent:
+    type: string
+    _minilatex: 'full'
+
   encoders:
     type: array
     items:
