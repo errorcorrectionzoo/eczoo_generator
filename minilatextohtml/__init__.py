@@ -15,7 +15,8 @@ logger_debug = logger.debug
 logger_error = logger.error
 
 
-from pylatexenc import latexwalker, macrospec
+from pylatexenc import latexnodes, latexwalker, macrospec
+from pylatexenc.latexnodes import parsers as latexnodes_parsers
 
 # ----------------------------
 
@@ -218,6 +219,11 @@ def _make_lw_context():
                                 )),
         ]
     )
+
+    lw_context.set_unknown_macro_spec(macrospec.MacroSpec(''))
+    lw_context.set_unknown_environment_spec(macrospec.EnvironmentSpec(''))
+    #lw_context.set_unknown_specials_spec(macrospec.SpecialsSpec(''))
+
     return lw_context
 
 _lw_context = _make_lw_context()
@@ -273,7 +279,8 @@ class ToHtmlConverter:
             raise ValueError(f"Please don't use None in to_html().  In parsing ‘{what}’")
         try:
             lw = latexwalker.LatexWalker(s, latex_context=_lw_context, tolerant_parsing=False)
-            nodelist, _, _ = lw.get_latex_nodes()
+            #nodelist, _, _ = lw.get_latex_nodes()
+            nodelist, _ = lw.parse_content( latexnodes_parsers.LatexGeneralNodesParser() )
             html = self.nodelist_to_html(nodelist)
             #logger_debug(f"HTML: ‘{s}’ → ‘{html}’")
             return html
@@ -289,7 +296,7 @@ class ToHtmlConverter:
         # wrap each paragraph in <p>...</p>, or we don't have any paragraph
         # breaks --> no wrapping in <p>.
 
-        #logger.debug(f"nodelist_to_html: {nodelist=}")
+        #logger.debug("NODELIST to HTML: --> %r", nodelist)
 
         accum = {
             'paragraphs': [],
@@ -681,6 +688,8 @@ class ToHtmlConverter:
         if isinstance(node, str):
             s = node
             return htmlescape(s)
+
+        #logger.debug("NODE to HTML: --> %r", node)
 
         if node.isNodeType(latexwalker.LatexCharsNode):
             # special case for chars node that contain '\n\n' -- these are
