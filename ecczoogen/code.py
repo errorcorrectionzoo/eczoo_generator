@@ -21,7 +21,9 @@ class Code:
             'year': 2021 # FIXME: WHAT YEAR SHOULD WE SET?  FIND FILE/GIT MODIFICATION DATE?
         }
 
-        self.schemadata = SchemaData(info, full_schema)
+        code_id = info['code_id']
+
+        self.schemadata = SchemaData(info, full_schema, what=f"<code {code_id}>")
 
         # often used properties
         self.code_id = self.schemadata['code_id']

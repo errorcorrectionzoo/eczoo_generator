@@ -242,8 +242,11 @@ for code_id, code in zoo.all_codes().items():
 schema_loader = schemaloader.SchemaLoader(schemas_dir=Dirs.schemas_dir)
 domainshierarchy_full_schema = schema_loader.get_full_schema('domainshierarchy')
 
-eczoo_domainshierarchy = schemadata.SchemaData(eczoo_site_setup['code_tree'],
-                                               domainshierarchy_full_schema)
+eczoo_domainshierarchy = schemadata.SchemaData(
+    eczoo_site_setup['code_tree'],
+    domainshierarchy_full_schema,
+    what="<eczoo_domainshierarchy>",
+)
 
 
 for domain in eczoo_domainshierarchy['domains']:
@@ -511,7 +514,7 @@ citation_scanner = citationmanager.MiniLatexCitationScanner()
 for code_id, code in zoo.all_codes().items():
     
     # look in the code.source_info field, where we kept the original YML structure
-    citation_scanner.scan_schemadataobj(code, where=f'<Code id={code_id}>')
+    citation_scanner.scan_schemadataobj(code, where=f'<code {code_id}>')
 
 citation_manager = citationmanager.CitationTextManager(citation_hints)
 for c in citation_scanner.get_encountered_citations():
