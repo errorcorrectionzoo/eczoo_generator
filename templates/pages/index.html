@@ -73,13 +73,13 @@
 <nav class="page-index-box" id="quick-stats-box">
   Stats at a glance:
   <span class="stat-number">{{ num_codes }}</span>&nbsp;codes,
-  <span class="stat-number">{{ stat_num_kingdoms }}</span>&nbsp;kingdoms, 
+  <span class="stat-number">{{ stat_num_kingdoms }}</span>&nbsp;kingdoms,
   <span class="stat-number">{{ domains | list | length }}</span>&nbsp;domains,
 {# manually select some code categories to highlight for the quick stats #}
 {% for (code_id, show_code_type) in [
   ['topological', 'topological'],
   ['css', 'CSS'],
-  ['quantum_ldpc','quantum LDPC'],
+  ['qldpc','quantum LDPC'],
   ['oscillators', 'bosonic'],
 ] %}
   {% set the_code = zoo.get_code_or_None(code_id) %}
