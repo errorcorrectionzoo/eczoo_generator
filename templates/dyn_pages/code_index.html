@@ -9,9 +9,9 @@
   <li>
     <span class="code-name">
       {{code|code_ref}}
-      {%- if code.introduced %}<span class="code-introduced">{{code.introduced}}</span>{% endif -%}
+      {%- if code.introduced %}<span class="code-introduced">{{code.introduced|to_html_with_notes(rc)}}</span>{% endif -%}
     </span>
-    <span class="code-description">{{code.description}}</span>
+    <span class="code-description">{{code.description|to_html_with_notes(rc)}}</span>
   </li>
 {% endfor %}
 </ol>

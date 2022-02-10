@@ -594,7 +594,7 @@ class MiniLatexCitationScanner:
         self.refcontext = CitationScannerRefContext()
 
     def scan_minilatex(self, minilatex, *, where):
-        logger.debug(f"Scanning for citations in {where} (“{minilatex}”)")
+        #logger.debug(f"Scanning for citations in {where} (“{minilatex}”)")
         try:
             dummy = minilatex.to_html(self.refcontext)
         except Exception as e:
@@ -604,11 +604,11 @@ class MiniLatexCitationScanner:
         # any encountered citation.
 
     def scan_schemadataobj(self, schemadataobj, *, where=''):
-        for (fldinfo, value) in schemadataobj.iter_values_with_field_info_recursive(
+        for (fldinfo, value) in schemadataobj.iter_fields_recursive(
                 arrays_at_once=False
         ):
-            logger.debug(f"Iter props; {fldinfo=} / {value=}")
-            if fldinfo['schema'].get('_minilatex', False):
+            #logger.debug(f"Cite scanning in {schemadataobj} - iter {fldinfo=} / {value=}")
+            if value is not None and fldinfo['schema'].get('_minilatex', False):
                 self.scan_minilatex(value, where=f"{where}{fldinfo['fieldname']}")
 
     def get_encountered_citations(self):

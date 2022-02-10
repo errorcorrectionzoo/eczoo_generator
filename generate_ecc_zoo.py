@@ -318,7 +318,8 @@ htmlpgcoll.create_page(
         },
         code_id_list=[
             code.code_id
-            for code in sorted(zoo.all_codes().values(), key=lambda code: code.name.text)
+            for code in sorted(zoo.all_codes().values(),
+                               key=lambda code: code.name.text)
         ],
         template_name='dyn_pages/code_index.html',
     )
@@ -503,7 +504,7 @@ citation_scanner = citationmanager.MiniLatexCitationScanner()
 for code_id, code in zoo.all_codes().items():
     
     # look in the code.source_info field, where we kept the original YML structure
-    citation_scanner.scan_schemadataobj(code.schemadata, where=f'<Code id={code_id}>')
+    citation_scanner.scan_schemadataobj(code, where=f'<Code id={code_id}>')
 
 citation_manager = citationmanager.CitationTextManager(citation_hints)
 for c in citation_scanner.get_encountered_citations():

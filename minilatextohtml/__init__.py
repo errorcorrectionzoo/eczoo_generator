@@ -110,7 +110,7 @@ class ItemToHtmlError(ItemToHtmlBase):
 
 class ItemToHtmlVerbatim(ItemToHtmlBase):
     def __call__(self, node, doccontext):
-        return self.node.latex_verbatim()
+        return htmlescape( self.node.latex_verbatim() )
 
 class ItemToHtmlWrapTag(ItemToHtmlBase):
     def __init__(self, tagname='span', attrs=None, class_=None):
@@ -141,7 +141,7 @@ class ItemToHtmlVerbatimWrapTag(ItemToHtmlWrapTag):
     def __call__(self, node, doccontext):
         return html_wrap_in_tag(
             tagname=self.tagname,
-            htmlcontent=node.latex_verbatim(),
+            htmlcontent=htmlescape( node.latex_verbatim() ),
             attrs=self.attrs,
             class_=self.class_
         )
@@ -584,6 +584,7 @@ class MiniLatex:
     def __init__(self, minilatex,
                  minilatex_context_db=_minilatex_context_db,
                  what='(unknown)'):
+
         self.minilatex = minilatex
         self.what = what
 
@@ -684,9 +685,9 @@ class MiniLatex:
         return self.to_html()
 
     def _nodelist_to_html(self, nodelist, doccontext):
-        return self._nodelist_to_x(nodelist, doccontext, 'html')
+        return self._nodelist_to_x(nodelist, doccontext, fmt='html')
     def _nodelist_to_text(self, nodelist, doccontext):
-        return self._nodelist_to_x(nodelist, doccontext, 'text')
+        return self._nodelist_to_x(nodelist, doccontext, fmt='text')
 
     def _nodelist_to_x(self, nodelist, doccontext, fmt='html'):
         # There are two cases.  Either we have paragraph breaks --> we need to
@@ -719,7 +720,7 @@ class MiniLatex:
 
         # wrap in paragraphs
         if fmt == 'html':
-            para_wrapper = lambda p : html_wrap_in_tag('p', p)
+            para_wrapper = lambda p : html_wrap_in_tag('p', p.strip())
         elif fmt == 'text':
             para_wrapper = lambda p : (p.strip() + '\n')
         else:

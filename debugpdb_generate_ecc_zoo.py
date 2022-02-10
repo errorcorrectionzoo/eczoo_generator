@@ -1,6 +1,6 @@
 try:
     import generate_ecc_zoo
-except Exception as e:
+except BaseException as e:
     import logging
     logger = logging.getLogger(__name__)
     logger.critical("Exception! %s", e, exc_info=True)

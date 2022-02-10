@@ -39,14 +39,14 @@ class SearchIndexGenerator:
 
     def add_code_page(self, code, href):
         d = {}
-        for fldinfo, value in code.schemadata.iter_values_with_field_info_recursive():
+        for fldinfo, value in code.iter_fields_recursive():
             fldname = fldinfo['fieldname'].replace('.', '_')
             if isinstance(value, list):
                 val = "\n".join([ self._get_value_string(v, fldinfo['schema'])
                                   for v in value ])
             else:
                 val = self._get_value_string(value, fldinfo['schema'])
-            logger.debug(f"build search index -- d[{fldname}] -> {val=}")
+            #logger.debug(f"build search index -- d[{fldname}] -> {val=}")
             d[fldname] = val
 
         d['_type'] = 'ecc'
@@ -56,6 +56,8 @@ class SearchIndexGenerator:
         self.documents.append( d )
 
     def _get_value_string(self, value, schema):
+        if value is None:
+            return ''
         if schema.get('_minilatex', False):
             return value.text
         return value

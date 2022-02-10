@@ -79,6 +79,18 @@ class SchemaData:
         return source_value
 
 
+    def add_extra_field(self, key, value, valueschema):
+        if self.data_type != 'object':
+            raise ValueError("Can only call add_extra_field() on object data types")
+
+        sdobj = SchemaData(v, value_schema, what=f"{self.what}.{key}")
+        self._data_sd[key] = sdobj
+        self.data[key] = sdobj.data
+        self.fields_info.append({
+            'fieldname': k,
+            'schema': value_schema,
+        })
+
     def value(self):
         return self.data
 
@@ -102,12 +114,12 @@ class SchemaData:
 
         raise ValueError("data not iterable")
 
-    def iter_values_with_field_info_recursive(self, *, arrays_at_once=True):
+    def iter_fields_recursive(self, *, arrays_at_once=True):
         if self.data_type == 'object':
             for fldinfo in self.fields_info:
                 valuesd = self._data_sd[fldinfo['fieldname']]
                 if fldinfo['schema']['type'] in ('object', 'array'):
-                    for (fldinfo2, value2) in valuesd.iter_values_with_field_info_recursive(
+                    for (fldinfo2, value2) in valuesd.iter_fields_recursive(
                             arrays_at_once=arrays_at_once
                     ):
                         #print(f"*** {fldinfo2} -> {value2}")
