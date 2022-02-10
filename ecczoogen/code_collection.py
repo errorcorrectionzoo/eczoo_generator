@@ -4,6 +4,9 @@ logger = logging.getLogger(__name__)
 
 from . import code
 
+from minilatextohtml import MiniLatex
+
+
 class InvalidCodeReference(Exception):
     def __init__(self, msg):
         super().__init__(msg)
@@ -71,7 +74,7 @@ class CodeCollection:
                 if not code_data_relations_reltypelist:
                     continue
 
-                for relinfo in code_data_relations_reltypelist:
+                for j, relinfo in enumerate(code_data_relations_reltypelist):
                     logger.debug(
                         f"Processing {rel_type} relation of {code_id} to {relinfo['code_id']}"
                     )
@@ -87,14 +90,20 @@ class CodeCollection:
                         )
                         raise
 
-                    rel_data = code.Relation(code=related_code,
-                                             detail=relinfo.get('detail', None))
+                    if 'detail' in relinfo:
+                        detail = MiniLatex(
+                            relinfo['detail'],
+                            what=f'Code({code_id=}).relations.{rel_type}s[{j}]'
+                        )
+                    else:
+                        detail = None
+
+                    rel_data = code.Relation(code=related_code, detail=detail)
                     rels_fld.append(rel_data)
 
                     # add to the other code's OTHER.relations.parent_of to include this code
 
-                    rel_data_other = code.Relation(code=codeobj,
-                                                   detail=relinfo.get('detail', None))
+                    rel_data_other = code.Relation(code=codeobj, detail=detail)
                     getattr(related_code.relations, rel_type+'_of') .append( rel_data_other )
             
 

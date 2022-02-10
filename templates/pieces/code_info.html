@@ -19,7 +19,7 @@ Expected context variables:
   <span class="code-name-cell">
   <span class="code-name">{{code.name}}</span>
   {%- if code.introduced -%}
-    <span class="code-introduced">{{code.introduced}}</span>
+    <span class="code-introduced">{{code.introduced | to_html_with_notes(rc)}}</span>
   {%- endif -%}
   </span>
   <!--<a class="code-info-corner-icon code-self-permalink"
@@ -29,11 +29,11 @@ Expected context variables:
 
 
 <dt class="code-description">Description</dt>
-<dd class="code-description">{{code.description}}</dd>
+<dd class="code-description">{{code.description | to_html_with_notes(rc)}}</dd>
 
 {% if code.protection %}
 <dt class="code-protection">Protection</dt>
-<dd class="code-protection">{{code.protection}}</dd>
+<dd class="code-protection">{{code.protection | to_html_with_notes(rc)}}</dd>
 {% endif %}
 
 
@@ -43,10 +43,10 @@ Expected context variables:
 {# helper macro to display features #}
 
 {% macro disp_feature_field(featurename, label) -%}
-  {%- if code.features[featurename] -%}
+  {%- if code['features'][featurename] -%}
   <dt class="code-feature code-feature-{{featurename}}">{{label}}</dt>
   <dd class="code-feature code-feature-{{featurename}}">
-    {{- code.features[featurename] -}}
+    {{- code['features'][featurename] | to_html_with_notes(rc) -}}
   </dd>
   {% endif %}
 {%- endmacro %}
@@ -74,14 +74,14 @@ Expected context variables:
 {% if code.realizations %}
 <dt class="code-realizations">Realizations</dt>
 <dd class="code-realizations">
-  {{code.realizations}}
+  {{code.realizations | to_html_with_notes(rc)}}
 </dd>
 {% endif %}
 
 {% if code.notes %}
 <dt class="code-notes">Notes</dt>
 <dd class="code-notes">
-  {{code.notes}}
+  {{code.notes | to_html_with_notes(rc)}}
 </dd>
 {% endif %}
 
@@ -148,11 +148,11 @@ Expected context variables:
      data-popup-button-class-list="code-show-citation">
   <dl class="show-citation">
     <dt>Cite as:</dt>
-    <dd>“{{code.name|raw_minilatex_code}}”, The Error Correction Zoo (V. V. Albert & P. Faist, eds.), {{code.citation_info.year}}. https://errorcorrectionzoo.org{{code|code_ref_href}}</dd>
+    <dd>“{{code.name|minilatex}}”, The Error Correction Zoo (V. V. Albert & P. Faist, eds.), {{code.citation_info.year}}. https://errorcorrectionzoo.org{{code|code_ref_href}}</dd>
     <dt>BibTeX:</dt>
     <dd class="bibtex">{#
 #}@incollection{{ '{' }}eczoo_{{code.code_id}},
-title={{'{'}}{{ code.name|raw_minilatex_code }}{{'}'}},
+title={{'{'}}{{ code.name|minilatex }}{{'}'}},
 booktitle={The Error Correction Zoo},
 year={{'{'}}{{code.citation_info.year}}{{'}'}},
 editor={Albert, Victor V. and Faist, Philippe},

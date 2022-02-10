@@ -25,7 +25,7 @@
         {% set this_max_num_codes = max_num_codes if loop.index0 < 2 else max_num_codes_later %}
         {% set num_codes = codes | length %}
         {%- for codeobj in codes[:this_max_num_codes] -%}
-          {%- set code = codeobj | wrap_minilatex -%}
+          {%- set code = codeobj -%}
           <a href="{{ code|code_ref_href }}">{{code.name}}</a>
           {%- if not loop.last -%}
             , {# space after comma #}

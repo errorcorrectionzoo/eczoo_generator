@@ -56,12 +56,14 @@ class Zoo:
 
                 # validate the code data structure, to be sure
                 try:
-                    validator.validate(code_info, 'ecc')
+                    full_schema = validator.validate(code_info, 'ecc')
                 except Exception as e:
-                    logger.error(f"Code data validation failed in YAML file ‘{filename}’:\n{e}\n\n")
+                    logger.error(
+                        f"Code data validation failed in YAML file ‘{filename}’:\n{e}\n\n"
+                    )
                     raise
 
-                codeobj = code.Code( code_info )
+                codeobj = code.Code( code_info , full_schema=full_schema )
 
                 codeobj.source_info_filename = os.path.relpath(fullfname, start=codes_dir)
 

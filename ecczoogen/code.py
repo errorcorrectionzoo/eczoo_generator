@@ -2,8 +2,14 @@ import logging
 logger = logging.getLogger(__name__)
 
 
+from minilatextohtml import MiniLatex
+
+
+from .schemadata import SchemaData
+
+
 class Code:
-    def __init__(self, info):
+    def __init__(self, info, full_schema):
         super().__init__()
 
         self.source_info = info
@@ -12,52 +18,105 @@ class Code:
         self.source_info_filename = None
 
         self.citation_info = {
-            'year': 2021 # FIXME: WHAT YEAR SHOULD WE SET?  FIND FILE/GIT MODIFICATION DATE?
+            'year': 2022 # FIXME: WHAT YEAR SHOULD WE SET?  FIND FILE/GIT MODIFICATION DATE?
         }
 
-        # parse the data structure.
-        try:
-            kw = dict(info)
+        self.schemadata = SchemaData(info, full_schema)
 
-            self.code_id = kw.pop('code_id')
-            self.physical = kw.pop('physical', None)
-            self.logical = kw.pop('logical', None)
+        # often used properties
+        self.code_id = self.schemadata.data['code_id']
+        self.name = self.schemadata.data['name']
 
-            self.name = kw.pop('name')
-            self.introduced = kw.pop('introduced', None)
-            self.description = kw.pop('description')
+        # # parse the data structure.
+        # try:
+        #     kw = dict(info)
 
-            self.protection = kw.pop('protection', None)
+        #     self._fields = []
+        #     self.data = {}
 
-            self.features = {
-                k: v
-                for (k,v) in kw.pop('features', {}).items() # a dictionary
-            }
+        #     def def_fld(fld, *, mandatory=False, minilatex=False, is_list=False):
 
-            self.realizations = kw.pop('realizations', None)
+        #         fldseq = fld.split('.')
+        #         fldobj = self.data
+        #         fldkw = kw
+        #         for fldpart in fldseq[:-1]:
+        #             if fldpart not in fldobj:
+        #                 fldpart[fldpart] = {}
+        #             fldobj = fldpart[fldpart]
+        #             fldvalue = fldkw.get(fldvalue, {})
+        #         fldpart = fldseq[len(fldseq)-1]
+
+        #         if mandatory:
+        #             value = fldkw.get(fld)
+        #         else:
+        #             value = fldkw.get(fld, None)
+
+        #         if minilatex:
+        #             if is_list:
+        #                 value = [ MiniLatex( x ) for x in value ]
+        #             else:
+        #                 value = MiniLatex( value )
+                    
+        #         fldobj[fldpart] = value
+
+        #         self._fields.append({
+        #             'fieldname': fld,
+        #             'mandatory': mandatory,
+        #             'minilatex': minilatex,
+        #             'is_list': is_list,
+        #         })
+
+        #     def_fld('code_id', mandatory=True)
+        #     def_fld('physical')
+        #     def_fld('logical')
+
+        #     def_fld('name', mandatory=True, minilatex=True)
+        #     def_fld('introduced', minilatex=True)
+        #     def_fld('description', minilatex=True)
+
+        #     def_fld('protection', minilatex=True)
+
+        #     def_fld('features..........', 
+
+        #     self.features = {}
+        #         if isinstance(v, list):
+        #             self.features[k] = [ MiniLatex( x ) for x in v ]
+        #         else:
+        #             self.features[k] = MiniLatex( v )
+
+        #     self.realizations = [
+        #         MiniLatex( x ) for x in kw.pop('realizations', None)
+        #     ]
             
-            self.notes = kw.pop('notes', None) # array of free text entries
+        #     self.notes = [
+        #         Minilatex(x) for x in kw.pop('notes', None)
+        #     ]
 
-            rel_info = dict( kw.pop('relations', {}) )
-            self.relations_info = {
-                'parents': rel_info.pop('parents', {}),
-                'cousins': rel_info.pop('cousins', {}),
-            }
-            if rel_info:
-                raise ValueError(f"Additional unexpected keys "
-                                 f"{list(rel_info.keys())} in YML under ‘relations:’ for "
-                                 f"code ‘{self.code_id}’")
+        #     rel_info = dict( kw.pop('relations', {}) )
+        #     self.relations_info = {}
+        #     for rel_type in ('parents', 'cousins'):
+        #         self.relations_info[rel_type] = []
+        #         for rel in rel_info.pop(rel_type, {}):
+        #             self.relations_info[rel_type].append(
+        #                 { 'code_id': rel['code_id'],
+        #                   'detail': MiniLatex( rel['detail'] ) }
+        #             )
 
-            if kw:
-                raise ValueError(f"Additional unexpected keys "
-                                 f"{list(kw.keys())} in YML for code ‘{self.code_id}’")
+        #     if rel_info:
+        #         raise ValueError(f"Additional unexpected keys "
+        #                          f"{list(rel_info.keys())} in YML under ‘relations:’ for "
+        #                          f"code ‘{self.code_id}’")
 
-        except KeyError as e:
-            logger.error(f"Missing key for code {self.code_id}: {e}")
-            raise
-        except Exception as e:
-            logger.error(f"Error parsing data structure for code {self.code_id}: {e}")
-            raise
+        #     if kw:
+        #         raise ValueError(f"Additional unexpected keys "
+        #                          f"{list(kw.keys())} in YML for code ‘{self.code_id}’")
+
+        # except KeyError as e:
+        #     logger.error(f"Missing key for code {self.code_id}: {e}")
+        #     raise
+        # except Exception as e:
+        #     logger.error(f"Error parsing data structure for code {self.code_id}: {e}")
+        #     raise
 
         
         # these fields only get set once we are assigned to a CodeCollection
@@ -69,50 +128,50 @@ class Code:
         self.family_generation_level = None
         self.family_root_code = None
 
+    def __getitem__(self, key):
+        return self.schemadata[key]
 
-    def fields_as_text_for_indexing(self, _minilatextotext):
+    def getfield(self, key, default=None):
+        return self.schemadata.getfield(key, default=default)
 
-        def _value_to_text(val, *, where):
-            if not val:
-                return ''
-            if isinstance(val, str):
-                return _minilatextotext(val, where=where)
-            if isinstance(val, list):
-                return '\n\n'.join(_value_to_text(x, where=f'{where}[{j}]')
-                                   for j, x in enumerate(val))
-            # if isinstance(val, dict):
-            #     return '\n\n'.join( (_minilatextotext(k)+': '+_value_to_text(v))
-            #                          for k,v in val.items() )
-            raise ValueError(f"Not sure how to handle value ‘{val!r}’ for indexing!")
-
-        d = {
-            k: _value_to_text( getattr(self, k, None), 
-                               where=f'{self!r}.{k}')
-            for k in (
-                    'name', 'description', 'protection',
-                    'realizations', 'notes'
-            )
-        }
-        d.update({
-            f'feature_{featurename}': _value_to_text(
-                featuredata,
-                where=f'{self!r}.features[{featurename!r}]'
-            )
-            for featurename, featuredata in self.features.items()
-        })
-
-        d.update({
-            f'{reltype}_detail': '\n\n'.join([
-                _minilatextotext(relobj.detail, where=f'{self!r}.relations.{reltype}s[{j}]')
-                for j, relobj in enumerate(
-                        getattr(self.relations, reltype+'s') # "self.relations.parents"
-                )
-            ])
-            for reltype in ('parent', 'cousin')
-        })
-
-        return d
-
+    # def fields_as_text_for_indexing(self, _minilatextotext):
+    #     def _value_to_text(val, *, where):
+    #         if not val:
+    #             return ''
+    #         if isinstance(val, str):
+    #             return _minilatextotext(val, where=where)
+    #         if isinstance(val, list):
+    #             return '\n\n'.join(_value_to_text(x, where=f'{where}[{j}]')
+    #                                for j, x in enumerate(val))
+    #         # if isinstance(val, dict):
+    #         #     return '\n\n'.join( (_minilatextotext(k)+': '+_value_to_text(v))
+    #         #                          for k,v in val.items() )
+    #         raise ValueError(f"Not sure how to handle value ‘{val!r}’ for indexing!")
+    #     d = {
+    #         k: _value_to_text( getattr(self, k, None), 
+    #                            where=f'{self!r}.{k}')
+    #         for k in (
+    #                 'name', 'description', 'protection',
+    #                 'realizations', 'notes'
+    #         )
+    #     }
+    #     d.update({
+    #         f'feature_{featurename}': _value_to_text(
+    #             featuredata,
+    #             where=f'{self!r}.features[{featurename!r}]'
+    #         )
+    #         for featurename, featuredata in self.features.items()
+    #     })
+    #     d.update({
+    #         f'{reltype}_detail': '\n\n'.join([
+    #             _minilatextotext(relobj.detail, where=f'{self!r}.relations.{reltype}s[{j}]')
+    #             for j, relobj in enumerate(
+    #                     getattr(self.relations, reltype+'s') # "self.relations.parents"
+    #             )
+    #         ])
+    #         for reltype in ('parent', 'cousin')
+    #     })
+    #     return d
 
     def __str__(self):
         return self.name

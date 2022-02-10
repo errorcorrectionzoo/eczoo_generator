@@ -20,16 +20,16 @@ class DummyRefContext:
 
 
 
-class MiniLatexToTextConverter(minilatextohtml.ToHtmlConverter):
-    def __init__(self):
-        super().__init__( DummyRefContext() )
+# class MiniLatexToTextConverter(minilatextohtml.ToHtmlConverter):
+#     def __init__(self):
+#         super().__init__( DummyRefContext() )
 
-    def to_text(self, x, *, what='(unknown)'):
-        htmlval = self.to_html(x, what=what)
-        return html.unescape(htmlval)
+#     def to_text(self, x, *, what='(unknown)'):
+#         htmlval = self.to_html(x, what=what)
+#         return html.unescape(htmlval)
 
-    def html_wrap_in_tag(self, tagname, htmlcontent, **kwargs):
-        return htmlcontent
+#     def html_wrap_in_tag(self, tagname, htmlcontent, **kwargs):
+#         return htmlcontent
 
 
 
@@ -37,21 +37,28 @@ class SearchIndexGenerator:
     def __init__(self):
         self.documents = []
 
-        self.ml2t = MiniLatexToTextConverter()
-
-    def _minilatextotext(self, x, where='(unknown)'):
-        #logger.debug(f"minilatex-to-text: {x=}")
-        if x is None:
-            return ''
-        return self.ml2t.to_text(x, what=where)
-
     def add_code_page(self, code, href):
-        d = code.fields_as_text_for_indexing(self._minilatextotext)
+        d = {}
+        for fldinfo, value in code.schemadata.iter_values_with_field_info_recursive():
+            fldname = fldinfo['fieldname'].replace('.', '_')
+            if isinstance(value, list):
+                val = "\n".join([ self._get_value_string(v, fldinfo['schema'])
+                                  for v in value ])
+            else:
+                val = self._get_value_string(value, fldinfo['schema'])
+            logger.debug(f"build search index -- d[{fldname}] -> {val=}")
+            d[fldname] = val
+
         d['_type'] = 'ecc'
         d['_page_id'] = f'c_{code.code_id}'
         d['_href'] = href
 
         self.documents.append( d )
+
+    def _get_value_string(self, value, schema):
+        if schema.get('_minilatex', False):
+            return value.text
+        return value
 
     def get_store_dump(self):
         return {

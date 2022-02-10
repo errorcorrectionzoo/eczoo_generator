@@ -38,13 +38,18 @@ class SchemaValidator:
 
         self.json_ref_loader = jsonref.JsonLoader(store=self.schema_uri_data)
 
-
-    def validate(self, code_info, schema_rel_name):
+    def get_full_schema(self, schema_rel_name):
         schema_uri = f'https://errorcorrectionzoo.org/schemas/{schema_rel_name}'
 
         #logger.debug("Trying to load schema ‘{schema_uri}’ ...")
-        schema_full_data = jsonref.load_uri(schema_uri, loader=self.json_ref_loader)
+        return jsonref.load_uri(schema_uri, loader=self.json_ref_loader)
+
+    def validate(self, code_info, schema_rel_name):
+
+        schema_full_data = self.get_full_schema(schema_rel_name)
 
         #logger.debug(f"Loaded schema for {schema_rel_name=}: {schema_full_data=}")
     
         jsonschema.validate(code_info, schema_full_data)
+
+        return schema_full_data

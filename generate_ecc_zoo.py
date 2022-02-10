@@ -55,6 +55,7 @@ args_parser.add_argument("--run-server-port", action='store', default=8000, type
 args = args_parser.parse_args()
 if args.verbose:
     logger.setLevel(logging.DEBUG)
+    logging.getLogger('pylatexenc').setLevel(logging.INFO)
 
 
 with open(args.eczoo_site_setup, encoding='utf-8') as f:
@@ -212,7 +213,7 @@ for code_id, code in zoo.all_codes().items():
     page = htmlpagecollectiongen.HtmlPage(
         name=f'c/{code_id}',
         info={
-            'page_title': htmlpgcoll.minilatex_to_html(code.name, f"name of ‘{code_id}’"),
+            'page_title': code.name,
             'page_title_text': code.name,
         },
         code_id_list=[ code_id ],
@@ -267,16 +268,14 @@ for domain in eczoo_domains:
         kingdom_page = htmlpagecollectiongen.HtmlPage(
             name=f'kingdom/{root_code_id}',
             info={
-                'page_title': htmlpgcoll.minilatex_to_html(
-                    kingdom['name'],
-                    f"name of kingdom ‘{root_code_id}’"
-                ),
+                'page_title': kingdom['name'],
                 'page_title_text': kingdom['name'],
             },
             code_id_list=sorted_code_id_list,
             context={
-                'kingdom': htmlpgcoll.wrap_object_with_minilatex_properties(kingdom),
-                'domain': htmlpgcoll.wrap_object_with_minilatex_properties(domain),
+                # FIXME: MIGHT NEED SCHEMADATA FOR THESE, TOO.
+                'kingdom': kingdom, #htmlpgcoll.wrap_object_with_minilatex_properties(kingdom),
+                'domain': domain, #htmlpgcoll.wrap_object_with_minilatex_properties(domain),
             },
             template_name='dyn_pages/kingdom_page.html',
         )
@@ -291,15 +290,12 @@ for domain in eczoo_domains:
     domain_page = htmlpagecollectiongen.HtmlPage(
         name=f'domain/{domain_id}',
         info={
-            'page_title': htmlpgcoll.minilatex_to_html(
-                domain['name'],
-                f"name of domain ‘{domain_id}’"
-            ),
+            'page_title': domain['name'],
             'page_title_text': domain['name'],
         },
         code_id_list=[ ],
         context={
-            'domain': htmlpgcoll.wrap_object_with_minilatex_properties(domain),
+            'domain': domain, #htmlpgcoll.wrap_object_with_minilatex_properties(domain),
         },
         template_name='dyn_pages/domain_page.html',
     )
@@ -322,7 +318,7 @@ htmlpgcoll.create_page(
         },
         code_id_list=[
             code.code_id
-            for code in sorted(zoo.all_codes().values(), key=lambda code: code.name)
+            for code in sorted(zoo.all_codes().values(), key=lambda code: code.name.text)
         ],
         template_name='dyn_pages/code_index.html',
     )
@@ -336,7 +332,7 @@ htmlpgcoll.create_page(
 #
 
 global_context = {
-    'domains': htmlpgcoll.wrap_object_with_minilatex_properties(eczoo_domains),
+    'domains': eczoo_domains, #htmlpgcoll.wrap_object_with_minilatex_properties(eczoo_domains),
     'zoo': zoo,
 }
 
@@ -507,7 +503,7 @@ citation_scanner = citationmanager.MiniLatexCitationScanner()
 for code_id, code in zoo.all_codes().items():
     
     # look in the code.source_info field, where we kept the original YML structure
-    citation_scanner.scan_dict_tree(code.source_info, f'<Code id={code_id}>')
+    citation_scanner.scan_schemadataobj(code.schemadata, where=f'<Code id={code_id}>')
 
 citation_manager = citationmanager.CitationTextManager(citation_hints)
 for c in citation_scanner.get_encountered_citations():

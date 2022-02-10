@@ -9,124 +9,125 @@ import markupsafe
 
 from . import code
 
+
 import minilatextohtml
 
 
 # ------------------------------------------------------------------------------
 
-_id_fields = ('code_id', )
+# _id_fields = ('code_id', )
 
-class _HtmlObjectWrapper:
-    def __init__(self, obj, tohtmlconverter, whatobject):
-        super().__init__()
-        self.obj = obj
-        self.tohtmlconverter = tohtmlconverter
-        self.whatobject = whatobject
+# class _HtmlObjectWrapper:
+#     def __init__(self, obj, tohtmlconverter, whatobject):
+#         super().__init__()
+#         self.obj = obj
+#         self.tohtmlconverter = tohtmlconverter
+#         self.whatobject = whatobject
 
-    def _to_html_str(self, value, whatobject):
-        return self.tohtmlconverter.to_html(value, what=whatobject)
+#     def _to_html_str(self, value, whatobject):
+#         return self.tohtmlconverter.to_html(value, what=whatobject)
 
-    def _wrap_obj(self, val, whatobject):
-        if val is None:
-            return None
-        if isinstance(val, _HtmlObjectWrapper):
-            # already wrapped (?!)
-            return val
-        if isinstance(val, (int, float, bool)):
-            return val # don't wrap ints, floats, or bools
-        if isinstance(val, str):
-            return _HtmlStringWrapper(val, self.tohtmlconverter, whatobject)
-        if isinstance(val, list):
-            return _HtmlListObjectWrapper(val, self.tohtmlconverter, whatobject)
-        if isinstance(val, dict):
-            return _HtmlDictObjectWrapper(val, self.tohtmlconverter, whatobject)
-        #logger.debug(f"Got attr value ‘{val!r}’, generic type {type(val)}")
-        return _HtmlObjectWrapper(val, self.tohtmlconverter, whatobject)
+#     def _wrap_obj(self, val, whatobject):
+#         if val is None:
+#             return None
+#         if isinstance(val, _HtmlObjectWrapper):
+#             # already wrapped (?!)
+#             return val
+#         if isinstance(val, (int, float, bool)):
+#             return val # don't wrap ints, floats, or bools
+#         if isinstance(val, str):
+#             return _HtmlStringWrapper(val, self.tohtmlconverter, whatobject)
+#         if isinstance(val, list):
+#             return _HtmlListObjectWrapper(val, self.tohtmlconverter, whatobject)
+#         if isinstance(val, dict):
+#             return _HtmlDictObjectWrapper(val, self.tohtmlconverter, whatobject)
+#         #logger.debug(f"Got attr value ‘{val!r}’, generic type {type(val)}")
+#         return _HtmlObjectWrapper(val, self.tohtmlconverter, whatobject)
 
-    def __bool__(self):
-        return True if self.obj else False
+#     def __bool__(self):
+#         return True if self.obj else False
 
-    def __call__(self, *args, **kwargs):
-        return self._wrap_obj(self.obj(*args, **kwargs), self.whatobject+'()')
+#     def __call__(self, *args, **kwargs):
+#         return self._wrap_obj(self.obj(*args, **kwargs), self.whatobject+'()')
 
-    def __iter__(self):
-        for j, a in enumerate(self.obj):
-            yield self._wrap_obj(a, '{}[{}]'.format(self.whatobject, j))
+#     def __iter__(self):
+#         for j, a in enumerate(self.obj):
+#             yield self._wrap_obj(a, '{}[{}]'.format(self.whatobject, j))
 
-    def __getattr__(self, attr):
-        # special exception for internal identificator fields (e.g., code_id)
-        if attr in _id_fields:
-            return getattr(self.obj, attr)
-        return self._wrap_obj( getattr(self.obj, attr) ,
-                               '{}.{}'.format(self.whatobject, attr))
+#     def __getattr__(self, attr):
+#         # special exception for internal identificator fields (e.g., code_id)
+#         if attr in _id_fields:
+#             return getattr(self.obj, attr)
+#         return self._wrap_obj( getattr(self.obj, attr) ,
+#                                '{}.{}'.format(self.whatobject, attr))
 
-    def __getitem__(self, key):
-        if key in _id_fields:
-            return self.obj[key]
-        return self._wrap_obj( self.obj[key] ,
-                              '{}[{!r}]'.format(self.whatobject, key) )
+#     def __getitem__(self, key):
+#         if key in _id_fields:
+#             return self.obj[key]
+#         return self._wrap_obj( self.obj[key] ,
+#                               '{}[{!r}]'.format(self.whatobject, key) )
 
-    def __repr__(self):
-        return f'_HtmlObjectWrapper({self.obj!r})'
-
-
-class _HtmlStringWrapper(_HtmlObjectWrapper):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-    # __bool__ def'd in base class
-
-    def __str__(self):
-        return self._to_html_str(self.obj, self.whatobject)
-
-    # The __html__() method will ensure this string is seen as "HTML-safe" by
-    # `markup.escape()`.
-    #
-    # This method works as an alternative to `markupsafe.Markup(..)`, for
-    # strings that we don't want to pre-compile before we're sure that the
-    # actual string is needed.
-    def __html__(self):
-        return self._to_html_str(self.obj, self.whatobject)
-
-    def __add__(self, other):
-        return self._wrap_obj(self.obj + other, '('+self.whatobject+'+str)')
-    def __radd__(self, other):
-        return self._wrap_obj(other + self.obj, '(str+'+self.whatobject+')')
+#     def __repr__(self):
+#         return f'_HtmlObjectWrapper({self.obj!r})'
 
 
-class _HtmlListObjectWrapper(_HtmlObjectWrapper):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+# class _HtmlStringWrapper(_HtmlObjectWrapper):
+#     def __init__(self, *args, **kwargs):
+#         super().__init__(*args, **kwargs)
 
-    # __bool__, __getitem__, __iter__ def'd in base class
+#     # __bool__ def'd in base class
 
-    def __len__(self):
-        return len(self.obj)
+#     def __str__(self):
+#         return self._to_html_str(self.obj, self.whatobject)
 
-    def __bool__(self):
-        return (True if self.obj else False)
+#     # The __html__() method will ensure this string is seen as "HTML-safe" by
+#     # `markup.escape()`.
+#     #
+#     # This method works as an alternative to `markupsafe.Markup(..)`, for
+#     # strings that we don't want to pre-compile before we're sure that the
+#     # actual string is needed.
+#     def __html__(self):
+#         return self._to_html_str(self.obj, self.whatobject)
 
-    # custom conversion to string
-    def __str__(self):
-        return "".join([f"<span class=\"paragraph-in-list\">{item}</span>" for item in self])
-
-    # see the string wrapper object above (_HtmlStringWrapper) for info about
-    # __html__
-    def __html__(self):
-        return "".join([f"<span class=\"paragraph-in-list\">{item}</span>" for item in self])
+#     def __add__(self, other):
+#         return self._wrap_obj(self.obj + other, '('+self.whatobject+'+str)')
+#     def __radd__(self, other):
+#         return self._wrap_obj(other + self.obj, '(str+'+self.whatobject+')')
 
 
-class _HtmlDictObjectWrapper(_HtmlObjectWrapper):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+# class _HtmlListObjectWrapper(_HtmlObjectWrapper):
+#     def __init__(self, *args, **kwargs):
+#         super().__init__(*args, **kwargs)
 
-    def keys(self):
-        return self.obj.keys()
+#     # __bool__, __getitem__, __iter__ def'd in base class
 
-    def items(self):
-        the_items = [ (k, self._wrap_obj(v, '{}[{!r}]'.format(self.whatobject, k)))
-                      for (k,v) in self.obj.items() ]
-        return the_items
+#     def __len__(self):
+#         return len(self.obj)
+
+#     def __bool__(self):
+#         return (True if self.obj else False)
+
+#     # custom conversion to string
+#     def __str__(self):
+#         return "".join([f"<span class=\"paragraph-in-list\">{item}</span>" for item in self])
+
+#     # see the string wrapper object above (_HtmlStringWrapper) for info about
+#     # __html__
+#     def __html__(self):
+#         return "".join([f"<span class=\"paragraph-in-list\">{item}</span>" for item in self])
+
+
+# class _HtmlDictObjectWrapper(_HtmlObjectWrapper):
+#     def __init__(self, *args, **kwargs):
+#         super().__init__(*args, **kwargs)
+
+#     def keys(self):
+#         return self.obj.keys()
+
+#     def items(self):
+#         the_items = [ (k, self._wrap_obj(v, '{}[{!r}]'.format(self.whatobject, k)))
+#                       for (k,v) in self.obj.items() ]
+#         return the_items
 
 
 # ------------------------------------------------------------------------------
@@ -183,14 +184,11 @@ class HtmlCitation:
         self.citation_obj = citation_obj
 
     def full_citation_text_html(self):
-        if self.citation_obj.full_citation_text_minilatex is None:
+        minilatex = self.citation_obj.full_citation_text_minilatex
+        if minilatex is None:
             raise ValueError(f"Unresolved citation {self.citation_obj}!  "
                              f"Is it a valid reference?")
-        return markupsafe.Markup(
-            minilatextohtml.ToHtmlConverter(None)
-            .to_html(self.citation_obj.full_citation_text_minilatex,
-                     what=f'full citation {self.citation_obj}')
-        )
+        return markupsafe.Markup( minilatex.to_html() )
 
 
 # _rx_ref_code = re.compile(r'^code:(?P<code_id>.*)$', flags=re.IGNORECASE)
@@ -209,10 +207,7 @@ class RefContextForHtmlConverter(minilatextohtml.HtmlRefContext):
     def _get_ref_code(self, code_id):
         code = self.htmlpagecollection.zoo.get_code(code_id)
         code_href = self.htmlpagecollection.get_code_href(code_id)
-        code_name_html = minilatextohtml.ToHtmlConverter(self).to_html(
-            code.name,
-            what=f"name of ‘{code_id}’"
-        )
+        code_name_html = code.name.to_html()
         return (code_name_html, code_href)
         
     def get_ref(self, ref_key_prefix, ref_key):
@@ -251,6 +246,9 @@ class RefContextForHtmlConverter(minilatextohtml.HtmlRefContext):
         return (foot_label_html, f'#fn-{foot_no}')
 
     def _get_citation_obj(self, citation_key_prefix, citation_key):
+
+        if not citation_key_prefix:
+            raise ValueError(f"Invalid {citation_key_prefix=}; {citation_key=}")
 
         citation_obj = self.htmlpagecollection.citation_manager.get_citation(
             **{citation_key_prefix: citation_key}
@@ -368,13 +366,28 @@ class HtmlPageCollection:
         self.jinja2env.filters['format_citation_label_html'] = \
             lambda cite_no: markupsafe.Markup( self.format_citation_label_html(cite_no) )
 
-        # explicitly wrap attributes for minilatex rendering
-        self.jinja2env.filters['wrap_minilatex'] = \
-            lambda obj: self.wrap_object_with_minilatex_properties(obj)
+        # # explicitly wrap attributes for minilatex rendering
+        # self.jinja2env.filters['wrap_minilatex'] = \
+        #     lambda obj: self.wrap_object_with_minilatex_properties(obj)
 
-        # access raw minilatex code on objects wrapped as _HtmlObjectWrapper
-        self.jinja2env.filters['raw_minilatex_code'] = \
-            lambda wrapperobj: wrapperobj.obj
+        self.jinja2env.filters['to_html_with_notes'] = self._jfilter_to_html_with_notes
+
+        # # access raw minilatex code on objects wrapped as _HtmlObjectWrapper
+        # self.jinja2env.filters['raw_minilatex_code'] = \
+        #     lambda wrapperobj: wrapperobj.obj
+        self.jinja2env.filters['minilatex'] = \
+            lambda minilatexobj: minilatexobj.minilatex
+
+
+    def _jfilter_to_html_with_notes(self, obj, refcontext=None):
+        if isinstance(obj, list):
+            return markupsafe.Markup( "".join([
+                (f"<span class=\"paragraph-in-list\">"
+                 + item.to_html(refcontext=refcontext)
+                 + f"</span>")
+                for item in obj
+            ]) )
+        return markupsafe.Markup( obj.to_html(refcontext=refcontext) )
 
 
     def create_page(self, htmlpage):
@@ -450,15 +463,15 @@ class HtmlPageCollection:
     def update_global_context(self, d):
         self.global_context.update(d)
 
-    def wrap_object_with_minilatex_properties(self, obj, html_page_notes=None):
-        tohtml_refcontext = RefContextForHtmlConverter(self, html_page_notes)
-        tohtmlconverter = minilatextohtml.ToHtmlConverter(tohtml_refcontext)
-        return _HtmlObjectWrapper(obj, tohtmlconverter, repr(obj))
+    # def wrap_object_with_minilatex_properties(self, obj, html_page_notes=None):
+    #     tohtml_refcontext = RefContextForHtmlConverter(self, html_page_notes)
+    #     tohtmlconverter = minilatextohtml.ToHtmlConverter(tohtml_refcontext)
+    #     return _HtmlObjectWrapper(obj, tohtmlconverter, repr(obj))
 
-    def minilatex_to_html(self, s, html_page_notes=None, what='(unknown)'):
-        tohtml_refcontext = RefContextForHtmlConverter(self, html_page_notes)
-        tohtmlconverter = minilatextohtml.ToHtmlConverter(tohtml_refcontext)
-        return markupsafe.Markup( tohtmlconverter.to_html(s, what=what) )
+    # def minilatex_to_html(self, s, html_page_notes=None, what='(unknown)'):
+    #     tohtml_refcontext = RefContextForHtmlConverter(self, html_page_notes)
+    #     tohtmlconverter = minilatextohtml.ToHtmlConverter(tohtml_refcontext)
+    #     return markupsafe.Markup( tohtmlconverter.to_html(s, what=what) )
 
     def generate(self, *, output_dir, additional_context={}):
 
@@ -471,25 +484,26 @@ class HtmlPageCollection:
             page_footnotes = HtmlPageNotes(self)
 
             tohtml_refcontext = RefContextForHtmlConverter(self, page_footnotes)
-            tohtmlconverter = minilatextohtml.ToHtmlConverter(tohtml_refcontext)
+            #tohtmlconverter = minilatextohtml.ToHtmlConverter(tohtml_refcontext)
 
             context = dict(
                 code_list=[
-                    _HtmlObjectWrapper(
-                        codeobj,
-                        tohtmlconverter,
-                        repr(codeobj)
-                    )
-                    for codeobj in [
+                    # _HtmlObjectWrapper(
+                    #     codeobj,
+                    #     tohtmlconverter,
+                    #     repr(codeobj)
+                    # )
+                    # for codeobj in [
                             self.zoo.get_code(code_id)
                             for code_id in htmlpage.code_id_list
-                    ]
+                    #]
                 ],
                 page_footnotes=page_footnotes,
                 pages=self.pages,
+                rc=tohtml_refcontext, # rc = "refcontext" for filter
                 **self.global_context,
                 **htmlpage.info,
-                **{k: _HtmlObjectWrapper(v, tohtmlconverter, repr(v))
+                **{k: v   #_HtmlObjectWrapper(v, tohtmlconverter, repr(v))
                    for (k, v) in (htmlpage.context.items() if htmlpage.context else {})},
                 **additional_context
             )

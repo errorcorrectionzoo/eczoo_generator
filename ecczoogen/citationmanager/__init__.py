@@ -166,7 +166,6 @@ class CitationTextManager:
 
         logger.debug(f"add_citation({kwargs=})")
 
-
         fld, val = _get_single_kwarg(kwargs)
 
         if val in self._citations_by_field[fld]:
@@ -202,6 +201,9 @@ class CitationTextManager:
 
         citation = self._citations_by_field[fld].get(val, None)
         if citation is None:
+            logger.debug(
+                f"Citation database is -> {self._citations_by_field}"
+            )
             raise ValueError(f"Citation not found for {kwargs=} in internally "
                              f"constructed database!")
         return citation
@@ -387,7 +389,10 @@ class CitationTextManager:
             full_citation_text += \
                 fr" \href{{https://arxiv.org/abs/{arxividstr}}}{{{arxividstr}}}"
 
-            citeobj.full_citation_text_minilatex = full_citation_text
+            citeobj.full_citation_text_minilatex = minilatextohtml.MiniLatex(
+                full_citation_text,
+                what=f"Citation ‘arXiv:{arxividstr}’",
+            )
 
             logger.debug(f"Citation arXiv:{arxividstr} → {full_citation_text}")
 
@@ -415,7 +420,10 @@ class CitationTextManager:
                 full_citation_text += \
                     f"; \href{{https://arxiv.org/abs/{arxividstr}}}{{{arxividstr}}}"
 
-            citeobj.full_citation_text_minilatex = full_citation_text
+            citeobj.full_citation_text_minilatex = minilatextohtml.MiniLatex(
+                full_citation_text,
+                what=f"Citation ‘doi:{doi}’",
+            )
             
             logger.debug(f"Citation doi:{doi} → {full_citation_text}")
         
@@ -425,7 +433,10 @@ class CitationTextManager:
 
         for preset, citeobj in self._citations_by_field['preset'].items():
             try:
-                citeobj.full_citation_text_minilatex = self._preset_citations[citeobj.preset]
+                citeobj.full_citation_text_minilatex = minilatextohtml.MiniLatex(
+                    self._preset_citations[citeobj.preset],
+                    what=f"Citation ‘preset:{citeobj.preset}’"
+                )
             except KeyError:
                 logger.error(f"Unknown preset citation: ‘{citeobj.preset}’")
                 raise
@@ -435,7 +446,10 @@ class CitationTextManager:
         #
 
         for manual, citeobj in self._citations_by_field['manual'].items():
-            citeobj.full_citation_text_minilatex = citeobj.manual
+            citeobj.full_citation_text_minilatex = minilatextohtml.MiniLatex(
+                citeobj.manual,
+                what=f"Manual citation ‘{citeobj.manual}’"
+            )
 
 
 
@@ -578,39 +592,24 @@ class MiniLatexCitationScanner:
         super().__init__()
 
         self.refcontext = CitationScannerRefContext()
-        self.tohtmlconverter = minilatextohtml.ToHtmlConverter(self.refcontext)
 
-    def scan(self, s, where):
-        #logger.debug(f"Scanning for citations: ‘{s}’")
-        self.refcontext.cur_where = where
+    def scan_minilatex(self, minilatex, *, where):
+        logger.debug(f"Scanning for citations in {where} (“{minilatex}”)")
         try:
-            dummy = self.tohtmlconverter.to_html(s, what=f'scanning for citations / {where}')
+            dummy = minilatex.to_html(self.refcontext)
         except Exception as e:
             logger.warning(f"Error while scanning for citations in ‘{where}’: {e}")
             raise
         # we can ignore dummy, our add_citation() callback will have fired for
         # any encountered citation.
 
-    def _scan_obj(self, v, where):
-        #logger.debug(f"Scanning for citations: {v=!r}")
-        
-        if v is None:
-            return
-        if isinstance(v, dict):
-            for k, x in v.items():
-                self._scan_obj(x, f'{where}["{k}"]')
-            return
-        if isinstance(v, list):
-            for j, x in enumerate(v):
-                self._scan_obj(x, f'{where}[{j}]')
-            return
-        if isinstance(v, str):
-            self.scan(v, where)
-            return
-        logger.warning(f"I don't know how to scan property value {v!r}")
-
-    def scan_dict_tree(self, d, where):
-        return self._scan_obj(d, where)
+    def scan_schemadataobj(self, schemadataobj, *, where=''):
+        for (fldinfo, value) in schemadataobj.iter_values_with_field_info_recursive(
+                arrays_at_once=False
+        ):
+            logger.debug(f"Iter props; {fldinfo=} / {value=}")
+            if fldinfo['schema'].get('_minilatex', False):
+                self.scan_minilatex(value, where=f"{where}{fldinfo['fieldname']}")
 
     def get_encountered_citations(self):
         # returns a list of pairs of (citation_key_prefix, citation_key)
