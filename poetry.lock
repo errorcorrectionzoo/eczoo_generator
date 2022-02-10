@@ -209,7 +209,7 @@ develop = false
 type = "git"
 url = "https://github.com/phfaist/pylatexenc.git"
 reference = "devel"
-resolved_reference = "5233443e3ee0cd721c12696e0d56b2a8cacaacf8"
+resolved_reference = "dc08b5f2d344b3d0e140c644653854c779f24605"
 
 [[package]]
 name = "pyrsistent"

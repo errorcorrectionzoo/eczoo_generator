@@ -7,7 +7,9 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-from . import code, code_collection, schema_validator
+from . import code, code_collection, schemaloader
+
+import jsonschema
 
 
 class Zoo:
@@ -19,7 +21,8 @@ class Zoo:
 
         self._collection = code_collection.CodeCollection()
 
-        validator = schema_validator.SchemaValidator(schemas_dir=schemas_dir)
+        schema_loader = schemaloader.SchemaLoader(schemas_dir=schemas_dir)
+        code_full_schema = schema_loader.get_full_schema('ecc')
 
         logger.info("Building the zoo ...")
 
@@ -56,14 +59,14 @@ class Zoo:
 
                 # validate the code data structure, to be sure
                 try:
-                    full_schema = validator.validate(code_info, 'ecc')
+                    jsonschema.validate(code_info, code_full_schema)
                 except Exception as e:
                     logger.error(
                         f"Code data validation failed in YAML file ‘{filename}’:\n{e}\n\n"
                     )
                     raise
 
-                codeobj = code.Code( code_info , full_schema=full_schema )
+                codeobj = code.Code( code_info , full_schema=code_full_schema )
 
                 codeobj.source_info_filename = os.path.relpath(fullfname, start=codes_dir)
 

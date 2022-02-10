@@ -170,8 +170,8 @@ class PagePrettyCodeGraph:
             n = {
                 'data': {
                     'id': f"domain_{domain['domain_id']}",
-                    'label': f"{domain['name']}",
-                    '_description': domain['description'],
+                    'label': domain['name'].text,
+                    '_description': domain['description'].text,
                     
                     '_is_domain': 1,
                     '_page_href':
@@ -283,7 +283,7 @@ class PagePrettyCodeGraph:
             if is_kingdom:
                 n['data'].update({
                     '_is_kingdom': 1,
-                    '_kingdom_name': kingdom['name'],
+                    '_kingdom_name': kingdom['name'].text,
                     '_kingdom_href': self.site_gen_env.prefix_base_url(
                         kingdom['htmlpage'].path()),
                 })

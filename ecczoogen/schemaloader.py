@@ -10,7 +10,7 @@ import jsonschema
 import jsonref
 
 
-class SchemaValidator:
+class SchemaLoader:
     def __init__(self, schemas_dir):
         # load code schemas
 
@@ -44,12 +44,8 @@ class SchemaValidator:
         #logger.debug("Trying to load schema ‘{schema_uri}’ ...")
         return jsonref.load_uri(schema_uri, loader=self.json_ref_loader)
 
-    def validate(self, code_info, schema_rel_name):
-
-        schema_full_data = self.get_full_schema(schema_rel_name)
-
-        #logger.debug(f"Loaded schema for {schema_rel_name=}: {schema_full_data=}")
-    
-        jsonschema.validate(code_info, schema_full_data)
-
-        return schema_full_data
+    # def validate(self, code_info, schema_rel_name):
+    #     schema_full_data = self.get_full_schema(schema_rel_name)
+    #     #logger.debug(f"Loaded schema for {schema_rel_name=}: {schema_full_data=}")
+    #     jsonschema.validate(code_info, schema_full_data)
+    #     return schema_full_data

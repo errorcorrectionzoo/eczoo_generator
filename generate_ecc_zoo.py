@@ -21,7 +21,9 @@ from ecczoogen import (
     sitegenerationenvironment,
     server,
     citationmanager,
-    searchindexgen
+    searchindexgen,
+    schemaloader,
+    schemadata,
 )
 
 logger = logging.getLogger()
@@ -214,7 +216,7 @@ for code_id, code in zoo.all_codes().items():
         name=f'c/{code_id}',
         info={
             'page_title': code.name,
-            'page_title_text': code.name,
+            'page_title_text': code.name.text,
         },
         code_id_list=[ code_id ],
         context={
@@ -236,9 +238,15 @@ for code_id, code in zoo.all_codes().items():
 # The list of domains and associated kingdoms.  This data tree will use the YAML
 # data, and it will add some more information to the bare YML data tree
 # (e.g. pointers to code objects)
-eczoo_domains = eczoo_site_setup['code_tree']['domains']
 
-for domain in eczoo_domains:
+schema_loader = schemaloader.SchemaLoader(schemas_dir=Dirs.schemas_dir)
+domainshierarchy_full_schema = schema_loader.get_full_schema('domainshierarchy')
+
+eczoo_domainshierarchy = schemadata.SchemaData(eczoo_site_setup['code_tree'],
+                                               domainshierarchy_full_schema)
+
+
+for domain in eczoo_domainshierarchy['domains']:
     domain_id = domain['domain_id']
     domain_name = domain['name']
 
@@ -269,13 +277,12 @@ for domain in eczoo_domains:
             name=f'kingdom/{root_code_id}',
             info={
                 'page_title': kingdom['name'],
-                'page_title_text': kingdom['name'],
+                'page_title_text': kingdom['name'].text,
             },
             code_id_list=sorted_code_id_list,
             context={
-                # FIXME: MIGHT NEED SCHEMADATA FOR THESE, TOO.
-                'kingdom': kingdom, #htmlpgcoll.wrap_object_with_minilatex_properties(kingdom),
-                'domain': domain, #htmlpgcoll.wrap_object_with_minilatex_properties(domain),
+                'kingdom': kingdom,
+                'domain': domain,
             },
             template_name='dyn_pages/kingdom_page.html',
         )
@@ -333,7 +340,7 @@ htmlpgcoll.create_page(
 #
 
 global_context = {
-    'domains': eczoo_domains, #htmlpgcoll.wrap_object_with_minilatex_properties(eczoo_domains),
+    'domains': eczoo_domainshierarchy['domains'],
     'zoo': zoo,
 }
 
@@ -480,7 +487,7 @@ for SpecialPageClass in special_pages:
         dirs=Dirs,
         site_gen_env=site_gen_env,
         zoo=zoo,
-        eczoo_domains=eczoo_domains,
+        eczoo_domains=eczoo_domainshierarchy['domains'],
         htmlpagescollection=htmlpgcoll,
         global_context=global_context,
     )

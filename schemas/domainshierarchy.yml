@@ -1,0 +1,45 @@
+$schema: "http://json-schema.org/draft-06/schema"
+$id: "https://errorcorrectionzoo.org/schemas/domainhierarchy"
+
+#
+# A hierarchy of domains and kingdoms, organizing the base concrete codes of the
+# error correction zoo.
+#
+type: object
+additionalProperties: false
+required: ['domains']
+properties:
+
+  domains:
+    type: array
+    items:
+      type: object
+      required: ['domain_id', 'name']
+      properties:
+        domain_id:
+          type: string
+          _single_line_string: True
+          pattern: '^[a-z0-9_.-]+$'
+
+        name:
+          type: string
+          _minilatex: 'no-refs'
+          _single_line_string: True
+
+        description:
+          type: string
+          _minilatex: 'full'
+          
+        kingdoms:
+          type: array
+          items:
+            type: object
+            properties:
+              code_id:
+                type: string
+                _single_line_string: True
+                pattern: '^[a-z0-9_.-]+$'
+              name:
+                type: string
+                _single_line_string: True
+                _minilatex: 'no-refs'

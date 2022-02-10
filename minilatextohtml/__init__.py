@@ -661,28 +661,36 @@ class MiniLatex:
         return (True if self.minilatex else False)
 
     def to_html(self, refcontext=None):
-        try:
-            doccontext = MiniLatex.DocContext(self, refcontext)
-            return self._nodelist_to_html(self.nodes, doccontext)
-        except Exception as e:
-            logger.error(f"Error producing HTML from latex-like minilanguage ‘{self.what}’: "
-                         f" {e}\n"
-                         f"Given text was:\n‘{self.minilatex}’\n\n")
-            raise
+        return self._to_x(refcontext=refcontext, fmt='html')
 
     def _to_text(self, refcontext=None):
+        # don't use _to_text(), use .text attribute as much as possible.  I'm
+        # not aware of any interesting setting where you'd want to produce text
+        # in a refcontext-aware setting.
+        return self._to_x(refcontext=refcontext, fmt='text')
+
+    def _to_x(self, refcontext=None, fmt='html'):
         try:
             doccontext = MiniLatex.DocContext(self, refcontext)
-            return self._nodelist_to_text(self.nodes, doccontext)
+            return self._nodelist_to_x(self.nodes, doccontext, fmt=fmt)
         except Exception as e:
-            logger.error(f"Error producing text from latex-like minilanguage ‘{self.what}’: "
-                         f" {e}\n"
-                         f"Given text was:\n‘{self.minilatex}’\n\n")
+            logger.error(
+                f"Error producing {fmt.upper()} from latex-like minilanguage ‘{self.what}’: "
+                f"  {e}\n"
+                f"Given text was:\n‘{self.minilatex}’\n\n"
+            )
             raise
-
+        
 
     def __html__(self):
         return self.to_html()
+
+    def __jsonobject__(self):
+        return {
+            'minilatex': self.minilatex,
+            'text': self.text,
+            'html_norefs': self.to_html()
+        }
 
     def _nodelist_to_html(self, nodelist, doccontext):
         return self._nodelist_to_x(nodelist, doccontext, fmt='html')
