@@ -22,7 +22,7 @@ properties:
   # every code must have a name.
   name:
     type: string
-    _minilatex: 'no-refs'
+    _minilatex: 'simple'
     _single_line_string: True
     _description: >-
       The name of the code.  It is listed in multiple places, so don't make it

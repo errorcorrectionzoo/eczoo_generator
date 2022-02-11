@@ -572,7 +572,9 @@ class HtmlPageCollection:
                  + f"</span>")
                 for item in obj
             ]) )
-        return markupsafe.Markup( obj.to_html(refcontext=refcontext) )
+        if isinstance(obj, minilatextohtml.MiniLatex):
+            return markupsafe.Markup( obj.to_html(refcontext=refcontext) )
+        return obj
 
 
     def create_page(self, htmlpage):

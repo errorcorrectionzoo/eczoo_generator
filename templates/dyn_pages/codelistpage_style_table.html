@@ -1,0 +1,48 @@
+{% extends 'layout/base_page.html' %}
+
+{% block contents %}
+
+{% macro render_template_variable(variable) -%}
+  {{variable}}
+{%- endmacro %}
+
+
+{{ codelistpage_data.intro|to_html_with_notes(rc) }}
+
+{% set colinfo = display_options.columns %}
+
+<table class="codelistpage-table {{display_options.cssclass}}">
+<thead>
+<tr>
+{% for col in colinfo %}
+  <th>{{col.title}}</th>
+{% endfor %}
+</tr>
+</thead>
+<tbody>
+{% for code in code_list %}
+{% set row_counter = loop.index %}
+<tr>
+{% for col in colinfo %}
+  <td {% if col.cssclass %}class="{{col.cssclass}}"{% endif %}>
+    {%- if col.predefined -%}
+      {%- if col.predefined == 'counter' -%}
+        {{ row_counter }}
+      {%- else -%}
+        ??
+      {%- endif -%}
+    {%- elif col.property -%}
+      {%- if col.link_to_code %}<a href="{{code|code_ref_href}}">{% endif -%}
+      {{ code[ col.property ] | to_html_with_notes(rc) }}
+      {%- if col.link_to_code %}</a>{% endif -%}
+    {%- endif -%}
+  </td>
+{% endfor %}
+</tr>
+{% endfor %}
+</tbody>
+</table>
+
+{% include 'pieces/endnotes.html' %}
+
+{% endblock contents %}

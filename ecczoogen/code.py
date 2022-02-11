@@ -53,9 +53,9 @@ class Code:
 
         code_id = info['code_id']
 
-        self.schemadata = SchemaData(info, full_schema,
+        self.schemadata = SchemaData(self.source_info, full_schema,
                                      what=f"<code {code_id}>",
-                                     resource_parent=self)
+                                     minilatex_resource_parent=self)
 
         # often used properties
         self.code_id = self.schemadata['code_id']
@@ -105,3 +105,42 @@ class Code:
             f"Code(code_id={self.code_id!r}, "
                  f"source_info_filename={self.source_info_filename!r})"
         )
+
+    def is_descendant_of(self, other_code_id):
+        # follow parents until we find other_code_id.
+        
+        code_ids_checked = set()
+
+        checking_codes = [self]
+
+        while checking_codes:
+
+            new_checking_codes = []
+
+            for checking_code in checking_codes:
+                code_ids_checked.add(checking_code.code_id)
+
+                for r in checking_code.relations.parents:
+                    rcid = r.code.code_id
+                    if other_code_id == rcid:
+                        # parent found
+                        return True
+                    # add parent to codes that need to be checked
+                    if rcid not in code_ids_checked:
+                        new_checking_codes.append(r.code)
+                        
+            checking_codes = new_checking_codes
+
+        return False
+
+    def is_in_domain(self, domain_obj):
+        # domain_obj is a data structure conforming to the "domains:" in
+        # 'domainshierarchy' schema
+        for kingdom in domain_obj['kingdoms']:
+            if self.is_descendant_of(kingdom):
+                return True
+        return False
+
+
+    def resource_parent_id(self):
+        return ('code', self.code_id)

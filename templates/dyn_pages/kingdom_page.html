@@ -1,10 +1,15 @@
-{% extends 'dyn_pages/code_list.html' %}
+{% extends 'layout/base_page.html' %}
 
 {% block contents %}
 
 <p>Welcome to the {{kingdom.name}}.</p>
 
-{# include the 'contents' block from the code_list.html template #}
-{{ super() }}
+{% for code in code_list %}
+
+  {% include 'pieces/code_info_short.html' %}
+
+{% endfor %}
+
+{% include 'pieces/endnotes.html' %}
 
 {% endblock contents %}

@@ -85,6 +85,8 @@ class Dirs:
 
     citation_extras = os.path.join(_root_dir, eczoo_site_setup['dirs']['citation_extras'])
 
+    code_tree_info = os.path.join(_root_dir, eczoo_site_setup['dirs']['code_tree_info'])
+
     #
     # Where to output the website files:
     #
@@ -131,13 +133,27 @@ if args.run_server:
 
 
 
+
+
+################################################################################
+
+#
+# Tools that we'll need all along the build process
+#
+
+schema_loader = schemaloader.SchemaLoader(schemas_dir=Dirs.schemas_dir)
+
+minilatex_scanner = minilatexscanner.MiniLatexScanner()
+
+
 ################################################################################
 
 #
 # Build the Code Collection --> create a `ecczoogen.zoo` object
 #
 
-zoo = zoo.Zoo(dirs=Dirs, fig_exts=eczoo_site_setup['image_filename_extensions'])
+zoo = zoo.Zoo(dirs=Dirs, schema_loader=schema_loader,
+              fig_exts=eczoo_site_setup['image_filename_extensions'])
 
 
 ################################################################################
@@ -205,7 +221,7 @@ search_index_generator = searchindexgen.SearchIndexGenerator()
 
 ################################################################################
 
-logger.info("Setting up ecc list pages ...")
+logger.info("Setting up code pages ...")
 
 #
 # Set up the individual code pages for the site -- i.e., here, we do one page
@@ -234,6 +250,8 @@ for code_id, code in zoo.all_codes().items():
     search_index_generator.add_code_page(code, page.path())
 
 
+logger.info("Setting up domain/kingdom pages ...")
+
 #
 # Now construct the domain & kingdom pages.
 #
@@ -242,14 +260,20 @@ for code_id, code in zoo.all_codes().items():
 # data, and it will add some more information to the bare YML data tree
 # (e.g. pointers to code objects)
 
-schema_loader = schemaloader.SchemaLoader(schemas_dir=Dirs.schemas_dir)
 domainshierarchy_full_schema = schema_loader.get_full_schema('domainshierarchy')
 
+with open(os.path.join(Dirs.code_tree_info, 'domainshierarchy.yml'), encoding='utf-8') as f:
+    domainshierarchy_source_data = yaml.safe_load(f)
+
 eczoo_domainshierarchy = schemadata.SchemaData(
-    eczoo_site_setup['code_tree'],
+    domainshierarchy_source_data,
     domainshierarchy_full_schema,
     what="<eczoo_domainshierarchy>",
+    minilatex_resource_parent=schemadata.UseSelfMinilatexResourceParent,
 )
+eczoo_domainshierarchy.resource_parent_id = lambda: ('domainshierarchy', '0')
+
+minilatex_scanner.scan_schemadatalike_obj(eczoo_domainshierarchy)
 
 
 for domain in eczoo_domainshierarchy['domains']:
@@ -265,13 +289,13 @@ for domain in eczoo_domainshierarchy['domains']:
         code = zoo.get_code(kingdom['code_id'])
         kingdom['code'] = code
 
-        root_code_id = code.code_id
+        kingdom_code_id = code.code_id
 
-        logger.debug(f"processing kingdom with code_id ‘{root_code_id}’ "
+        logger.debug(f"processing kingdom with code_id ‘{kingdom_code_id}’ "
                      f"(‘{kingdom['name']}’), in domain ‘{domain_id}‘")
 
         sorted_code_list = list(
-            sorted(zoo.get_code_family_tree(root_code_id),
+            sorted(zoo.get_code_family_tree(kingdom_code_id),
                    key=lambda code: code.family_generation_level)
         )
 
@@ -280,7 +304,7 @@ for domain in eczoo_domainshierarchy['domains']:
 
         # create kingdom page.
         kingdom_page = htmlpagecollectiongen.HtmlPage(
-            name=f'kingdom/{root_code_id}',
+            name=f'kingdom/{kingdom_code_id}',
             info={
                 'page_title': kingdom['name'],
                 'page_title_text': kingdom['name'].text,
@@ -297,7 +321,7 @@ for domain in eczoo_domainshierarchy['domains']:
 
         htmlpgcoll.create_page( kingdom_page )
         #
-        #logger.debug(f"kingdom page created (‘{root_code_id}’)")
+        #logger.debug(f"kingdom page created (‘{kingdom_code_id}’)")
 
     # create domain page.
     domain_page = htmlpagecollectiongen.HtmlPage(
@@ -318,24 +342,133 @@ for domain in eczoo_domainshierarchy['domains']:
     htmlpgcoll.create_page( domain_page )
 
 
+logger.info("Setting up code list pages ...")
 
 #
 # Create a code index page with ALL codes in a single page.
 #
 
-htmlpgcoll.create_page(
-    htmlpagecollectiongen.HtmlPage(
-        name='all',
-        info={
-            'page_title': 'Index of all codes',
-        },
-        code_id_list=[
-            code.code_id
-            for code in sorted(zoo.all_codes().values(),
-                               key=lambda code: code.name.text)
-        ],
-        template_name='dyn_pages/code_index.html',
-    )
+codelistpage_full_schema = schema_loader.get_full_schema('codelistpage')
+
+codelistpages_dir = os.path.join(Dirs.code_tree_info, 'codelistpages')
+
+os.makedirs(os.path.join(Dirs.output_dir, 'list'), exist_ok=True)
+
+
+codelistpage_list = []
+
+for (dirpath, dirnames, filenames) in os.walk(codelistpages_dir, followlinks=True):
+    show_dirpath = os.path.relpath(dirpath)
+    logger.info(f"Scanning for code list page YAML files (.yml) in ‘{show_dirpath}’ ...")
+
+    for filename in filenames:
+
+        if not filename.endswith(".yml"):
+            logger.debug(f"Skipping file {filename} which is not a .yml file")
+            continue
+
+        fullfname = os.path.join(dirpath, filename)
+        relfname = os.path.relpath(fullfname, codelistpages_dir)
+
+        try:
+            with open(fullfname, encoding='utf-8') as f:
+                ydata = yaml.safe_load(f)
+        except Exception as e:
+            logger.critical(
+                f"Failed to load code list page YAML file {fullfname}: {e}"
+            )
+            raise
+                
+        codelistpage_sd = schemadata.SchemaData(
+            ydata,
+            codelistpage_full_schema,
+            what=f'codelistpage ‘{filename}’',
+            minilatex_resource_parent=schemadata.UseSelfMinilatexResourceParent,
+        )
+        codelistpage_sd.resource_parent_id = \
+            lambda: ('codelistpage', relfname)
+
+        minilatex_scanner.scan_schemadatalike_obj(codelistpage_sd)
+
+        domains_by_domainid = {
+            domain['domain_id']: domain
+            for domain in eczoo_domainshierarchy['domains']
+        }
+
+        # resolve code list, prepare all codes
+        def _code_select_predicate(code, predinfo):
+            if 'property_set' in predinfo:
+                if not code.getfield(predinfo['property_set']):
+                    logger.debug(
+                      f"Code {code.code_id} does not have property {predinfo['property_set']}")
+                    return False
+            if 'domain' in predinfo:
+                if not code.is_in_domain(domains_by_domainid[predinfo['domain']]):
+                    logger.debug(f"Code {code.code_id} is not in domain {predinfo['domain']}")
+                    return False
+            if 'descendant_of' in predinfo:
+                if not code.is_descendant_of(predinfo['descendant_of']):
+                    logger.debug(
+                        f"Code {code.code_id} is not descendant of {predinfo['descendant_of']}")
+                    return False
+            return True
+
+        def _code_select_predicates(code, preds_info):
+            for pred in preds_info:
+                if _code_select_predicate(code, pred):
+                    return True
+            return False
+
+        def _ml_as_text(s):
+            return getattr(s, 'text', s)
+
+        list_of_codes = [
+            code
+            for code in zoo.all_codes().values()
+            if _code_select_predicates(code, codelistpage_sd['codes'])
+        ]
+        sort_by = codelistpage_sd.getfield('sort.by', 'name')
+        reverse = codelistpage_sd.getfield('sort.reverse', False)
+        list_of_codes.sort(
+            key=lambda code: _ml_as_text(code.getfield(sort_by)),
+            reverse=reverse,
+        )
+
+        codepagelistdisplaystyle = codelistpage_sd.getfield('display.style', 'cards')
+        templatename = f'dyn_pages/codelistpage_style_{codepagelistdisplaystyle}.html'
+
+        listpageid = codelistpage_sd['list_id']
+        if codelistpage_sd['list_id_root']:
+            pass
+        else:
+            listpageid = f'list/{listpageid}'
+
+        htmlpage = htmlpagecollectiongen.HtmlPage(
+            name=listpageid,
+            info={
+                'page_title': codelistpage_sd['title'],
+                'page_title_text': codelistpage_sd['title'].text,
+                'codelistpage_data': codelistpage_sd,
+                'display_options': codelistpage_sd.subobject('display.options'),
+            },
+            code_id_list=[
+                code.code_id
+                for code in list_of_codes
+            ],
+            template_name=templatename,
+        )
+        htmlpgcoll.create_page( htmlpage )
+
+        codelistpage_list.append({
+            'list_id': codelistpage_sd['list_id'],
+            'path': htmlpage.path(),
+            'title': codelistpage_sd['title'],
+            'codelistpage_data': codelistpage_sd,
+        })
+
+
+codelistpage_list.sort(
+    key=lambda x: (True if x['codelistpage_data']['list_id_root'] else False, x['list_id'])
 )
 
 
@@ -348,6 +481,7 @@ htmlpgcoll.create_page(
 global_context = {
     'domains': eczoo_domainshierarchy['domains'],
     'zoo': zoo,
+    'codelistpage_list': codelistpage_list,
 }
 
 
@@ -509,11 +643,9 @@ for SpecialPageClass in special_pages:
 
 logger.info("Scanning code minilatex for external resources ...")
 
-minilatex_scanner = minilatexscanner.MiniLatexScanner()
-
 for code_id, code in zoo.all_codes().items():
     
-    minilatex_scanner.scan_code_obj(code, where=f'<code {code_id}>')
+    minilatex_scanner.scan_schemadatalike_obj(code, what=f"<code {code.code_id}>")
 
 
 ################################################################################
@@ -532,18 +664,32 @@ output_fig_prefix = 'fig'
 os.makedirs(os.path.join(Dirs.output_dir, output_fig_prefix), exist_ok=True)
 
 for encountered_image_filename in minilatex_scanner.get_encountered_image_filenames():
-    if encountered_image_filename.encountered_code_id is not None:
-        code_id = encountered_image_filename.encountered_code_id
+    if encountered_image_filename.encountered_resource_parent_id is not None:
+        resource_parent_id = encountered_image_filename.encountered_resource_parent_id
         image_filename = encountered_image_filename.image_filename
 
-        if (code_id, image_filename) in figsdb:
+        if (resource_parent_id, image_filename) in figsdb:
             # already got this figure (how is this possible ?)
             continue
 
-        code = zoo.get_code(code_id)
-        full_path = os.path.join(Dirs.codes_dir,
-                                 os.path.dirname(code.source_info_filename),
-                                 image_filename)
+        resource_parent_type, resource_parent_id_part = resource_parent_id
+
+        if resource_parent_type == 'code':
+            code_id = resource_parent_id_part
+            code = zoo.get_code(code_id)
+            full_path = os.path.join(Dirs.codes_dir,
+                                     os.path.dirname(code.source_info_filename),
+                                     image_filename)
+        elif resource_parent_type == 'domainshierarchy':
+            full_path = os.path.join(Dirs.code_tree_info, image_filename)
+        elif resource_parent_type == 'codelistpage':
+            full_path = os.path.join(Dirs.code_tree_info, 'codelistpages',
+                                     resource_parent_id_part, image_filename)
+        else:
+            raise ValueError(
+                f"Unknown resource_parent_type for finding minilatex figures:"
+                f"{resource_parent_type} in {resource_parent_id}"
+            )
 
         ext = ''
         for ext in fig_exts:

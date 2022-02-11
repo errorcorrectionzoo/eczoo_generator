@@ -253,7 +253,7 @@ input.navbar-search {
 
 ////////////////////////////////////////////////////////////////////////////////
 //
-// main section for code list pages
+// code list pages
 //
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -265,16 +265,116 @@ input.navbar-search {
         margin-bottom: $inner-parskip-half-length;
     }
 }
+
+
+//
+// Code list page with style=index
+//
+ul.code-index, ol.code-index {
+    &, &:first-child {
+        margin: 1.5rem 0 2rem !important;
+    }
+
+    li {
+        margin-bottom: 0.7rem;
+    }
+
+    .code-name {
+        padding-right: 1em;
+        font-weight: bold;
+    }
+    .code-description {
+    }
+}
+
+//
+// Code list page with style=table
+//
+
+table.codelistpage-table {
+    margin: 1.5rem 0rem 2rem;
+
+    border-top: solid .15rem black;
+    border-bottom: solid .15rem black;
+
+    width: 100%;
+    box-sizing: border-box;
+    border-collapse: collapse;
+
+    thead {
+        tr {
+            border-bottom: solid .1rem black;
+
+            th {
+                //font-weight: normal;
+                font-weight: bold;
+                //font-style: italic;
+                font-size: $small-font-size;
+                
+                padding: 0.25rem 0.1rem;
+            }
+        }
+    }
+
+    &.hlines {
+        thead tr {
+            // turn the thin rule below header into a thick rule
+            border-bottom: solid .15rem black;
+        }
+        tbody tr {
+            border-bottom: solid .1rem black;
+        }
+    }
+
+    td {
+        padding: 0.15rem 0.25rem 0.15rem;
+    }
+
+    &.xtra-stretch td {
+        padding: 0.25rem 0.25rem 0.25rem;
+    }
+    &.xtra-xtra-stretch td {
+        padding: 0.5rem 0.25rem 0.5rem;
+    }
+
+
+
+    td.small {
+        font-size: $small-font-size;
+    }
+    td.left {
+        text-align: left;
+    }
+    td.center {
+        text-align: center;
+    }
+    td.right {
+        text-align: right;
+    }
+    td.top {
+        vertical-align: top;
+    }
+    td.bottom {
+        vertical-align: bottom;
+    }
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// main code page
+//
+////////////////////////////////////////////////////////////////////////////////
+
 .ecc-code.ecc-code-page {
     border: none 0px;
 }
 
 //
-// Code info "table" fields appearance
+// Code info page article appearance
 //
 
 @import 'ecc-code-page.scss';
-
 
 //
 // Elements displayed on the code info page
@@ -501,25 +601,6 @@ a.code-self-edit {
 }
 
 
-
-////////////////////////////////////////////////////////////////////////////////
-//
-// code index style
-//
-////////////////////////////////////////////////////////////////////////////////
-
-.code-index {
-    li {
-        margin-bottom: 0.7rem;
-    }
-
-    .code-name {
-        padding-right: 1em;
-        font-weight: bold;
-    }
-    .code-description {
-    }
-}
 
 
 

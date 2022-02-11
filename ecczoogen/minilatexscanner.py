@@ -11,12 +11,12 @@ import minilatextohtml
 EncounteredCitation = collections.namedtuple('EncounteredCitation',
                                              ['citation_key_prefix',
                                               'citation_key',
-                                              'encountered_code_id',
+                                              'encountered_resource_parent_id',
                                               'encountered_where'])
 
 EncounteredImageFilename = collections.namedtuple('EncounteredFloat',
                                                   ['image_filename',
-                                                   'encountered_code_id',
+                                                   'encountered_resource_parent_id',
                                                    'encountered_where'])
 
 
@@ -28,7 +28,7 @@ class ScannerRefContext(minilatextohtml.HtmlRefContext):
         self.encountered_citations = []
         self.encountered_image_filenames = []
         self.cur_where = None
-        self.cur_code_id = None
+        self.cur_resource_parent_id = None
 
     def get_ref(self, ref_key_prefix, ref_key):
         # return (target_html, targethref)
@@ -45,7 +45,7 @@ class ScannerRefContext(minilatextohtml.HtmlRefContext):
             EncounteredCitation(
                 citation_key_prefix=citation_key_prefix,
                 citation_key=citation_key,
-                encountered_code_id=self.cur_code_id,
+                encountered_resource_parent_id=self.cur_resource_parent_id,
                 encountered_where=self.cur_where,
             )
         )
@@ -57,7 +57,7 @@ class ScannerRefContext(minilatextohtml.HtmlRefContext):
         self.encountered_image_filenames.append(
             EncounteredImageFilename(
                 image_filename=float_obj.contents_image_filename,
-                encountered_code_id=self.cur_code_id,
+                encountered_resource_parent_id=self.cur_resource_parent_id,
                 encountered_where=self.cur_where,
             )
         )
@@ -70,11 +70,11 @@ class MiniLatexScanner:
 
         self.refcontext = ScannerRefContext()
 
-    def scan_minilatex(self, minilatex, *, where, code_id=None):
+    def scan_minilatex(self, minilatex, *, where, resource_parent_id=None):
         #logger.debug(f"Scanning for citations in {where} (“{minilatex}”)")
         try:
             self.refcontext.cur_where = where
-            self.refcontext.cur_code_id = code_id
+            self.refcontext.cur_resource_parent_id = resource_parent_id
             dummy = minilatex.to_html(self.refcontext)
         except Exception as e:
             logger.warning(f"Error while scanning for citations in ‘{where}’: {e}")
@@ -82,15 +82,29 @@ class MiniLatexScanner:
         # we can ignore dummy, our add_citation() callback will have fired for
         # any encountered citation.
 
-    def scan_code_obj(self, obj, *, where=''):
+    def scan_schemadatalike_obj(self, obj, resource_parent_obj=True, what=None):
+
+        if resource_parent_obj is True:
+            resource_parent_obj = obj
+
+        resource_parent_id = None
+
         for (fldinfo, value) in obj.iter_fields_recursive(
                 arrays_at_once=False
         ):
             #logger.debug(f"Cite scanning in {obj} - iter {fldinfo=} / {value=}")
-            if value is not None and fldinfo['schema'].get('_minilatex', False):
+            if value is not None and fldinfo is not None \
+               and fldinfo['schema'] is not None \
+               and fldinfo['schema'].get('_minilatex', False):
+                if resource_parent_obj is not None:
+                    resource_parent_id = resource_parent_obj.resource_parent_id()
+                if what is not None:
+                    this_what = what
+                else:
+                    this_what = obj.what
                 self.scan_minilatex(value,
-                                    where=f"{where}{fldinfo['fieldname']}",
-                                    code_id=obj.code_id)
+                                    where=f"{this_what}{fldinfo['fieldname']}",
+                                    resource_parent_id=resource_parent_id)
 
     def get_encountered_citations(self):
         # returns a list of pairs of (citation_key_prefix, citation_key)

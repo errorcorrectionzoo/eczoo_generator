@@ -9,7 +9,6 @@ logger = logging.getLogger(__name__)
 
 from . import code, code_collection, schemaloader
 
-import jsonschema
 
 
 _junk_files = (
@@ -32,18 +31,16 @@ _accessory_ignore_exts = (
 
 
 class Zoo:
-    def __init__(self, *, dirs, fig_exts):
+    def __init__(self, *, dirs, schema_loader, fig_exts):
         super().__init__()
 
         codes_dir = dirs.codes_dir
-        schemas_dir = dirs.schemas_dir
 
         # make into a tuple; remove empty suffix if present
         fig_exts = tuple([e for e in fig_exts if e])
 
         self._collection = code_collection.CodeCollection()
 
-        schema_loader = schemaloader.SchemaLoader(schemas_dir=schemas_dir)
         code_full_schema = schema_loader.get_full_schema('ecc')
 
         logger.info("Building the zoo ...")
@@ -83,16 +80,13 @@ class Zoo:
                             logger.error(f"Failed to parse YAML file ‘{filename}’:\n{e}\n\n")
                             raise
 
-                    # validate the code data structure, to be sure
                     try:
-                        jsonschema.validate(code_info, code_full_schema)
+                        codeobj = code.Code( code_info , full_schema=code_full_schema )
                     except Exception as e:
                         logger.error(
-                            f"Code data validation failed in YAML file ‘{filename}’:\n{e}\n\n"
+                            f"Error constructing code from YAML file ‘{filename}’:\n{e}\n\n"
                         )
                         raise
-
-                    codeobj = code.Code( code_info , full_schema=code_full_schema )
 
                     codeobj.source_info_filename = os.path.relpath(fullfname, start=codes_dir)
 

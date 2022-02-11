@@ -14,6 +14,7 @@ properties:
     type: array
     items:
       type: object
+      additionalProperties: false
       required: ['domain_id', 'name']
       properties:
         domain_id:
@@ -23,7 +24,7 @@ properties:
 
         name:
           type: string
-          _minilatex: 'no-refs'
+          _minilatex: 'simple'
           _single_line_string: True
 
         description:
@@ -34,6 +35,8 @@ properties:
           type: array
           items:
             type: object
+            additionalProperties: false
+            required: ['code_id', 'name']
             properties:
               code_id:
                 type: string
@@ -42,4 +45,4 @@ properties:
               name:
                 type: string
                 _single_line_string: True
-                _minilatex: 'no-refs'
+                _minilatex: 'simple'
