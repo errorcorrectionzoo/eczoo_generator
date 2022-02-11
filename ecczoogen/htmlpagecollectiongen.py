@@ -230,7 +230,7 @@ class HtmlFloat:
             figuretag_attrs['id'] = f"{float_type}-{self.no}"
 
             # we have a figure caption
-            fltnostr, flthref = self.html_page_notes.get_float_ref(
+            _, fltnostr, flthref = self.html_page_notes.get_float_ref(
                 self.float_obj.float_type,
                 self.float_obj.label
             )
@@ -261,6 +261,8 @@ class RefContextForHtmlConverter(minilatextohtml.HtmlRefContext):
         self.htmlpagecollection = htmlpagecollection
         self.html_page_notes = html_page_notes
 
+        self.state = None
+
     def _get_ref_code(self, code_id):
         code = self.htmlpagecollection.zoo.get_code(code_id)
         code_href = self.htmlpagecollection.get_code_href(code_id)
@@ -268,6 +270,10 @@ class RefContextForHtmlConverter(minilatextohtml.HtmlRefContext):
         return (code_name_html, code_href)
         
     def get_ref(self, ref_key_prefix, ref_key):
+
+        if self.state != 'generation':
+            return ('','')
+
         if ref_key_prefix == 'eq':
             raise ValueError(
                 f"Equation references should use \\eqref{{eq:XXX}}, not \\ref{{eq:XXX}}: "
@@ -275,7 +281,9 @@ class RefContextForHtmlConverter(minilatextohtml.HtmlRefContext):
             )
 
         if ref_key_prefix in ('figure', 'table'):
-            return self.html_page_notes.get_float_ref(ref_key_prefix, ref_key)
+            (htmlfloat, floatnostr, floathref) = \
+                self.html_page_notes.get_float_ref(ref_key_prefix, ref_key)
+            return (floatnostr, floathref)
 
         if ref_key_prefix == 'code':
             return self._get_ref_code(ref_key)
@@ -300,6 +308,9 @@ class RefContextForHtmlConverter(minilatextohtml.HtmlRefContext):
     def add_footnote(self, footnote_text_html):
         # return (footnotelabel_html, footnotehref)
 
+        if self.state != 'generation':
+            return ('','')
+
         self._check_html_page_notes_context()
 
         footnote = HtmlFootnote(footnote_text_html=footnote_text_html)
@@ -323,6 +334,9 @@ class RefContextForHtmlConverter(minilatextohtml.HtmlRefContext):
                      optional_cite_extra_html=None):
         # return (citelabel_html, citehref)
 
+        if self.state != 'generation':
+            return ('','')
+
         self._check_html_page_notes_context()
 
         citation = self._get_citation_obj(citation_key_prefix, citation_key)
@@ -337,13 +351,30 @@ class RefContextForHtmlConverter(minilatextohtml.HtmlRefContext):
         
         self._check_html_page_notes_context()
 
-        htmlfloat = HtmlFloat(float_obj=float_obj, html_page_notes=self.html_page_notes)
+        if self.state == 'pre-pass':
 
-        if htmlfloat.numbered():
-            float_no = self.html_page_notes.add_float(htmlfloat)
-            htmlfloat.no = float_no
+            if float_obj.label is not None: # numbered float --> register it!!
+                htmlfloat = \
+                    HtmlFloat(float_obj=float_obj, html_page_notes=self.html_page_notes)
 
-        return htmlfloat.full_float_html()
+                float_no = self.html_page_notes.add_float(htmlfloat)
+                htmlfloat.no = float_no
+
+            return ''
+
+        if self.state == 'generation':
+
+            if float_obj.label is None: # not a numbered float
+                htmlfloat = HtmlFloat(float_obj=float_obj,
+                                      html_page_notes=self.html_page_notes)
+            else:
+                htmlfloat, _, _ = self.html_page_notes.get_float_ref(
+                    float_obj.float_type, float_obj.label
+                )
+
+            return htmlfloat.full_float_html()
+
+        return ''
         
 
 
@@ -418,7 +449,7 @@ class HtmlPageNotes:
                     )
                 )
                 floatnohref = f'#{float_type}-{htmlfloat.no}'
-                return (floatnostr, floatnohref)
+                return (htmlfloat, floatnostr, floatnohref)
 
         raise ValueError(f"Float reference ‘{ref_key_prefix}:{ref_key}’ not resolved!")
                     
@@ -642,31 +673,38 @@ class HtmlPageCollection:
 
             context = dict(
                 code_list=[
-                    # _HtmlObjectWrapper(
-                    #     codeobj,
-                    #     tohtmlconverter,
-                    #     repr(codeobj)
-                    # )
-                    # for codeobj in [
-                            self.zoo.get_code(code_id)
-                            for code_id in htmlpage.code_id_list
-                    #]
+                    self.zoo.get_code(code_id)
+                    for code_id in htmlpage.code_id_list
                 ],
                 page_footnotes=page_footnotes,
                 pages=self.pages,
                 rc=tohtml_refcontext, # rc = "refcontext" for filter
                 **self.global_context,
                 **htmlpage.info,
-                **{k: v   #_HtmlObjectWrapper(v, tohtmlconverter, repr(v))
+                **{k: v
                    for (k, v) in (htmlpage.context.items() if htmlpage.context else {})},
                 **additional_context
             )
 
+            logger.debug("Generating page; first doing a pre-pass to detect floats ...")
+
+            # do a first pass to detect & register floats
+            tohtml_refcontext.state = 'pre-pass'
+            try:
+                pg_template = self.jinja2env.get_template(htmlpage.template_name)
+                rendered_output = pg_template.render(context)
+            except Exception as e:
+                logger.error(f"Error compiling template: {e}", exc_info=True)
+                raise
+
+            logger.debug("Generating page; generating ...")
+
+            tohtml_refcontext.state = 'generation'
 
             self.site_generation_environment.compile_template(
                 fn_template=htmlpage.template_name,
                 fn_output=output_page_fname,
-                context=context
+                context=context,
             )
 
             # template = self.jinja2env.get_template(htmlpage.template_name)

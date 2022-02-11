@@ -31,16 +31,17 @@ from pylatexenc.macrospec import LatexArgumentSpec
 
 
 class _ItemToHtmlSpec(object):
-    def __init__(self, item_to_html=None, **kwargs):
-        super(_ItemToHtmlSpec, self).__init__(**kwargs)
+    def __init__(self, *args, item_to_html=None, **kwargs):
+        super(_ItemToHtmlSpec, self).__init__(*args, **kwargs)
         if item_to_html is None:
             self.item_to_html = ItemToHtmlVerbatim()
         elif isinstance(item_to_html, str):
             self.item_to_html = ItemToHtmlConst(item_to_html)
         else:
             self.item_to_html = item_to_html
-        
-class MiniHtmlMacroSpec(macrospec.MacroSpec, _ItemToHtmlSpec):
+
+
+class MiniHtmlMacroSpec(_ItemToHtmlSpec, macrospec.MacroSpec):
     def __init__(self, macroname, arguments_spec_list=None, item_to_html=None):
         super(MiniHtmlMacroSpec, self).__init__(
             macroname,
@@ -66,8 +67,10 @@ class MiniHtmlSpecialsSpec(macrospec.SpecialsSpec, _ItemToHtmlSpec):
             item_to_html=item_to_html,
         )
 
+# ------------------
 
-# ----
+
+# ------------------
 
 def html_wrap_in_tag(tagname, htmlcontent, *, attrs=None, class_=None):
     s = f'<{tagname}'
