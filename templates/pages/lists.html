@@ -1,0 +1,14 @@
+{% extends 'layout/base_page.html' %}
+{% block block_page_title %}Error Correction Zoo — Code lists{% endblock %}
+
+{% block contents %}
+
+<h1>List of code lists</h1>
+
+<ul>
+{% for codelistpage in codelistpage_list %}
+  <li><p><a href="{{codelistpage.path|prebaseurl}}">{{codelistpage.title}}</a></p></li>
+{% endfor %}
+</ul>
+
+{% endblock contents %}

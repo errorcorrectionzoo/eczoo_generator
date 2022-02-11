@@ -2,7 +2,7 @@
 
 Expected context variables:
 
-- `code` -> a WRAPPED `ecczoogen.code.Code` object, with relations field
+- `code` -> a `ecczoogen.code.Code` object, with relations field
             populated (i.e., it must have been added to a
             `ecczoogen.code_collection.CodeCollection` which was subsequently
             finalized with its `finished()` method.)
@@ -11,11 +11,11 @@ Expected context variables:
 
 <div class="ecc-code" id="ecc_{{code.code_id}}">
   <span class="short-code-name">{{code|code_ref}}
-    {%- if code.introduced %}<span class="code-introduced">{{code.introduced}}</span>{% endif -%}
+    {%- if code.introduced %}<span class="code-introduced">{{code.introduced|to_html_with_notes(rc)}}</span>{% endif -%}
   </span>
-  <span class="short-code-description">{{code.description}}</span>
+  <span class="short-code-description">{{code.description.get_first_paragraph()|to_html_with_notes(rc)}}</span>
   {% if code.protection %}
-  <span class="short-code-info">Protection: {{code.protection}}</span>
+  <span class="short-code-info">Protection: {{code.protection.get_first_paragraph()|to_html_with_notes(rc)}}</span>
   {% endif %}
   {% if code.relations.parents %}
   <span class="short-code-parents">

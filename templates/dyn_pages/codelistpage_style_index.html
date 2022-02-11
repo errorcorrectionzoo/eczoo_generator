@@ -1,0 +1,21 @@
+{% extends 'layout/base_page.html' %}
+
+{% block contents %}
+
+{{ codelistpage_data.intro }}
+
+<ol class="code-index">
+{% for code in code_list %}
+  <li>
+    <span class="code-name">
+      {{code|code_ref}}
+      {%- if code.introduced %}<span class="code-introduced">{{code.introduced|to_html_with_notes(rc)}}</span>{% endif -%}
+    </span>
+    <span class="code-description">{{code.description|to_html_with_notes(rc)}}</span>
+  </li>
+{% endfor %}
+</ol>
+
+{% include 'pieces/endnotes.html' %}
+
+{% endblock contents %}

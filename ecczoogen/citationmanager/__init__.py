@@ -166,7 +166,6 @@ class CitationTextManager:
 
         logger.debug(f"add_citation({kwargs=})")
 
-
         fld, val = _get_single_kwarg(kwargs)
 
         if val in self._citations_by_field[fld]:
@@ -202,6 +201,9 @@ class CitationTextManager:
 
         citation = self._citations_by_field[fld].get(val, None)
         if citation is None:
+            logger.debug(
+                f"Citation database is -> {self._citations_by_field}"
+            )
             raise ValueError(f"Citation not found for {kwargs=} in internally "
                              f"constructed database!")
         return citation
@@ -387,7 +389,10 @@ class CitationTextManager:
             full_citation_text += \
                 fr" \href{{https://arxiv.org/abs/{arxividstr}}}{{{arxividstr}}}"
 
-            citeobj.full_citation_text_minilatex = full_citation_text
+            citeobj.full_citation_text_minilatex = minilatextohtml.MiniLatex(
+                full_citation_text,
+                what=f"Citation ‘arXiv:{arxividstr}’",
+            )
 
             logger.debug(f"Citation arXiv:{arxividstr} → {full_citation_text}")
 
@@ -415,7 +420,10 @@ class CitationTextManager:
                 full_citation_text += \
                     f"; \href{{https://arxiv.org/abs/{arxividstr}}}{{{arxividstr}}}"
 
-            citeobj.full_citation_text_minilatex = full_citation_text
+            citeobj.full_citation_text_minilatex = minilatextohtml.MiniLatex(
+                full_citation_text,
+                what=f"Citation ‘doi:{doi}’",
+            )
             
             logger.debug(f"Citation doi:{doi} → {full_citation_text}")
         
@@ -424,20 +432,35 @@ class CitationTextManager:
         #
 
         for preset, citeobj in self._citations_by_field['preset'].items():
+
+            # don't use _make_minilatex_citation_text() because we should report
+            # syntax errors in preset citations !
+
             try:
-                citeobj.full_citation_text_minilatex = self._preset_citations[citeobj.preset]
+                full_citation_text = self._preset_citations[citeobj.preset]
             except KeyError:
                 logger.error(f"Unknown preset citation: ‘{citeobj.preset}’")
                 raise
+
+            citeobj.full_citation_text_minilatex = minilatextohtml.MiniLatex(
+                full_citation_text,
+                what=f"Citation ‘preset:{citeobj.preset}’"
+            )
+
 
         #
         # Now also process manual entries
         #
 
         for manual, citeobj in self._citations_by_field['manual'].items():
-            citeobj.full_citation_text_minilatex = citeobj.manual
 
+            # don't use _make_minilatex_citation_text() because we should report
+            # syntax errors in manual citations !
 
+            citeobj.full_citation_text_minilatex = minilatextohtml.MiniLatex(
+                citeobj.manual,
+                what=f"Manual citation ‘{citeobj.manual}’"
+            )
 
         #
         # And we're done!
@@ -445,13 +468,17 @@ class CitationTextManager:
         return
         
 
+
+
 def _generate_citation_from_citeprocjsond(citeprocjsond, bib_style):
 
     with warnings.catch_warnings():
         warnings.simplefilter('ignore', citeproc.source.MissingArgumentWarning)
         warnings.simplefilter('ignore', citeproc.source.UnsupportedArgumentWarning)
 
-        logger.debug(f"Creating citation for entry ‘{citeprocjsond['id']}’")
+        citekey = citeprocjsond['id']
+
+        logger.debug(f"Creating citation for entry ‘{citekey}’")
 
         # patch JSON for limitations of citeproc-py (?)
         #
@@ -464,15 +491,55 @@ def _generate_citation_from_citeprocjsond(citeprocjsond, bib_style):
                     author['family'] = author['name']
                     del author['name']
 
-        bib_source = citeproc.source.json.CiteProcJSON([citeprocjsond])
-        bibliography = citeproc.CitationStylesBibliography(bib_style, bib_source,
-                                                           _cslformatter)
+        # explore the citeprocjsond tree and make sure that all strings are
+        # valid minilatex markup
+        def _sanitize(d):
+            if isinstance(d, dict):
+                for k in d.keys():
+                    d[k] = _sanitize(d[k])
+                return d
+            elif isinstance(d, list):
+                for j, val in enumerate(d):
+                    d[j] = _sanitize(val)
+                return d
+            else:
+                try:
+                    # try compiling the given value, suppressing warnings
+                    minilatextohtml.MiniLatex(str(d), _silent=True).text
+                except Exception:
+                    logger.debug(
+                        f"Encountered invalid minilatex string {d!r} when "
+                        f"composing citation."
+                    )
+                    return r'\begin{verbatiminput}' + str(d) + r'\end{verbatiminput}'
+                return d
 
-        citation1 = citeproc.Citation([citeproc.CitationItem(citeprocjsond['id'])])
-        bibliography.register(citation1)
-        bibliography_items = [str(item) for item in bibliography.bibliography()]
-        assert len(bibliography_items) == 1
-        return bibliography_items[0]
+        #
+        # Sanitizing the entire JSON object (which often includes the abstract,
+        # etc.) is completely overkill.  So we first try to generate the entry
+        # without sanitizing, and if it fails, we sanitize.
+        #
+        #_sanitize(citeprocjsond)
+
+        def _gen_entry(citeprocjsond):
+            bib_source = citeproc.source.json.CiteProcJSON([citeprocjsond])
+            bibliography = citeproc.CitationStylesBibliography(bib_style, bib_source,
+                                                               _cslformatter)
+
+            citation1 = citeproc.Citation([citeproc.CitationItem(citeprocjsond['id'])])
+            bibliography.register(citation1)
+            bibliography_items = [str(item) for item in bibliography.bibliography()]
+            assert len(bibliography_items) == 1
+            return bibliography_items[0]
+
+        try:
+            return _gen_entry(citeprocjsond)
+        except Exception:
+            logger.debug(f"Error while forming citation entry for {citekey}, trying "
+                         f"again with minilatex sanitization")
+
+        _sanitize(citeprocjsond)
+        return _gen_entry(citeprocjsond)
 
 
 # def _get_full_citation_text_minilatex_for_pure_arxiv_entry(arxividstr, d):
@@ -531,87 +598,3 @@ def _get_crossref_citeproc_json_object(doi, req_session):
 
 
 
-
-# ------------------------------------------------
-
-# tool to scan for citations
-
-
-
-EncounteredCitation = collections.namedtuple('EncounteredCitation',
-                                             ['citation_key_prefix',
-                                              'citation_key',
-                                              'encountered_where'])
-
-
-class CitationScannerRefContext(minilatextohtml.HtmlRefContext):
-    def __init__(self, *args, where=None, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        # list of (citation_key_prefix [lower-case], citation_key, where)
-        self.encountered_citations = []
-        self.cur_where = where
-
-    def get_ref(self, ref_key_prefix, ref_key):
-        # return (target_html, targethref)
-        return ('','')
-
-    def add_footnote(self, footnotetext):
-        # return (footnotelabel_html, footnotehref)
-        return ('','')
-
-    def add_citation(self, citation_key_prefix, citation_key,
-                     optional_cite_extra_html=None):
-        # return (citelabel_html, citehref)
-        self.encountered_citations.append(
-            EncounteredCitation(
-                citation_key_prefix=citation_key_prefix,
-                citation_key=citation_key,
-                encountered_where=self.cur_where
-            )
-        )
-        return ('','')
-
-
-class MiniLatexCitationScanner:
-    def __init__(self):
-        super().__init__()
-
-        self.refcontext = CitationScannerRefContext()
-        self.tohtmlconverter = minilatextohtml.ToHtmlConverter(self.refcontext)
-
-    def scan(self, s, where):
-        #logger.debug(f"Scanning for citations: ‘{s}’")
-        self.refcontext.cur_where = where
-        try:
-            dummy = self.tohtmlconverter.to_html(s, what=f'scanning for citations / {where}')
-        except Exception as e:
-            logger.warning(f"Error while scanning for citations in ‘{where}’: {e}")
-            raise
-        # we can ignore dummy, our add_citation() callback will have fired for
-        # any encountered citation.
-
-    def _scan_obj(self, v, where):
-        #logger.debug(f"Scanning for citations: {v=!r}")
-        
-        if v is None:
-            return
-        if isinstance(v, dict):
-            for k, x in v.items():
-                self._scan_obj(x, f'{where}["{k}"]')
-            return
-        if isinstance(v, list):
-            for j, x in enumerate(v):
-                self._scan_obj(x, f'{where}[{j}]')
-            return
-        if isinstance(v, str):
-            self.scan(v, where)
-            return
-        logger.warning(f"I don't know how to scan property value {v!r}")
-
-    def scan_dict_tree(self, d, where):
-        return self._scan_obj(d, where)
-
-    def get_encountered_citations(self):
-        # returns a list of pairs of (citation_key_prefix, citation_key)
-        return self.refcontext.encountered_citations

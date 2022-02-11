@@ -18,6 +18,11 @@ dirs:
   #
   # Where to find additional info to help building the citations
   #
+  code_tree_info: ../eczoo_data/code_tree_info
+
+  #
+  # Where to find additional info to help building the citations
+  #
   citation_extras: ../eczoo_data/citation_extras
 
   #
@@ -28,41 +33,10 @@ dirs:
 
 
 
-#
-# Specify how to organize the tree of codes on the website.  THE ‘code_tree:’
-# PROPERTY SHOULD BE THE ONLY PLACE IN THE PRESENT REPOSITORY WHERE EXPLICIT
-# CODE_ID'S ARE HARD-CODED.
-#
+image_filename_extensions:
+  - ''
+  - '.svg'
+  - '.png'
+  - '.jpeg'
+  - '.jpg'
 
-code_tree:
-  domains:
-    - domain_id: classical_domain
-      name: 'Classical Domain'
-      description: 'codes for classical systems'
-
-      kingdoms:
-        - code_id: bits_into_bits
-          name: 'Binary Kingdom'
-
-        - code_id: q-ary_digits_into_q-ary_digits
-          name: '\(q\)-ary Digits Kingdom'
-
-    - domain_id: quantum_domain
-      name: 'Quantum Domain'
-      description: 'codes for quantum systems'
-
-      kingdoms:
-        - code_id: qubits_into_qubits
-          name: 'Qubit Kingdom'
-        - code_id: qudits_into_qudits
-          name: 'Modular-qudit Kingdom'
-        - code_id: galois_into_galois
-          name: 'Galois-qudit Kingdom'
-        - code_id: oscillators
-          name: 'Bosonic Kingdom'
-        - code_id: fermions
-          name: 'Fermionic Kingdom'
-        - code_id: group_quantum
-          name: 'Group Kingdom'
-        - code_id: category_quantum
-          name: 'Category Kingdom'

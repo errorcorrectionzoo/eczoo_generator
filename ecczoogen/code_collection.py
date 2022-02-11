@@ -4,6 +4,9 @@ logger = logging.getLogger(__name__)
 
 from . import code
 
+from minilatextohtml import MiniLatex
+
+
 class InvalidCodeReference(Exception):
     def __init__(self, msg):
         super().__init__(msg)
@@ -71,7 +74,7 @@ class CodeCollection:
                 if not code_data_relations_reltypelist:
                     continue
 
-                for relinfo in code_data_relations_reltypelist:
+                for j, relinfo in enumerate(code_data_relations_reltypelist):
                     logger.debug(
                         f"Processing {rel_type} relation of {code_id} to {relinfo['code_id']}"
                     )
@@ -87,16 +90,32 @@ class CodeCollection:
                         )
                         raise
 
-                    rel_data = code.Relation(code=related_code,
-                                             detail=relinfo.get('detail', None))
+                    if 'detail' in relinfo:
+                        detail = MiniLatex(
+                            relinfo['detail'],
+                            what=f'Code({code_id=}).relations.{rel_type}s[{j}]'
+                        )
+                    else:
+                        detail = None
+
+                    rel_data = code.Relation(code=related_code, detail=detail)
                     rels_fld.append(rel_data)
 
                     # add to the other code's OTHER.relations.parent_of to include this code
 
-                    rel_data_other = code.Relation(code=codeobj,
-                                                   detail=relinfo.get('detail', None))
+                    rel_data_other = code.Relation(code=codeobj, detail=detail)
                     getattr(related_code.relations, rel_type+'_of') .append( rel_data_other )
             
+        #
+        # Canonicalize the order of the codes listed in parent_of and cousin_of,
+        # so that we have a deterministic order.  Sorting is alphabetical in
+        # relation target's code name converted to text.
+        #
+        for code_id, codeobj in self._codes.items():
+            for rel_type in ('parent', 'cousin',):
+                setattr(codeobj.relations, rel_type+'_of',
+                        sorted(getattr(codeobj.relations, rel_type+'_of'),
+                               key=lambda relobj: relobj.code.name.text))
 
         #
         # Compute the generation of codes.
@@ -173,6 +192,7 @@ class CodeCollection:
                 if child.code_id not in all_children_ids:
                     all_children.append(child)
                     all_children_ids.add(child.code_id)
+            # sort children alphabetically to have a deterministic order
             for child_rel in children:
                 _visit_code(child_rel.code)
 

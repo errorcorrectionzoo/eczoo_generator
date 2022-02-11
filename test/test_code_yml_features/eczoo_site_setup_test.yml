@@ -35,6 +35,13 @@ dirs:
   output_dir: test/test_code_yml_features/_output
 
 
+image_filename_extensions:
+  - ''
+  - '.svg'
+  - '.png'
+  - '.jpeg'
+  - '.jpg'
+
 
 #
 # Specify how to organize the tree of codes on the website.  THE ‘code_tree:’

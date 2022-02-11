@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 
 
 def is_abstract_code(code):
-    if not code.physical: # or not code.logical: # e.g. 'bosonic code' kingdom
+    if not code['physical']: # or not code.logical: # e.g. 'bosonic code' kingdom
         return True
     return False
 
@@ -170,8 +170,8 @@ class PagePrettyCodeGraph:
             n = {
                 'data': {
                     'id': f"domain_{domain['domain_id']}",
-                    'label': f"{domain['name']}",
-                    '_description': domain['description'],
+                    'label': domain['name'].text,
+                    '_description': domain['description'].text,
                     
                     '_is_domain': 1,
                     '_page_href':
@@ -206,7 +206,7 @@ class PagePrettyCodeGraph:
 
         for code_id, code in all_codes_dict.items():
 
-            short_description = code.description
+            short_description = code['description'].text
             if short_description and len(short_description) > 200:
                 short_description = short_description[:200-3]+'...',
 
@@ -269,7 +269,7 @@ class PagePrettyCodeGraph:
             n = {
                 'data': {
                     'id': node_id_code(code_id),
-                    'label': code.name,
+                    'label': code.name.text,
 
                     '_is_code': 1,
                     '_is_abstract_code': \
@@ -283,7 +283,7 @@ class PagePrettyCodeGraph:
             if is_kingdom:
                 n['data'].update({
                     '_is_kingdom': 1,
-                    '_kingdom_name': kingdom['name'],
+                    '_kingdom_name': kingdom['name'].text,
                     '_kingdom_href': self.site_gen_env.prefix_base_url(
                         kingdom['htmlpage'].path()),
                 })

@@ -95,8 +95,8 @@ $header-bgimage-width: 150px;
 $header-bgimage-width-mobile: 80px;
 
 #header {
-    background-color: rgb(0,0,127);
-    color: rgba(255,255,255,0.9);
+    background-color: $pageheader-background-color;
+    color: $pageheader-text-color;
 
     padding: $header-padding ($page-header-bleed+$header-padding);
 
@@ -246,21 +246,16 @@ input.navbar-search {
 @mixin card-item {
     margin: 1rem 0px 1rem;
     padding: 10px;
-    border: solid 1px rgba($text-dim-color,0.15);
+    border: solid 1px $discreet-border-color;
 }
 
 
 
 ////////////////////////////////////////////////////////////////////////////////
 //
-// main section for code list pages
+// code list pages
 //
 ////////////////////////////////////////////////////////////////////////////////
-
-
-//
-// Code info "table" fields appearance
-//
 
 .ecc-code {
     @include card-item;
@@ -270,109 +265,116 @@ input.navbar-search {
         margin-bottom: $inner-parskip-half-length;
     }
 }
+
+
+//
+// Code list page with style=index
+//
+ul.code-index, ol.code-index {
+    &, &:first-child {
+        margin: 1.5rem 0 2rem !important;
+    }
+
+    li {
+        margin-bottom: 0.7rem;
+    }
+
+    .code-name {
+        padding-right: 1em;
+        font-weight: bold;
+    }
+    .code-description {
+    }
+}
+
+//
+// Code list page with style=table
+//
+
+table.codelistpage-table {
+    margin: 1.5rem 0rem 2rem;
+
+    border-top: solid .15rem black;
+    border-bottom: solid .15rem black;
+
+    width: 100%;
+    box-sizing: border-box;
+    border-collapse: collapse;
+
+    thead {
+        tr {
+            border-bottom: solid .1rem black;
+
+            th {
+                //font-weight: normal;
+                font-weight: bold;
+                //font-style: italic;
+                font-size: $small-font-size;
+                
+                padding: 0.25rem 0.1rem;
+            }
+        }
+    }
+
+    &.hlines {
+        thead tr {
+            // turn the thin rule below header into a thick rule
+            border-bottom: solid .15rem black;
+        }
+        tbody tr {
+            border-bottom: solid .1rem black;
+        }
+    }
+
+    td {
+        padding: 0.15rem 0.25rem 0.15rem;
+    }
+
+    &.xtra-stretch td {
+        padding: 0.25rem 0.25rem 0.25rem;
+    }
+    &.xtra-xtra-stretch td {
+        padding: 0.5rem 0.25rem 0.5rem;
+    }
+
+
+
+    td.small {
+        font-size: $small-font-size;
+    }
+    td.left {
+        text-align: left;
+    }
+    td.center {
+        text-align: center;
+    }
+    td.right {
+        text-align: right;
+    }
+    td.top {
+        vertical-align: top;
+    }
+    td.bottom {
+        vertical-align: bottom;
+    }
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// main code page
+//
+////////////////////////////////////////////////////////////////////////////////
+
 .ecc-code.ecc-code-page {
     border: none 0px;
 }
 
-$ecc-dl-left-column-width: 120px;
+//
+// Code info page article appearance
+//
 
-@mixin ecc-label-dt-word-wrap {
-    max-width: $ecc-dl-left-column-width;
-}
-
-dl.ecc-code {
-
-    grid-template-columns: max-content 1fr auto;
-
-    > dt {
-        min-width: $ecc-dl-left-column-width;
-    }
-    
-    > dt.dt-wrap-label {
-        @include ecc-label-dt-word-wrap;
-    }
-
-    > dd {
-        margin-left: 1rem;
-        grid-column-start: 2;
-        grid-column-end: 4;
-    }
-    
-    > dt, > dd
-    {
-        padding: 2px 0px;
-        margin-bottom: 10px;
-    }
-
-    >dd.code-name {
-        grid-column-end: 3;
-    }
-    >dd.info-popup-button-container {
-        margin-top: 0px;
-        grid-column-start: 3;
-        grid-row-start: 1;
-    }
-
-
-    .na {
-        font-style: italic;
-        color: $text-dim-color;
-    }
-
-    .code-relations-list {
-        list-style: none;
-        padding: 0px;
-        margin: 0px;
-    }
-
-    span.code-introduced {
-        display: inline-block;
-        margin-left: 0.3em;
-    }
-
-    dt.code-feature-code_capacity_threshold {
-        @include ecc-label-dt-word-wrap;
-    }
-
-}
-
-// adjustments for small screens
-@media (max-width: $page-main-width+2*$page-main-margins) {
-    dl.ecc-code {
-        display: block;
-        margin-top: 0px;
-
-        > dt {
-            display: block;
-
-            margin-bottom: 3px;
-        }
-        > dd {
-            display: block;
-            margin-left: 0px;
-        }
-
-        // hide label "Name:" on narrow screens
-        dt.code-name {
-            display: none;
-        }
-
-        .info-popup-button-container {
-            display: block;
-            //margin-top: 1rem;
-
-            .popup-info-button {
-                margin-top: 0px;
-            }
-
-            .tippy-container {
-                text-align: left;
-            }
-        }
-
-    }
-}
-
+@import 'ecc-code-page.scss';
 
 //
 // Elements displayed on the code info page
@@ -391,10 +393,6 @@ a.code-link-with-icon {
     background-repeat: no-repeat;
 }
 
-span.code-name {
-    font-weight: bold;
-}
-
 .display-code-id {
     margin-top: 1.5rem;
 
@@ -408,7 +406,7 @@ span.code-name {
 
 .paragraph-in-list {
     display: block;
-    margin-top: $inner-parskip-half-length;
+    margin-top: 2*$inner-parskip-half-length;
     margin-bottom: $inner-parskip-half-length;
     margin-left: 1rem;
 }
@@ -429,6 +427,7 @@ span.code-name {
 
 .paragraph-in-list:only-child {
     margin-left: 0px;
+    margin-top: $inner-parskip-half-length;
 }
 .paragraph-in-list:only-child::before {
     display: none;
@@ -481,7 +480,6 @@ a.code-self-edit {
         box-sizing: border-box;
         max-width: 100%;
         min-width: 100%;
-
     }
 
     > dd.bibtex {
@@ -603,25 +601,6 @@ a.code-self-edit {
 }
 
 
-
-////////////////////////////////////////////////////////////////////////////////
-//
-// code index style
-//
-////////////////////////////////////////////////////////////////////////////////
-
-.code-index {
-    li {
-        margin-bottom: 0.7rem;
-    }
-
-    .code-name {
-        padding-right: 1em;
-        font-weight: bold;
-    }
-    .code-description {
-    }
-}
 
 
 

@@ -1,0 +1,15 @@
+{% extends 'layout/base_page.html' %}
+
+{% block contents %}
+
+{{ codelistpage_data.intro|to_html_with_notes(rc) }}
+
+{% for code in code_list %}
+
+  {% include 'pieces/code_info_short.html' %}
+
+{% endfor %}
+
+{% include 'pieces/endnotes.html' %}
+
+{% endblock contents %}

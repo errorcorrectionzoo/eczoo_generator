@@ -29,6 +29,30 @@ protection: |
   Detects errors on \(d-1\) qubits, corrects errors on \(\left\lfloor (d-1)/2
   \right\rfloor\) qubits.
 
+  \begin{figure}
+    \includegraphics{testfigure}
+    \caption{Here's a \textbf{test} figure.}
+    \label{figure:test1}
+  \end{figure}
+
+  We'll try out some tables with fictitious “Exponents”, too.
+
+  \begin{table}
+    \includegraphics{testtable}
+    \caption{A shiny table.}
+    \label{table:mytabletest}
+  \end{table}
+
+  \begin{figure}
+    \includegraphics{testfigure2.png}
+    \caption{Another \emph{test} for a figure.  Let's see what happens when 
+      we have a really long caption that can span multiple lines like this,
+      without it being necessarily informative.  After all, this article is
+      really only a dummy example meant to test different features of the
+      generator of our pretty site \url{https://errorcorrectionzoo.org/}.}
+    \label{figure:test2}
+  \end{figure}
+
 # An error should be reported for ref{invalid-references} (ok), as well as for
 # \eqref{invalid-eqn-keys} (doesn't work yet).
 
@@ -38,7 +62,20 @@ notes:
       the \hyperref[code:css]{CSS code}.
       
       Multiple paragraphs here.\footnote{Do these paragraph breaks work?  Here's
-      a \textit{footnote}, by the way.}
+      a \textit{footnote}, by the way.}  Here's also a reference to
+      \ref{figure:test1}.
+
+  - |
+      Another thing we should try out is what happens when we have really,
+      really, really long equations.
+      \begin{align}
+        F\bigl(\psi, -i[H,\psi]\bigr)
+        \geq
+        F\bigl(\mathcal{N}(\psi), \mathcal{N}(-i[H,\psi])\bigr)
+        \geq
+        F\bigl(\psi, -i[H,\psi]\bigr)
+        - 8\epsilon \bigl\Vert{-i[H,\psi]}\bigr\Vert_1\bigl\Vert{-i[H,\psi]}\bigr\Vert_\infty\ .
+      \end{align}
 
   - |
       Test citation to book \cite{doi:10.1017/CBO9780511976667}.  Test citation
@@ -46,6 +83,14 @@ notes:
       Test citing a preset: \cite{preset:PreskillLectureNotesQuComputation}.
       Test citing a preset with citation note:
       \cite[Chap.~6]{preset:PreskillLectureNotesQuComputation}.
+
+  - |
+      By the way, you can |\begin{verbatiminput}\input %verbatim$ text&*~like
+      this.\end{booh} using the \begin{vertatiminput} ... \end {verbatiminput}
+      environment\end{verbatiminput}|!
+
+      A bug can occur if a paper on the arXiv has a ‘\%’ sign in its
+      title:\cite{arXiv:1907.02554}
 
   - |
       A second note goes here.  This one contains a display equation:
@@ -76,10 +121,27 @@ notes:
       Test a manual citation \cite{manual:{A. Smith et al., \emph{Textbook of
       fancy stuff}, Taylor \& Francis, 1999}}.
 
+  - |
+      Figures don't need to have numbers & captions (but then you can't
+      reference them):
+
+      \begin{figure}
+        \includegraphics{testfigure}
+      \end{figure}
+
+      Or you can simply have the figure number:
+
+      \begin{figure}
+        \includegraphics{testfigure}
+        \label{figure:test-n-only}
+      \end{figure}
+
+
+
 # An error: \alpha.
 
 relations:
   parents:
     - code_id: stabilizer
-      detail: 'Description of how this code relates to stabilizer codes.'
+      detail: 'Description of how this code relates to stabilizer codes.\cite{arXiv:1111.0011}'
   

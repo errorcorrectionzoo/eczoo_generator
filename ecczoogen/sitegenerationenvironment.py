@@ -23,7 +23,10 @@ class SiteGenerationEnvironment:
 
     def copy_file(self, *, source_dir, fn_source, fn_target):
         
-        full_src_path = os.path.join(source_dir, fn_source)
+        if source_dir is None:
+            full_src_path = fn_source
+        else:
+            full_src_path = os.path.join(source_dir, fn_source)
         logger.info(f"Copying file "
                     f"‘{os.path.relpath(full_src_path, start=self.dirs.root_dir)}’ "
                     f"→ ‘{fn_target}’")
