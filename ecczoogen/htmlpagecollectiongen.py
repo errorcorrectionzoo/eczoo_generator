@@ -202,15 +202,29 @@ class HtmlFloat:
 
     def full_float_html(self):
         if self.float_obj.contentstype == 'image_filename':
-            imginfo = self.htmlpagecollection.get_image_filename_path_info(
+            floatinfo = self.htmlpagecollection.get_image_filename_path_info(
                 self.float_obj.contents_image_filename,
                 resource_parent=self.float_obj.resource_parent
             )
-            imgpath = imginfo['prefixed_path']
-            width_dimunit, height_dimunit = imginfo['image_info']['physical_dimensions']
-            width_dim, width_unit = width_dimunit
-            height_dim, height_unit = height_dimunit
-            style = f"""width: {width_dim}{width_unit}; height: {height_dim}{height_unit}"""
+            imgpath = floatinfo['prefixed_path']
+            image_info = floatinfo['image_info']
+            if image_info['type'] == 'vector':
+                width_dimunit, height_dimunit = image_info['physical_dimensions']
+                width_dim, width_unit = width_dimunit
+                height_dim, height_unit = height_dimunit
+            else:
+                # specify dimensions in pixels; I'm not sure that makes a huge
+                # difference...
+                width_dim, height_dim = image_info['pixel_dimensions']
+                dpi = image_info['dpi']
+                pxfactor = dpi/96
+                width_dim = width_dim / pxfactor
+                height_dim = height_dim / pxfactor
+                width_unit, height_unit = 'px', 'px'
+            style = (
+                f"width: {width_dim:.6f}{width_unit}; "
+                f"height: {height_dim:.6f}{height_unit}"
+            )
             float_inner_contents_html = \
                 f"""<img src="{imgpath}" style="{style}" alt="(float)">"""
         else:

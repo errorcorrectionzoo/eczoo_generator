@@ -46,8 +46,8 @@ def get_image_file_info_pil(filename):
             "your image so that it has a fixed DPI setting."
         )
 
-    # round up DPI setting a bit
-    dpi = int(dpi_x * 1024 + 0.5) / 1024
+    # round up DPI setting a bit (two decimal places' equivalent in binary)
+    dpi = int(dpi_x * 128 + 0.5) / 128
 
     # There are 72 pts in an inch. Don't use 96 here, it's the DPI value that
     # should reflect the value 96 that your googling might have alerted you to.
