@@ -476,7 +476,9 @@ def _generate_citation_from_citeprocjsond(citeprocjsond, bib_style):
         warnings.simplefilter('ignore', citeproc.source.MissingArgumentWarning)
         warnings.simplefilter('ignore', citeproc.source.UnsupportedArgumentWarning)
 
-        logger.debug(f"Creating citation for entry ‘{citeprocjsond['id']}’")
+        citekey = citeprocjsond['id']
+
+        logger.debug(f"Creating citation for entry ‘{citekey}’")
 
         # patch JSON for limitations of citeproc-py (?)
         #
@@ -512,18 +514,32 @@ def _generate_citation_from_citeprocjsond(citeprocjsond, bib_style):
                     return r'\begin{verbatiminput}' + str(d) + r'\end{verbatiminput}'
                 return d
 
-        #citeprocjsond = 
+        #
+        # Sanitizing the entire JSON object (which often includes the abstract,
+        # etc.) is completely overkill.  So we first try to generate the entry
+        # without sanitizing, and if it fails, we sanitize.
+        #
+        #_sanitize(citeprocjsond)
+
+        def _gen_entry(citeprocjsond):
+            bib_source = citeproc.source.json.CiteProcJSON([citeprocjsond])
+            bibliography = citeproc.CitationStylesBibliography(bib_style, bib_source,
+                                                               _cslformatter)
+
+            citation1 = citeproc.Citation([citeproc.CitationItem(citeprocjsond['id'])])
+            bibliography.register(citation1)
+            bibliography_items = [str(item) for item in bibliography.bibliography()]
+            assert len(bibliography_items) == 1
+            return bibliography_items[0]
+
+        try:
+            return _gen_entry(citeprocjsond)
+        except Exception:
+            logger.debug(f"Error while forming citation entry for {citekey}, trying "
+                         f"again with minilatex sanitization")
+
         _sanitize(citeprocjsond)
-
-        bib_source = citeproc.source.json.CiteProcJSON([citeprocjsond])
-        bibliography = citeproc.CitationStylesBibliography(bib_style, bib_source,
-                                                           _cslformatter)
-
-        citation1 = citeproc.Citation([citeproc.CitationItem(citeprocjsond['id'])])
-        bibliography.register(citation1)
-        bibliography_items = [str(item) for item in bibliography.bibliography()]
-        assert len(bibliography_items) == 1
-        return bibliography_items[0]
+        return _gen_entry(citeprocjsond)
 
 
 # def _get_full_citation_text_minilatex_for_pure_arxiv_entry(arxividstr, d):

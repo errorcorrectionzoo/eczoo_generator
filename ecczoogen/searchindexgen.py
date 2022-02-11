@@ -1,3 +1,4 @@
+import re
 import html
 import logging
 
@@ -40,13 +41,21 @@ class SearchIndexGenerator:
     def add_code_page(self, code, href):
         d = {}
         for fldinfo, value in code.iter_fields_recursive():
-            fldname = fldinfo['fieldname'].replace('.', '_')
+
+            fldname = fldinfo['fieldname']
+
+            # flatten out array numbers e.g, "parents_3_detail" -> "parents_detail"
+            fldname = re.sub('[.](\d+)[.]', '.', fldname)
+
+            fldname = fldname.replace('.', '_')
             if isinstance(value, list):
                 val = "\n".join([ self._get_value_string(v, fldinfo['schema'])
                                   for v in value ])
             else:
                 val = self._get_value_string(value, fldinfo['schema'])
             #logger.debug(f"build search index -- d[{fldname}] -> {val=}")
+            if fldname in d:
+                val = d[fldname] + '\n' + val
             d[fldname] = val
 
         d['_type'] = 'ecc'
