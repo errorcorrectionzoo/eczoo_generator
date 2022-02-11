@@ -246,7 +246,7 @@ input.navbar-search {
 @mixin card-item {
     margin: 1rem 0px 1rem;
     padding: 10px;
-    border: solid 1px rgba($text-dim-color,0.15);
+    border: solid 1px $discreet-border-color;
 }
 
 
@@ -296,6 +296,8 @@ dl.ecc-code {
         margin-left: 1rem;
         grid-column-start: 2;
         grid-column-end: 4;
+
+        width: 100%;
     }
     
     > dt, > dd
@@ -481,7 +483,6 @@ a.code-self-edit {
         box-sizing: border-box;
         max-width: 100%;
         min-width: 100%;
-
     }
 
     > dd.bibtex {

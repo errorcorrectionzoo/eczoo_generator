@@ -26,6 +26,7 @@ from ecczoogen import (
     searchindexgen,
     schemaloader,
     schemadata,
+    inspectimagefile,
 )
 
 logger = logging.getLogger()
@@ -565,7 +566,12 @@ for encountered_image_filename in minilatex_scanner.get_encountered_image_filena
             fn_target=os.path.join(output_fig_prefix, ofigname)
         )
 
-        figsdb[(code_id, image_filename)] = output_fig_prefix + '/' + ofigname
+        image_info = dict(inspectimagefile.get_image_file_info(full_path_wext))
+
+        figsdb[(code_id, image_filename)] = {
+            'path': output_fig_prefix + '/' + ofigname,
+            'image_info': image_info,
+        }
 
     else:
         # TODO! will we need figures outside code pages?

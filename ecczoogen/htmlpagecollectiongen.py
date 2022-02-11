@@ -191,26 +191,65 @@ class HtmlCitation:
         return markupsafe.Markup( minilatex.to_html() )
 
 class HtmlFloat:
-    def __init__(self, *, no=None, float_obj, htmlpagecollection=None):
+    def __init__(self, *, no=None, float_obj, html_page_notes=None):
         self.no = no
         self.float_obj = float_obj
-        self.htmlpagecollection = htmlpagecollection
+        self.html_page_notes = html_page_notes
+        self.htmlpagecollection = html_page_notes.htmlpagecollection
+
+    def numbered(self):
+        return self.float_obj.label is not None
 
     def full_float_html(self):
         if self.float_obj.contentstype == 'image_filename':
-            imgsrc = self.htmlpagecollection.get_image_filename_path(
+            imginfo = self.htmlpagecollection.get_image_filename_path_info(
                 self.float_obj.contents_image_filename,
                 resource_parent=self.float_obj.resource_parent
             )
-            float_contents_html = f"""<img src="{imgsrc}" style="width:100%">"""
+            imgpath = imginfo['prefixed_path']
+            width_dimunit, height_dimunit = imginfo['image_info']['physical_dimensions']
+            width_dim, width_unit = width_dimunit
+            height_dim, height_unit = height_dimunit
+            style = f"""width: {width_dim}{width_unit}; height: {height_dim}{height_unit}"""
+            float_inner_contents_html = \
+                f"""<img src="{imgpath}" style="{style}" alt="(float)">"""
         else:
             raise ValueError("I don't know how to display the float {!r}"
                              .format(self.float_obj))
 
-        return f"""<div
-   style="width: calc(100% - 40px); text-align: center;
-           padding: 20px; background-color: gray;"
-   >{float_contents_html}</div>"""
+        float_contents_html = \
+            f"""<div class="float-contents">{float_inner_contents_html}</div>"""
+
+        float_type = self.float_obj.float_type
+
+        figuretag_attrs = {}
+        figuretag_classes = []
+
+        captionhtml = ''
+        if self.numbered():
+            figuretag_attrs['id'] = f"{float_type}-{self.no}"
+
+            # we have a figure caption
+            fltnostr, flthref = self.html_page_notes.get_float_ref(
+                self.float_obj.float_type,
+                self.float_obj.label
+            )
+            fltnohtml = f"""<span class="float-number">{fltnostr}</span>"""
+            if self.float_obj.caption:
+                captiontexthtml = \
+                    f"""<span class="caption-text">{self.float_obj.caption}</span>"""
+                captionhtml = \
+                    f"""<figcaption>{fltnohtml}: {captiontexthtml}</figcaption>"""
+            else:
+                captionhtml = f"<figcaption>{fltnohtml}</figcaption>"
+
+        figuretag_classes += ['float', f'float-{float_type}']
+
+        figuretag_attrs['class'] = " ".join(figuretag_classes)
+        attrsstr = " ".join([ f'{k}="{markupsafe.escape(v)}"'
+                              for k, v in figuretag_attrs.items() ])
+
+        return f"""<figure {attrsstr}>{float_contents_html}{captionhtml}</figure>"""
 
 
 
@@ -298,9 +337,11 @@ class RefContextForHtmlConverter(minilatextohtml.HtmlRefContext):
         
         self._check_html_page_notes_context()
 
-        htmlfloat = HtmlFloat(float_obj=float_obj, htmlpagecollection=self.htmlpagecollection)
-        float_no = self.html_page_notes.add_float(htmlfloat)
-        htmlfloat.no = float_no
+        htmlfloat = HtmlFloat(float_obj=float_obj, html_page_notes=self.html_page_notes)
+
+        if htmlfloat.numbered():
+            float_no = self.html_page_notes.add_float(htmlfloat)
+            htmlfloat.no = float_no
 
         return htmlfloat.full_float_html()
         
@@ -522,13 +563,14 @@ class HtmlPageCollection:
         # url suffices
         return full_page_path
 
-    def get_image_filename_path(self, image_filename, resource_parent):
+    def get_image_filename_path_info(self, image_filename, resource_parent):
         if hasattr(resource_parent, 'code_id'):
             code_id = resource_parent.code_id
             try:
-                return self.site_generation_environment.prefix_base_url(
-                    self.figsdb[(code_id, image_filename)]
-                )
+                info = dict( self.figsdb[(code_id, image_filename)] )
+                info['prefixed_path'] = \
+                    self.site_generation_environment.prefix_base_url( info['path'] )
+                return info
             except KeyError:
                 raise ValueError(f"Image ‘{image_filename}’ in {code_id} was not "
                                  f"included in image database!")
