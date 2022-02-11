@@ -29,6 +29,24 @@ protection: |
   Detects errors on \(d-1\) qubits, corrects errors on \(\left\lfloor (d-1)/2
   \right\rfloor\) qubits.
 
+  \begin{figure}
+    \includegraphics{testfigure}
+    \caption{Here's a \textbf{test} figure.}
+    \label{figure:test1}
+  \end{figure}
+
+  \begin{table}
+    \includegraphics{testtable}
+    \caption{A shiny table.}
+    \label{table:mytabletest}
+  \end{table}
+
+  \begin{figure}
+    \includegraphics{testfigure2.png}
+    \caption{Another \emph{test} for a figure.}
+    \label{figure:test2}
+  \end{figure}
+
 # An error should be reported for ref{invalid-references} (ok), as well as for
 # \eqref{invalid-eqn-keys} (doesn't work yet).
 
@@ -38,7 +56,8 @@ notes:
       the \hyperref[code:css]{CSS code}.
       
       Multiple paragraphs here.\footnote{Do these paragraph breaks work?  Here's
-      a \textit{footnote}, by the way.}
+      a \textit{footnote}, by the way.}  Here's also a reference to
+      \ref{figure:test1}.
 
   - |
       Test citation to book \cite{doi:10.1017/CBO9780511976667}.  Test citation

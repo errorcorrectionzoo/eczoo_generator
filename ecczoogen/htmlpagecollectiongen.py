@@ -190,10 +190,28 @@ class HtmlCitation:
                              f"Is it a valid reference?")
         return markupsafe.Markup( minilatex.to_html() )
 
+class HtmlFloat:
+    def __init__(self, *, no=None, float_obj, htmlpagecollection=None):
+        self.no = no
+        self.float_obj = float_obj
+        self.htmlpagecollection = htmlpagecollection
 
-# _rx_ref_code = re.compile(r'^code:(?P<code_id>.*)$', flags=re.IGNORECASE)
-# _rx_cite_arxiv = re.compile(r'^arxiv:(?P<arxivid>[-a-zA-Z/_.+0-9]+)$', flags=re.IGNORECASE)
-# _rx_cite_doi = re.compile(r'^doi:(?P<doi>.*)$', flags=re.IGNORECASE)
+    def full_float_html(self):
+        if self.float_obj.contentstype == 'image_filename':
+            imgsrc = self.htmlpagecollection.get_image_filename_path(
+                self.float_obj.contents_image_filename,
+                resource_parent=self.float_obj.resource_parent
+            )
+            float_contents_html = f"""<img src="{imgsrc}" style="width:100%">"""
+        else:
+            raise ValueError("I don't know how to display the float {!r}"
+                             .format(self.float_obj))
+
+        return f"""<div
+   style="width: calc(100% - 40px); text-align: center;
+           padding: 20px; background-color: gray;"
+   >{float_contents_html}</div>"""
+
 
 
 # ------------------------------------------------------------------------------
@@ -216,14 +234,19 @@ class RefContextForHtmlConverter(minilatextohtml.HtmlRefContext):
                 f"Equation references should use \\eqref{{eq:XXX}}, not \\ref{{eq:XXX}}: "
                 f"‘{ref_key}’"
             )
-        if ref_key_prefix != 'code':
-            raise ValueError(
-                f"Invalid ref: ‘{ref_key}’.  Such references must be "
-                f"to a code; use a ref label of the form ‘code:<code-id>’.  "
-                f"For equation references, use \\eqref{{eq:XXX}} instead of \\ref."
-            )
 
-        return self._get_ref_code(ref_key)
+        if ref_key_prefix in ('figure', 'table'):
+            return self.html_page_notes.get_float_ref(ref_key_prefix, ref_key)
+
+        if ref_key_prefix == 'code':
+            return self._get_ref_code(ref_key)
+
+        raise ValueError(
+            f"Invalid ref: ‘{ref_key}’.  Such references must be "
+            f"to a code; use a ref label of the form ‘code:<code-id>’.  "
+            f"For equation references, use \\eqref{{eq:XXX}} instead of \\ref."
+        )
+
         
 
     def _check_html_page_notes_context(self):
@@ -270,6 +293,17 @@ class RefContextForHtmlConverter(minilatextohtml.HtmlRefContext):
                                                                optional_cite_extra_html)
         return (cite_label_html, f'#cite-{cite_no}')
 
+    def add_float(self, float_obj):
+        # return float_html
+        
+        self._check_html_page_notes_context()
+
+        htmlfloat = HtmlFloat(float_obj=float_obj, htmlpagecollection=self.htmlpagecollection)
+        float_no = self.html_page_notes.add_float(htmlfloat)
+        htmlfloat.no = float_no
+
+        return htmlfloat.full_float_html()
+        
 
 
 # ------------------------------------------------------------------------------
@@ -280,6 +314,11 @@ class HtmlPageNotes:
         self.footnotes = []
         self.cite_no = -1 # last attributed citation number
         self.citations = []
+
+        self.floats = {
+            'figure': [],
+            'table': [],
+        }
 
         self.htmlpagecollection = htmlpagecollection
 
@@ -315,22 +354,75 @@ class HtmlPageNotes:
         self.citations.append( citation )
         return cite_no #(cite_no, cite_label_html)
 
+    def add_float(self, htmlfloat):
 
+        float_type = htmlfloat.float_obj.float_type
 
+        float_no = len(self.floats[float_type])
+        self.floats[float_type].append(htmlfloat)
 
+        return float_no
 
+    def get_float_ref(self, ref_key_prefix, ref_key):
+
+        float_type = ref_key_prefix
+        for htmlfloat in self.floats[float_type]:
+            if htmlfloat.float_obj.label == ref_key:
+                # found float!
+                floatnostr = (
+                    htmlfloat.float_obj.float_caption_name + '&nbsp;'
+                    + self.htmlpagecollection.format_float_no_html(
+                        float_type=float_type,
+                        no=htmlfloat.no,
+                    )
+                )
+                floatnohref = f'#{float_type}-{htmlfloat.no}'
+                return (floatnostr, floatnohref)
+
+        raise ValueError(f"Float reference ‘{ref_key_prefix}:{ref_key}’ not resolved!")
+                    
+
+        
 
 # ------------------------------------------------------------------------------
 
 
 _alpha = 'abcdefghijklmnopqrstuvwxyz'
 
-def alphacounter(n):
+def alphacounter(n, lower=True):
     # a, b, c, d, ..., y, z, aa, bb, cc, ..., zz, aaa, ...
     w = 1 + (n // 26)
     m = n % 26
-    return _alpha[m] * w
+    s = _alpha[m] * w
+    if lower:
+        return s
+    return s.upper()
     
+_romancounterchars = (
+    (1000, "M"),
+    (900, "CM"),
+    (500, "D"),
+    (400, "CD"),
+    (100, "C"),
+    (90, "XC"),
+    (50, "L"),
+    (40, "XL"),
+    (10, "X"),
+    (9, "IX"),
+    (5, "V"),
+    (4, "IV"),
+    (1, "I"),
+)
+
+def romancounter(n, lower=True):
+    s = ''
+    for romancharvalue, romanchar in _romancounterchars:
+        s += romanchar * (n // romancharvalue)
+        n = n % romancharvalue
+    if lower:
+        return s.lower()
+    return s
+
 
 
 # ------------------------------------------------------------------------------
@@ -347,6 +439,7 @@ class HtmlPageCollection:
         self.site_generation_environment = site_generation_environment
 
         self.citation_manager = None
+        self.figsdb = None
 
         self.jinja2env = self.site_generation_environment.jinja2env
 
@@ -429,10 +522,25 @@ class HtmlPageCollection:
         # url suffices
         return full_page_path
 
+    def get_image_filename_path(self, image_filename, resource_parent):
+        if hasattr(resource_parent, 'code_id'):
+            code_id = resource_parent.code_id
+            try:
+                return self.site_generation_environment.prefix_base_url(
+                    self.figsdb[(code_id, image_filename)]
+                )
+            except KeyError:
+                raise ValueError(f"Image ‘{image_filename}’ in {code_id} was not "
+                                 f"included in image database!")
+
+        raise ValueError(f"I don't know where to look for {image_filename!r} with "
+                         f"{resource_parent=!r}")
 
     def set_citation_manager(self, citation_manager):
         self.citation_manager = citation_manager
 
+    def set_image_filename_database(self, figsdb):
+        self.figsdb = figsdb
 
     def format_footnote_label_html(self, foot_no):
         fn_symb = alphacounter(foot_no)
@@ -445,6 +553,10 @@ class HtmlPageCollection:
         if optional_cite_extra_html is not None:
             return markupsafe.Markup(f'[{cite_symb}; {optional_cite_extra_html}]')
         return markupsafe.Markup(f'[{cite_symb}]')
+
+    def format_float_no_html(self, float_type, no):
+        return romancounter(1 + no, lower=False)
+
 
     def _jfilter_code_ref(self, code):
         # need str(code.code_id) since for now we brutally wrap all the entire

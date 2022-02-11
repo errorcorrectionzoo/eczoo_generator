@@ -2,6 +2,7 @@ import os
 import os.path
 import re
 import sys
+import hashlib
 
 import yaml
 import json
@@ -20,6 +21,7 @@ from ecczoogen import (
     htmlpagecollectiongen,
     sitegenerationenvironment,
     server,
+    minilatexscanner,
     citationmanager,
     searchindexgen,
     schemaloader,
@@ -134,7 +136,7 @@ if args.run_server:
 # Build the Code Collection --> create a `ecczoogen.zoo` object
 #
 
-zoo = zoo.Zoo(dirs=Dirs)
+zoo = zoo.Zoo(dirs=Dirs, fig_exts=eczoo_site_setup['image_filename_extensions'])
 
 
 ################################################################################
@@ -504,20 +506,88 @@ for SpecialPageClass in special_pages:
 # Scan codes' information for citations, and build the bibliography.
 #
 
+logger.info("Scanning code minilatex for external resources ...")
+
+minilatex_scanner = minilatexscanner.MiniLatexScanner()
+
+for code_id, code in zoo.all_codes().items():
+    
+    minilatex_scanner.scan_code_obj(code, where=f'<code {code_id}>')
+
+
+################################################################################
+
+#
+# Copy the figure files to the output.
+#
+
+logger.info("Copying image files ...")
+
+fig_exts = eczoo_site_setup['image_filename_extensions']
+
+figsdb = {}
+
+output_fig_prefix = 'fig'
+os.makedirs(os.path.join(Dirs.output_dir, output_fig_prefix), exist_ok=True)
+
+for encountered_image_filename in minilatex_scanner.get_encountered_image_filenames():
+    if encountered_image_filename.encountered_code_id is not None:
+        code_id = encountered_image_filename.encountered_code_id
+        image_filename = encountered_image_filename.image_filename
+
+        if (code_id, image_filename) in figsdb:
+            # already got this figure (how is this possible ?)
+            continue
+
+        code = zoo.get_code(code_id)
+        full_path = os.path.join(Dirs.codes_dir,
+                                 os.path.dirname(code.source_info_filename),
+                                 image_filename)
+
+        ext = ''
+        for ext in fig_exts:
+            full_path_wext = full_path + ext
+            if os.path.exists(full_path_wext):
+                break
+        else:
+            raise ValueError(
+                f"Cannot find image file {full_path}, tried extentions {fig_exts}")
+
+        ofigname = hashlib.sha256(full_path_wext.encode('utf-8')).hexdigest()[:32]
+
+        # pick up the extension again, in case it was already in full_path
+        _, ext = os.path.splitext(full_path_wext)
+        ofigname = ofigname + ext
+
+        site_gen_env.copy_file(
+            source_dir=None,
+            fn_source=full_path_wext,
+            fn_target=os.path.join(output_fig_prefix, ofigname)
+        )
+
+        figsdb[(code_id, image_filename)] = output_fig_prefix + '/' + ofigname
+
+    else:
+        # TODO! will we need figures outside code pages?
+        raise RuntimeError("please implement me")
+
+
+htmlpgcoll.set_image_filename_database( figsdb )
+
+
+################################################################################
+
+#
+# Build the bibliography.
+#
+
 logger.info("Generating citation database ...")
 
 with open(os.path.join(Dirs.citation_extras, 'citations_hints.yml'), encoding='utf-8') as f:
     citation_hints = yaml.safe_load(f)
 
-citation_scanner = citationmanager.MiniLatexCitationScanner()
-
-for code_id, code in zoo.all_codes().items():
-    
-    # look in the code.source_info field, where we kept the original YML structure
-    citation_scanner.scan_schemadataobj(code, where=f'<code {code_id}>')
-
 citation_manager = citationmanager.CitationTextManager(citation_hints)
-for c in citation_scanner.get_encountered_citations():
+for c in minilatex_scanner.get_encountered_citations():
     try:
         citation_manager.add_encountered_citation(c)
     except Exception as e:

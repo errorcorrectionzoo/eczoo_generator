@@ -9,7 +9,7 @@ from minilatextohtml import MiniLatex
 
 class SchemaData:
 
-    def __init__(self, source_data, full_schema, *, what='<?>'):
+    def __init__(self, source_data, full_schema, *, what='<?>', resource_parent=None):
         self.source_data = source_data
         self.full_schema = full_schema
 
@@ -17,6 +17,7 @@ class SchemaData:
         self.fields_info = []
         
         self.what = what
+        self.resource_parent = resource_parent
 
         if self.data_type == 'object':
             self.data = {}
@@ -38,7 +39,8 @@ class SchemaData:
                     # (e.g. for code relations)
                     continue
 
-                sdobj = SchemaData(v, value_schema, what=f"{what}.{k}")
+                sdobj = SchemaData(v, value_schema, what=f"{what}.{k}",
+                                   resource_parent=self.resource_parent)
                 self._data_sd[k] = sdobj
                 self.data[k] = sdobj.data
                 self.fields_info.append({
@@ -55,7 +57,8 @@ class SchemaData:
             }]
             if self.source_data is not None:
                 for j, v in enumerate(self.source_data):
-                    sdobj = SchemaData(v, value_schema, what=f"{what}[{j}]")
+                    sdobj = SchemaData(v, value_schema, what=f"{what}[{j}]",
+                                       resource_parent=self.resource_parent)
                     self._data_sd.append(sdobj)
                     self.data.append(sdobj.data)
 
@@ -74,7 +77,8 @@ class SchemaData:
         if value_schema.get('_minilatex', None):
             if source_value is None:
                 source_value = ''
-            return MiniLatex( source_value, what=what )
+            return MiniLatex( source_value, what=what,
+                              resource_parent=self.resource_parent )
 
         return source_value
 
@@ -83,7 +87,8 @@ class SchemaData:
         if self.data_type != 'object':
             raise ValueError("Can only call add_extra_field() on object data types")
 
-        sdobj = SchemaData(v, value_schema, what=f"{self.what}.{key}")
+        sdobj = SchemaData(v, value_schema, what=f"{self.what}.{key}",
+                           resource_parent=self.resource_parent)
         self._data_sd[key] = sdobj
         self.data[key] = sdobj.data
         self.fields_info.append({
@@ -151,19 +156,3 @@ class SchemaData:
         else:
             raise ValueError("data not iterable")
 
-
-    # def _get_value_schemadata_object(self, value, valueschema):
-
-    #     typ = valueschema['type']
-
-    #     if typ == 'string':
-    #         if valueschema.get('_minilatex', None):
-    #             if value is None:
-    #                 value = ''
-    #             return MiniLatex( value )
-    #         return value
-
-    #     if typ in ('object', 'array'):
-    #         return SchemaData(value, valueschema)
-
-    #     raise RuntimeError(f'Unknown jsonschema type {typ}')

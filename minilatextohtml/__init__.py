@@ -67,6 +67,28 @@ class MiniHtmlSpecialsSpec(macrospec.SpecialsSpec, _ItemToHtmlSpec):
 
 # ----
 
+### This looks a bit too complicated -- it's easier to check syntax later at
+### formatting time.
+
+# class MiniHtmlFloatEnvironmentCallParser(LatexEnvironmentCallParser):
+#     def __init__(self, *args, lw_context_floatcontents, **kwargs):
+#         super(MiniHtmlFloatEnvironmentCallParser, self).__init__(*args, **kwargs)
+#         self.lw_context_floatcontents = lw_context_floatcontents
+#
+#     def make_body_parser_and_parsing_state(self, nodeargd, arg_carryover_info, parsing_state):
+#         body_parsing_state = parsing_state.sub_context(
+#             latex_context_db=self.lw_context_floatcontents
+#         )
+#         return LatexGeneralNodesParser(
+#             stop_token_condition=self._parse_body_token_stop_condition,
+#             handle_stop_condition_token=self._handle_stop_condition_token,
+#             make_child_parsing_state=lambda body_parsing_state, node_class: parsing_state,
+#         )
+        
+
+
+# ----
+
 def html_wrap_in_tag(tagname, htmlcontent, *, attrs=None, class_=None):
     s = f'<{tagname}'
     if attrs:
@@ -110,7 +132,7 @@ class ItemToHtmlError(ItemToHtmlBase):
 
 class ItemToHtmlVerbatim(ItemToHtmlBase):
     def __call__(self, node, doccontext):
-        return htmlescape( self.node.latex_verbatim() )
+        return htmlescape( node.latex_verbatim() )
 
 class ItemToHtmlWrapTag(ItemToHtmlBase):
     def __init__(self, tagname='span', attrs=None, class_=None):
@@ -196,13 +218,10 @@ class ItemToHtmlEqRef(ItemToHtmlWrapTag):
         # this one is an exception, as it is directly picked up by MathJax.
         tgt = doccontext.get_nodearglist(node, 'reftarget')
         #logger.debug(f"Got eqref; {tgt=}")
-        if len(tgt) != 1 or not tgt[0].isNodeType(nodes.LatexGroupNode):
-            raise ValueError("Invalid \\eqref invocation: expected single braced argument")
-        grp = tgt[0]
-        if len(grp.nodelist) != 1 or not grp.nodelist[0].isNodeType(nodes.LatexCharsNode):
+        if len(tgt) != 1 or not tgt[0].isNodeType(nodes.LatexCharsNode):
             raise ValueError("Invalid \\eqref invocation: expected single braced argument")
 
-        eqref_target = grp.nodelist[0].chars
+        eqref_target = tgt[0].chars
 
         return html_wrap_in_tag(
             'span',
@@ -213,13 +232,13 @@ class ItemToHtmlEqRef(ItemToHtmlWrapTag):
 
 class ItemToHtmlHyperref(ItemToHtmlRef):
     def __call__(self, node, doccontext):
-        reftarget = doccontext.nodearg_to_html(node, 0)
+        reftarget = doccontext.nodearg_to_chars(node, 0)
         display_html = doccontext.nodearg_to_html(node, 1)
         return self.ref_to_html(reftarget, doccontext=doccontext,
                                 display_html=display_html)
 
     def as_text(self, node, doccontext):
-        reftarget = doccontext.nodearg_to_html(node, 0)
+        reftarget = doccontext.nodearg_to_chars(node, 0)
         display_text = doccontext.nodearg_to_text(node, 1)
         return f"{display_text}<{reftarget}>"
 
@@ -311,7 +330,7 @@ class ItemToHtmlCite(ItemToHtmlWrapTag):
         return f"[{citekeys}]"
 
     def _pretty_citekey_as_text(self, n, doccontext):
-        key = doccontext.nodelist_to_text([n])
+        key = doccontext.nodelist_to_text(nodes.LatexNodeList([n])) #n.nodelist)
         key = re.sub(r'^[a-zA-Z]+:', '', key) # remove prefix, avoid it being indexed...
         return key
 
@@ -341,7 +360,7 @@ class ItemToHtmlFootnote(ItemToHtmlWrapTag):
 
 class ItemToHtmlHref(ItemToHtmlWrapTag):
     def __call__(self, node, doccontext):
-        url = doccontext.nodearg_to_html(node, 'url')
+        url = doccontext.nodearg_to_chars(node, 'url')
         disphtml = doccontext.nodearg_to_html(node, 'displaytext')
 
         return html_wrap_in_tag(
@@ -352,13 +371,13 @@ class ItemToHtmlHref(ItemToHtmlWrapTag):
         )
 
     def as_text(self, node, doccontext):
-        url = doccontext.nodearg_to_html(node, 'url')
+        url = doccontext.nodearg_to_chars(node, 'url')
         disptext = doccontext.nodearg_to_text(node, 'displaytext')
         return disptext + f" <{url}>"
 
 class ItemToHtmlUrl(ItemToHtmlWrapTag):
     def __call__(self, node, doccontext):
-        url = doccontext.nodearg_to_html(node, 'url')
+        url = doccontext.nodearg_to_chars(node, 'url')
 
         url_display = url
         for prefix in ('http://', 'https://'):
@@ -377,11 +396,92 @@ class ItemToHtmlUrl(ItemToHtmlWrapTag):
         )
 
     def as_text(self, node, doccontext):
-        url = doccontext.nodearg_to_html(node, 'url')
+        url = doccontext.nodearg_to_chars(node, 'url')
         return f"<{url}>"
 
 
+class ItemToHtmlFloat(ItemToHtmlBase):
+    def __init__(self, float_type='figure', float_caption_name='Figure'):
+        self.float_type = float_type
+        self.float_caption_name = float_caption_name
+        
+    def __call__(self, node, doccontext):
+        
+        figobj = Float(float_type=self.float_type,
+                       float_caption_name=self.float_caption_name)
+        
+        # this can be important e.g., for finding image files.
+        figobj.resource_parent = doccontext.resource_parent
 
+        body_nodelist = node.nodelist
+        # the body_nodelist should have top-level macro calls only, with the
+        # specific macros.
+        for bodynode in body_nodelist:
+            if bodynode is None:
+                continue
+            if bodynode.isNodeType(nodes.LatexMacroNode):
+                if bodynode.macroname == 'includegraphics':
+                    if figobj.contents_image_filename is not None:
+                        raise ValueError(
+                            r"You can't use \includegraphics twice in a figure"
+                        )
+                    includegraphics_options = \
+                        doccontext.nodearg_to_chars(bodynode, 'options')
+                    includegraphics_filename = \
+                        doccontext.nodearg_to_chars(bodynode, 'filename')
+
+                    if includegraphics_options is not None \
+                       and includegraphics_options.strip():
+                        raise ValueError(
+                            r"Options to \includegraphics[...] are not supported.  Please "
+                            r"size and trim your figure directly in the source file."
+                        )
+
+                    figobj.contentstype = 'image_filename'
+                    figobj.contents_image_filename = includegraphics_filename
+                    continue
+
+                if bodynode.macroname == 'caption':
+                    if figobj.caption is not None:
+                        raise ValueError(
+                            r"You can't use \caption twice in a figure"
+                        )
+                    caption_html = doccontext.nodearg_to_html(bodynode, 'captiontext')
+                    figobj.caption = caption_html
+                    continue
+
+                if bodynode.macroname == 'label':
+                    if figobj.label is not None:
+                        raise ValueError(
+                            r"You can't use \label twice in a figure"
+                        )
+                    label = doccontext.nodearg_to_chars(bodynode, 'reftarget')
+
+                    if not label.startswith(self.float_type+':'):
+                        raise ValueError(
+                            r"Float labels must have a prefix that is equal to "
+                            r"the float type; e.g., figure labels must have the "
+                            r"form \label{figure:XYZ}."
+                        )
+                    label = label[len(self.float_type)+1:]
+                    figobj.label = label
+                    continue
+
+            if bodynode.isNodeType(nodes.LatexCharsNode):
+                if not bodynode.chars.strip():
+                    continue
+
+            raise ValueError(
+                r"Encountered invalid node in float environment body that "
+                r"is not one of \includegraphics, \caption, or \label:"
+                + repr(bodynode)
+            )
+
+        if doccontext.add_float is None:
+            return "&lt;" + self.float_caption_name + "&gt;"
+
+        float_html = doccontext.add_float(figobj)
+        return float_html
 
 
 # --------------------------------------------------------------------
@@ -537,6 +637,42 @@ def _make_lw_context():
             ),
         ]
     )
+    lw_context.add_context_category(
+        'floats',
+        macros=[
+            MiniHtmlMacroSpec(
+                'includegraphics',
+                arguments_spec_list=[
+                    LatexArgumentSpec('[', 'options'),
+                    LatexArgumentSpec(LatexCharsGroupParser(), 'filename'),
+                ]
+            ),
+            MiniHtmlMacroSpec(
+                'caption',
+                arguments_spec_list=[
+                    LatexArgumentSpec('[', 'shortcaptiontext'),
+                    LatexArgumentSpec('{', 'captiontext'),
+                ]
+            ),
+            # ### \label is already defined above (e.g. for equations)
+            # MiniHtmlMacroSpec(
+            #     'label',
+            #     arguments_spec_list=[
+            #         LatexArgumentSpec(LatexCharsGroupParser(), 'reftarget'),
+            #     ]
+            # ),
+        ],
+        environments=[
+            MiniHtmlEnvironmentSpec(
+                'figure',
+                item_to_html=ItemToHtmlFloat('figure', 'Figure'),
+            ),
+            MiniHtmlEnvironmentSpec(
+                'table',
+                item_to_html=ItemToHtmlFloat('table', 'Table'),
+            ),
+        ],
+    )
 
     lw_context.set_unknown_macro_spec(MiniHtmlMacroSpec(''))
     lw_context.set_unknown_environment_spec(MiniHtmlEnvironmentSpec(''))
@@ -553,6 +689,26 @@ _minilatex_context_db = _make_lw_context()
 
 
 # --------------------------------------------------------------------
+
+
+class Float:
+    def __init__(
+            self,
+            float_type='figure',
+            float_caption_name='Figure',
+            caption=None,
+            label=None, # label is stored WITHOUT the "figure:" prefix
+            contentstype=None,
+            contents_image_filename=None,
+            resource_parent=None
+    ):
+        self.float_type = float_type
+        self.float_caption_name = float_caption_name
+        self.caption = caption
+        self.label = label
+        self.contentstype = contentstype
+        self.contents_image_filename = contents_image_filename
+        self.resource_parent = resource_parent
 
 
 class HtmlRefContext:
@@ -576,17 +732,28 @@ class HtmlRefContext:
         # return (citelabel_html, citehref)
         raise RuntimeError("Subclass must reimplement add_citation()")
 
+    def add_float(self, float_obj):
+        # return float_html
+        raise RuntimeError("Subclass must reimplement add_float()")
+
 
 # --------------------------------------------------------------------
 
 
 class MiniLatex:
-    def __init__(self, minilatex,
-                 minilatex_context_db=_minilatex_context_db,
-                 what='(unknown)'):
+    def __init__(
+            self,
+            minilatex,
+            minilatex_context_db=_minilatex_context_db,
+            what='(unknown)',
+            resource_parent=None
+    ):
 
         self.minilatex = minilatex
         self.what = what
+        # an object that identifies where we can look up external resources,
+        # e.g., image files
+        self.resource_parent = resource_parent
 
         self._latex_walker = latexwalker.LatexWalker(
             self.minilatex,
@@ -622,31 +789,41 @@ class MiniLatex:
             self.minilatexobj = minilatexobj
             self.refcontext = refcontext
 
+            self.what = self.minilatexobj.what
+            self.resource_parent = self.minilatexobj.resource_parent
+
             self.get_nodearglist = self.minilatexobj.get_nodearglist
 
             if self.refcontext is not None:
                 self.get_ref = self.refcontext.get_ref
                 self.add_footnote = self.refcontext.add_footnote
                 self.add_citation = self.refcontext.add_citation
+                self.add_float = self.refcontext.add_float
             else:
                 self.get_ref = None
                 self.add_footnote = None
                 self.add_citation = None
-
-        def nodearg_to_html(self, node, arg_i):
-            nodelist = self.get_nodearglist(node, arg_i)
-            #logger.debug(f"nodearg_to_html: {nodelist=}")
-            return self.minilatexobj._nodelist_to_html( nodelist, self )
+                self.add_float = None
 
         def nodelist_to_html(self, nodelist):
             return self.minilatexobj._nodelist_to_html( nodelist, self )
 
-        def nodearg_to_text(self, node, arg_i):
-            nodelist = self.get_nodearglist(node, arg_i)
-            #logger.debug(f"nodearg_to_html: {nodelist=}")
-            return self.minilatexobj._nodelist_to_text( nodelist, self )
+        def nodelist_to_chars(self, nodelist):
+            return self.minilatexobj._nodelist_to_chars( nodelist, self )
 
         def nodelist_to_text(self, nodelist):
+            return self.minilatexobj._nodelist_to_text( nodelist, self )
+
+        def nodearg_to_html(self, node, arg_i):
+            nodelist = self.get_nodearglist(node, arg_i)
+            return self.minilatexobj._nodelist_to_html( nodelist, self )
+
+        def nodearg_to_chars(self, node, arg_i):
+            nodelist = self.get_nodearglist(node, arg_i)
+            return self.minilatexobj._nodelist_to_chars( nodelist, self )
+
+        def nodearg_to_text(self, node, arg_i):
+            nodelist = self.get_nodearglist(node, arg_i)
             return self.minilatexobj._nodelist_to_text( nodelist, self )
 
 
@@ -691,6 +868,18 @@ class MiniLatex:
             'text': self.text,
             'html_norefs': self.to_html()
         }
+
+    def _nodelist_to_chars(self, nodelist, doccontext):
+        charslist = []
+        for n in nodelist:
+            if n is None:
+                continue
+            if not n.isNodeType(nodes.LatexCharsNode):
+                raise ValueError(
+                    f"Expected chars-only nodes, got ‘{n.latex_verbatim()}<{n.__class__.__name__}>’ in ‘{nodelist.latex_verbatim()}’"
+                )
+            charslist.append(n.chars)
+        return "".join(charslist)
 
     def _nodelist_to_html(self, nodelist, doccontext):
         return self._nodelist_to_x(nodelist, doccontext, fmt='html')

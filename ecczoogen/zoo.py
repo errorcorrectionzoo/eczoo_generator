@@ -13,11 +13,14 @@ import jsonschema
 
 
 class Zoo:
-    def __init__(self, *, dirs):
+    def __init__(self, *, dirs, fig_exts):
         super().__init__()
 
         codes_dir = dirs.codes_dir
         schemas_dir = dirs.schemas_dir
+
+        # make into a tuple; remove empty suffix if present
+        fig_exts = tuple([e for e in fig_exts if e])
 
         self._collection = code_collection.CodeCollection()
 
@@ -36,41 +39,51 @@ class Zoo:
 
             for filename in filenames:
                 fullfname = os.path.join(dirpath, filename)
-                if not fullfname.endswith('.yml'):
-                    if fullfname.endswith('~') or fullfname.endswith('.bak'):
-                        # okay, backup file, we can skip
-                        logger.debug(f"Skipping backup file {show_dirpath}/{filename}")
-                        continue
-                    msg = (
-                        f"All files in the code data tree must have the suffix '.yml' to "
-                        f"indicate that they are YaML files. "
-                        f"Offending file: ‘{show_dirpath}/{filename}’."
-                    )
-                    logger.error(msg)
-                    raise ValueError(msg)
+                if fullfname.endswith('~') or fullfname.endswith('.bak'):
+                    # okay, backup file, we can skip
+                    logger.debug(f"Skipping backup file {show_dirpath}/{filename}")
+                    continue
+                
+                if fullfname.endswith( fig_exts ):
 
-                logger.debug(f"Loading code file ‘{filename}’ ...")
-                with open(os.path.join(codes_dir, fullfname), 'r', encoding='utf-8') as f:
+                    # all fine, it's a figure file
+                    continue
+
+                if fullfname.endswith('.yml'):
+
+                    logger.debug(f"Loading code file ‘{filename}’ ...")
+                    with open(os.path.join(codes_dir, fullfname), 'r', encoding='utf-8') as f:
+                        try:
+                            code_info = yaml.safe_load(f)
+                        except Exception as e:
+                            logger.error(f"Failed to parse YAML file ‘{filename}’:\n{e}\n\n")
+                            raise
+
+                    # validate the code data structure, to be sure
                     try:
-                        code_info = yaml.safe_load(f)
+                        jsonschema.validate(code_info, code_full_schema)
                     except Exception as e:
-                        logger.error(f"Failed to parse YAML file ‘{filename}’:\n{e}\n\n")
+                        logger.error(
+                            f"Code data validation failed in YAML file ‘{filename}’:\n{e}\n\n"
+                        )
                         raise
 
-                # validate the code data structure, to be sure
-                try:
-                    jsonschema.validate(code_info, code_full_schema)
-                except Exception as e:
-                    logger.error(
-                        f"Code data validation failed in YAML file ‘{filename}’:\n{e}\n\n"
-                    )
-                    raise
+                    codeobj = code.Code( code_info , full_schema=code_full_schema )
 
-                codeobj = code.Code( code_info , full_schema=code_full_schema )
+                    codeobj.source_info_filename = os.path.relpath(fullfname, start=codes_dir)
 
-                codeobj.source_info_filename = os.path.relpath(fullfname, start=codes_dir)
+                    self._collection.add_code( codeobj )
+                    
+                    continue
 
-                self._collection.add_code( codeobj )
+
+                msg = (
+                    f"All files in the code data tree must have the suffix '.yml' to "
+                    f"indicate that they are YaML files. "
+                    f"Offending file: ‘{show_dirpath}/{filename}’."
+                )
+                logger.error(msg)
+                raise ValueError(msg)
 
         logger.info(f"Finalizing code collection ...")
 
