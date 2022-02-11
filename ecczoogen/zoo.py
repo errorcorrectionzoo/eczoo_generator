@@ -12,7 +12,23 @@ from . import code, code_collection, schemaloader
 import jsonschema
 
 
-_junk_files = ( '.DS_Store', )
+_junk_files = (
+    '.DS_Store',
+    '.gitignore',
+)
+
+_accessory_ignore_exts = (
+    '.tex',
+    '.pdf',
+    '.aux',
+    '.log',
+    '.dvi',
+    '.xcf',
+    '.ai',
+    '.indd',
+    '.afdesign',
+    '.afpub',
+)
 
 
 class Zoo:
@@ -48,10 +64,13 @@ class Zoo:
                     # okay, backup file, we can skip
                     logger.debug(f"Skipping junk file {show_dirpath}/{filename}")
                     continue
-                
-                if fullfname.endswith( fig_exts ):
 
-                    # all fine, it's a figure file
+                if fullfname.endswith( _accessory_ignore_exts ):
+                    logger.debug(f"Skipping accessory file {show_dirpath}/{filename}")
+                    continue
+
+                if fullfname.endswith( fig_exts ):
+                    logger.debug(f"Skipping figure {show_dirpath}/{filename}")
                     continue
 
                 if fullfname.endswith('.yml'):
