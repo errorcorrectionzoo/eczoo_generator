@@ -35,7 +35,7 @@ protection: |
     \label{figure:test1}
   \end{figure}
 
-  We'll try out some tables, too.
+  We'll try out some tables with fictitious “Exponents”, too.
 
   \begin{table}
     \includegraphics{testtable}
@@ -66,11 +66,31 @@ notes:
       \ref{figure:test1}.
 
   - |
+      Another thing we should try out is what happens when we have really,
+      really, really long equations.
+      \begin{align}
+        F\bigl(\psi, -i[H,\psi]\bigr)
+        \geq
+        F\bigl(\mathcal{N}(\psi), \mathcal{N}(-i[H,\psi])\bigr)
+        \geq
+        F\bigl(\psi, -i[H,\psi]\bigr)
+        - 8\epsilon \bigl\Vert{-i[H,\psi]}\bigr\Vert_1\bigl\Vert{-i[H,\psi]}\bigr\Vert_\infty\ .
+      \end{align}
+
+  - |
       Test citation to book \cite{doi:10.1017/CBO9780511976667}.  Test citation
       to arXiv entry with incomplete DOI (issue \#43) \cite{arXiv:1604.04062}.
       Test citing a preset: \cite{preset:PreskillLectureNotesQuComputation}.
       Test citing a preset with citation note:
       \cite[Chap.~6]{preset:PreskillLectureNotesQuComputation}.
+
+  - |
+      By the way, you can |\begin{verbatiminput}\input %verbatim$ text&*~like
+      this.\end{booh} using the \begin{vertatiminput} ... \end {verbatiminput}
+      environment\end{verbatiminput}|!
+
+      A bug can occur if a paper on the arXiv has a ‘\%’ sign in its
+      title:\cite{arXiv:1907.02554}
 
   - |
       A second note goes here.  This one contains a display equation:

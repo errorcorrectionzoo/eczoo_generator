@@ -49,6 +49,11 @@ body {
         grid-row: 3;
         grid-column: 1;
     }
+
+    // force #main to viewport width
+    #bodycontents:not(.app-full-width) #main {
+        width: calc(100vw - #{2*$page-main-margins});
+    }
 }
 
 #main {

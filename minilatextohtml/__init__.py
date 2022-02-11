@@ -21,6 +21,7 @@ from pylatexenc.latexnodes.parsers import (
     LatexCharsCommaSeparatedListParser,
     LatexCharsGroupParser,
     LatexDelimitedVerbatimParser,
+    LatexVerbatimEnvironmentContentsParser,
 )
 from pylatexenc.latexnodes import nodes
 from pylatexenc.macrospec import LatexArgumentSpec
@@ -64,27 +65,6 @@ class MiniHtmlSpecialsSpec(macrospec.SpecialsSpec, _ItemToHtmlSpec):
             arguments_spec_list=arguments_spec_list,
             item_to_html=item_to_html,
         )
-
-# ----
-
-### This looks a bit too complicated -- it's easier to check syntax later at
-### formatting time.
-
-# class MiniHtmlFloatEnvironmentCallParser(LatexEnvironmentCallParser):
-#     def __init__(self, *args, lw_context_floatcontents, **kwargs):
-#         super(MiniHtmlFloatEnvironmentCallParser, self).__init__(*args, **kwargs)
-#         self.lw_context_floatcontents = lw_context_floatcontents
-#
-#     def make_body_parser_and_parsing_state(self, nodeargd, arg_carryover_info, parsing_state):
-#         body_parsing_state = parsing_state.sub_context(
-#             latex_context_db=self.lw_context_floatcontents
-#         )
-#         return LatexGeneralNodesParser(
-#             stop_token_condition=self._parse_body_token_stop_condition,
-#             handle_stop_condition_token=self._handle_stop_condition_token,
-#             make_child_parsing_state=lambda body_parsing_state, node_class: parsing_state,
-#         )
-        
 
 
 # ----
@@ -160,16 +140,33 @@ class ItemToHtmlVerbatimWrapTag(ItemToHtmlWrapTag):
         self.attrs = attrs
         self.class_ = class_
 
+    def get_verbatim_contents(self, node, doccontext):
+        return node.latex_verbatim()
+
     def __call__(self, node, doccontext):
         return html_wrap_in_tag(
             tagname=self.tagname,
-            htmlcontent=htmlescape( node.latex_verbatim() ),
+            htmlcontent=htmlescape( self.get_verbatim_contents(node, doccontext) ),
             attrs=self.attrs,
             class_=self.class_
         )
 
     def as_text(self, node, doccontext):
-        return node.latex_verbatim()
+        return self.get_verbatim_contents(node, doccontext)
+
+class ItemToHtmlVerbatimContentsWrapTag(ItemToHtmlVerbatimWrapTag):
+    def __init__(self, class_="verbatim", is_environment=False):
+        super(ItemToHtmlVerbatimContentsWrapTag, self).__init__(
+            tagname='span',
+            class_=class_,
+        )
+        self.is_environment = is_environment
+
+    def get_verbatim_contents(self, node, doccontext):
+        if self.is_environment:
+            return doccontext.nodelist_to_chars(node.nodelist)
+        return doccontext.nodearg_to_chars(node, 'verbatimcontent')
+
 
 # ----
 
@@ -673,6 +670,22 @@ def _make_lw_context():
             ),
         ],
     )
+    lw_context.add_context_category(
+        'verbatim-input',
+        environments={
+            MiniHtmlEnvironmentSpec(
+                'verbatiminput',
+                arguments_spec_list=[],
+                body_parser=LatexVerbatimEnvironmentContentsParser(
+                    environment_name='verbatiminput'
+                ),
+                item_to_html=ItemToHtmlVerbatimContentsWrapTag(
+                    class_="verbatiminput",
+                    is_environment=True,
+                ),
+            ),
+        }
+    )
 
     lw_context.set_unknown_macro_spec(MiniHtmlMacroSpec(''))
     lw_context.set_unknown_environment_spec(MiniHtmlEnvironmentSpec(''))
@@ -744,9 +757,10 @@ class MiniLatex:
     def __init__(
             self,
             minilatex,
-            minilatex_context_db=_minilatex_context_db,
             what='(unknown)',
-            resource_parent=None
+            resource_parent=None,
+            minilatex_context_db=_minilatex_context_db,
+            _silent=False,
     ):
 
         self.minilatex = minilatex
@@ -755,17 +769,17 @@ class MiniLatex:
         # e.g., image files
         self.resource_parent = resource_parent
 
-        self._latex_walker = latexwalker.LatexWalker(
-            self.minilatex,
-            latex_context=minilatex_context_db,
-            tolerant_parsing=False
-        )
+        self.minilatex_context_db = minilatex_context_db
+
+        self._silent = _silent
 
         try:
-            self.nodes, _ = self._latex_walker.parse_content( LatexGeneralNodesParser() )
+            self._latex_walker, self.nodes, _ = \
+                MiniLatex.parse(self.minilatex, self.minilatex_context_db)
         except Exception as e:
-            logger.error(f"Error parsing latex-like minilanguage ‘{self.what}’: {e}\n"
-                         f"Given text was:\n‘{self.minilatex}’\n\n")
+            if not self._silent:
+                logger.error(f"Error parsing latex-like minilanguage ‘{self.what}’: {e}\n"
+                             f"Given text was:\n‘{self.minilatex}’\n\n")
             raise
 
         # helper
@@ -782,6 +796,32 @@ class MiniLatex:
 
         self.text = self._to_text()
 
+
+    @classmethod
+    def parse(cls, minilatex, minilatex_context_db=_minilatex_context_db):
+
+        latex_walker = latexwalker.LatexWalker(
+            minilatex,
+            latex_context=minilatex_context_db,
+            tolerant_parsing=False
+        )
+
+        nodes, carryover_info = latex_walker.parse_content( LatexGeneralNodesParser() )
+
+        return latex_walker, nodes, carryover_info
+
+
+
+    def get_first_paragraph(self):
+        r"""
+        Returns a new MiniLatex object
+        """
+        nodelists_paragraphs = self.nodes.split_at_node(
+            lambda n: (n.isNodeType(nodes.LatexSpecialsNode) and n.specials_chars == '\n\n'),
+            max_split=1
+        )
+        return MiniLatex( nodelists_paragraphs[0].latex_verbatim(),
+                          what=f"{self.what}:first-paragraph" )
 
 
     class DocContext:
@@ -804,6 +844,11 @@ class MiniLatex:
                 self.add_footnote = None
                 self.add_citation = None
                 self.add_float = None
+
+        def warning(self, *args, **kwargs):
+            if self.minilatexobj._silent:
+                return
+            logger.warning(*args, **kwargs)
 
         def nodelist_to_html(self, nodelist):
             return self.minilatexobj._nodelist_to_html( nodelist, self )
@@ -851,11 +896,12 @@ class MiniLatex:
             doccontext = MiniLatex.DocContext(self, refcontext)
             return self._nodelist_to_x(self.nodes, doccontext, fmt=fmt)
         except Exception as e:
-            logger.error(
-                f"Error producing {fmt.upper()} from latex-like minilanguage ‘{self.what}’: "
-                f"  {e}\n"
-                f"Given text was:\n‘{self.minilatex}’\n\n"
-            )
+            if not self._silent:
+                logger.error(
+                    f"Error producing {fmt.upper()} from latex-like minilanguage "
+                    f"‘{self.what}’: {e}\n"
+                    f"Given text was:\n‘{self.minilatex}’\n\n"
+                )
             raise
         
 
@@ -893,14 +939,9 @@ class MiniLatex:
 
         #logger.debug("NODELIST to HTML: --> %r", nodelist)
 
-        nodelists_paragraphs = [ [] ]
-        #logger.debug("nodelist = %r", nodelist)
-        for n in nodelist:
-            if n is not None \
-               and n.isNodeType(nodes.LatexSpecialsNode) and n.specials_chars == '\n\n':
-                nodelists_paragraphs.append([])
-            else:
-                nodelists_paragraphs[len(nodelists_paragraphs)-1].append(n)
+        nodelists_paragraphs = nodelist.split_at_node(
+            lambda n: (n.isNodeType(nodes.LatexSpecialsNode) and n.specials_chars == '\n\n')
+        )
 
         # conver to HTML per-paragraph
         html_paragraphs = [
@@ -948,10 +989,11 @@ class MiniLatex:
             return self._charsnode_to_x(node, fmt=fmt)
 
         if node.isNodeType(nodes.LatexCommentNode):
-            logger_error(
-                f"You cannot use LaTeX comments (‘%{node.comment}’). "
-                f"To type a percent sign, use ‘\\%’"
-            )
+            if not self._silent:
+                logger.error(
+                    f"You cannot use LaTeX comments (‘%{node.comment}’). "
+                    f"To type a percent sign, use ‘\\%’"
+                )
             raise ValueError(f"LaTeX comments not supported: ‘%{node.comment}’. "
                              f"To type a percent sign, use ‘\\%’")
 
@@ -973,9 +1015,9 @@ class MiniLatex:
  
     def get_nodearglist(self, node, arg_i):
         if node.nodeargd is None:
-            return []
+            return nodes.LatexNodeList([])
         if node.nodeargd.argnlist is None:
-            return []
+            return nodes.LatexNodeList([])
         if isinstance(arg_i, str):
             # find the correct argument number
             for j, arg_spec in enumerate(node.nodeargd.arguments_spec_list):
@@ -989,7 +1031,7 @@ class MiniLatex:
             raise ValueError(f"Invalid argument #{arg_i} for macro ‘\\{node.macroname}’")
         argnode = node.nodeargd.argnlist[arg_i]
         if argnode is None:
-            return [None]
+            return nodes.LatexNodeList([None])
         if argnode.isNodeType(nodes.LatexGroupNode):
             return argnode.nodelist
         return nodes.LatexNodeList([argnode])

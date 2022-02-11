@@ -12,9 +12,9 @@ figure.float {
     width: 100%;
     text-align: center;
 
-    border-width: 0.5px 0px 0.5px 0px;
-    border-style: solid none solid none;
-    border-color: $discreet-border-color;
+    // border-width: 0.5px 0px 0.5px 0px;
+    // border-style: solid none solid none;
+    // border-color: $discreet-border-color;
 
     margin: 0.5rem 0px;
     padding: 0.5rem 0px;
@@ -42,6 +42,17 @@ figure.float {
         font-style: italic;
     }
 }
+
+
+
+.display-math {
+    width: 100%;
+    max-width: 100%;
+
+    display: flex;
+    overflow-x: auto;
+}
+
 
 
 @mixin fixbaseline-superscript-text {

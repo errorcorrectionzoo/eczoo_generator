@@ -95,8 +95,8 @@ $header-bgimage-width: 150px;
 $header-bgimage-width-mobile: 80px;
 
 #header {
-    background-color: rgb(0,0,127);
-    color: rgba(255,255,255,0.9);
+    background-color: $pageheader-background-color;
+    color: $pageheader-text-color;
 
     padding: $header-padding ($page-header-bleed+$header-padding);
 
@@ -257,11 +257,6 @@ input.navbar-search {
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-
-//
-// Code info "table" fields appearance
-//
-
 .ecc-code {
     @include card-item;
 
@@ -274,106 +269,11 @@ input.navbar-search {
     border: none 0px;
 }
 
-$ecc-dl-left-column-width: 120px;
+//
+// Code info "table" fields appearance
+//
 
-@mixin ecc-label-dt-word-wrap {
-    max-width: $ecc-dl-left-column-width;
-}
-
-dl.ecc-code {
-
-    grid-template-columns: max-content 1fr auto;
-
-    > dt {
-        min-width: $ecc-dl-left-column-width;
-    }
-    
-    > dt.dt-wrap-label {
-        @include ecc-label-dt-word-wrap;
-    }
-
-    > dd {
-        margin-left: 1rem;
-        grid-column-start: 2;
-        grid-column-end: 4;
-
-        width: 100%;
-    }
-    
-    > dt, > dd
-    {
-        padding: 2px 0px;
-        margin-bottom: 10px;
-    }
-
-    >dd.code-name {
-        grid-column-end: 3;
-    }
-    >dd.info-popup-button-container {
-        margin-top: 0px;
-        grid-column-start: 3;
-        grid-row-start: 1;
-    }
-
-
-    .na {
-        font-style: italic;
-        color: $text-dim-color;
-    }
-
-    .code-relations-list {
-        list-style: none;
-        padding: 0px;
-        margin: 0px;
-    }
-
-    span.code-introduced {
-        display: inline-block;
-        margin-left: 0.3em;
-    }
-
-    dt.code-feature-code_capacity_threshold {
-        @include ecc-label-dt-word-wrap;
-    }
-
-}
-
-// adjustments for small screens
-@media (max-width: $page-main-width+2*$page-main-margins) {
-    dl.ecc-code {
-        display: block;
-        margin-top: 0px;
-
-        > dt {
-            display: block;
-
-            margin-bottom: 3px;
-        }
-        > dd {
-            display: block;
-            margin-left: 0px;
-        }
-
-        // hide label "Name:" on narrow screens
-        dt.code-name {
-            display: none;
-        }
-
-        .info-popup-button-container {
-            display: block;
-            //margin-top: 1rem;
-
-            .popup-info-button {
-                margin-top: 0px;
-            }
-
-            .tippy-container {
-                text-align: left;
-            }
-        }
-
-    }
-}
+@import 'ecc-code-page.scss';
 
 
 //
@@ -393,10 +293,6 @@ a.code-link-with-icon {
     background-repeat: no-repeat;
 }
 
-span.code-name {
-    font-weight: bold;
-}
-
 .display-code-id {
     margin-top: 1.5rem;
 
@@ -410,7 +306,7 @@ span.code-name {
 
 .paragraph-in-list {
     display: block;
-    margin-top: $inner-parskip-half-length;
+    margin-top: 2*$inner-parskip-half-length;
     margin-bottom: $inner-parskip-half-length;
     margin-left: 1rem;
 }
@@ -431,6 +327,7 @@ span.code-name {
 
 .paragraph-in-list:only-child {
     margin-left: 0px;
+    margin-top: $inner-parskip-half-length;
 }
 .paragraph-in-list:only-child::before {
     display: none;

@@ -45,13 +45,21 @@ $inner-parskip-half-length: 0.35em;
 // Base colors
 //
 
+// page header
+$pageheader-background-color: rgb(0,0,127);
+$pageheader-text-color: rgba(255,255,255,0.9);
+
+// page contents
+
 $page-link-color: rgba(50,50,200,1.0);
 $page-link-highlight-color: rgba(80,80,255,1.0);
 
 $text-dim-color: rgba(120, 120, 140, 1.0);
 
+$inner-heading-color: rgb(40,40,80); //lighten(desaturate($pageheader-background-color, 70%), 20%);
+
+$discreet-border-color: rgba($text-dim-color,0.15);
+
 $sidebar-panel-background-color: rgba(245,245,255,1.0);
 
 $visual-highlight-color: rgba(255,230,70,0.8);
-
-$discreet-border-color: rgba($text-dim-color,0.15);

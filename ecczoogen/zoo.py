@@ -12,6 +12,9 @@ from . import code, code_collection, schemaloader
 import jsonschema
 
 
+_junk_files = ( '.DS_Store', )
+
+
 class Zoo:
     def __init__(self, *, dirs, fig_exts):
         super().__init__()
@@ -39,9 +42,11 @@ class Zoo:
 
             for filename in filenames:
                 fullfname = os.path.join(dirpath, filename)
-                if fullfname.endswith('~') or fullfname.endswith('.bak'):
+
+                if os.path.basename(fullfname) in _junk_files \
+                   or fullfname.endswith('~') or fullfname.endswith('.bak'):
                     # okay, backup file, we can skip
-                    logger.debug(f"Skipping backup file {show_dirpath}/{filename}")
+                    logger.debug(f"Skipping junk file {show_dirpath}/{filename}")
                     continue
                 
                 if fullfname.endswith( fig_exts ):

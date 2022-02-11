@@ -432,32 +432,43 @@ class CitationTextManager:
         #
 
         for preset, citeobj in self._citations_by_field['preset'].items():
+
+            # don't use _make_minilatex_citation_text() because we should report
+            # syntax errors in preset citations !
+
             try:
-                citeobj.full_citation_text_minilatex = minilatextohtml.MiniLatex(
-                    self._preset_citations[citeobj.preset],
-                    what=f"Citation ‘preset:{citeobj.preset}’"
-                )
+                full_citation_text = self._preset_citations[citeobj.preset]
             except KeyError:
                 logger.error(f"Unknown preset citation: ‘{citeobj.preset}’")
                 raise
+
+            citeobj.full_citation_text_minilatex = minilatextohtml.MiniLatex(
+                full_citation_text,
+                what=f"Citation ‘preset:{citeobj.preset}’"
+            )
+
 
         #
         # Now also process manual entries
         #
 
         for manual, citeobj in self._citations_by_field['manual'].items():
+
+            # don't use _make_minilatex_citation_text() because we should report
+            # syntax errors in manual citations !
+
             citeobj.full_citation_text_minilatex = minilatextohtml.MiniLatex(
                 citeobj.manual,
                 what=f"Manual citation ‘{citeobj.manual}’"
             )
-
-
 
         #
         # And we're done!
         #
         return
         
+
+
 
 def _generate_citation_from_citeprocjsond(citeprocjsond, bib_style):
 
@@ -477,6 +488,32 @@ def _generate_citation_from_citeprocjsond(citeprocjsond, bib_style):
                 if 'name' in author and 'family' not in author and 'given' not in author:
                     author['family'] = author['name']
                     del author['name']
+
+        # explore the citeprocjsond tree and make sure that all strings are
+        # valid minilatex markup
+        def _sanitize(d):
+            if isinstance(d, dict):
+                for k in d.keys():
+                    d[k] = _sanitize(d[k])
+                return d
+            elif isinstance(d, list):
+                for j, val in enumerate(d):
+                    d[j] = _sanitize(val)
+                return d
+            else:
+                try:
+                    # try compiling the given value, suppressing warnings
+                    minilatextohtml.MiniLatex(str(d), _silent=True).text
+                except Exception:
+                    logger.debug(
+                        f"Encountered invalid minilatex string {d!r} when "
+                        f"composing citation."
+                    )
+                    return r'\begin{verbatiminput}' + str(d) + r'\end{verbatiminput}'
+                return d
+
+        #citeprocjsond = 
+        _sanitize(citeprocjsond)
 
         bib_source = citeproc.source.json.CiteProcJSON([citeprocjsond])
         bibliography = citeproc.CitationStylesBibliography(bib_style, bib_source,

@@ -61,6 +61,7 @@ class Code:
         self.code_id = self.schemadata['code_id']
         self.name = self.schemadata['name']
 
+        self.description = self.schemadata['description']
         
         # these fields only get set once we are assigned to a CodeCollection
         self.collection = None

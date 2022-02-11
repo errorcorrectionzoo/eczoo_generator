@@ -6,6 +6,17 @@ import PIL.Image
 import xml.etree.ElementTree as ET
 
 
+
+# global factor to scale all SVG files.  The ratio is fixed such that an SVG
+# file with a Source Sans Pro font text at 10pt should appear the same size as
+# the main font of the webpage.
+#
+# 10pt in SVG = 12.5 px @ screen css with 96dpi  -->  target is 16px as in our variables.scss
+
+_uniform_svg_scale = 1.28
+
+
+
 def get_image_file_info(filename):
     if filename.endswith('.svg'):
         # use svg processor
@@ -112,7 +123,7 @@ def get_image_file_info_svg(filename):
     return {
         'type': 'vector',
         'physical_dimensions': (
-            ( width_pt, 'pt' ),
-            ( height_pt, 'pt' ),
+            ( _uniform_svg_scale * width_pt, 'pt' ),
+            ( _uniform_svg_scale * height_pt, 'pt' ),
         )
     }
