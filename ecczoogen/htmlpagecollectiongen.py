@@ -253,9 +253,15 @@ class HtmlFloat:
                 captiontexthtml = \
                     f"""<span class="caption-text">{self.float_obj.caption}</span>"""
                 captionhtml = \
-                    f"""<figcaption>{fltnohtml}: {captiontexthtml}</figcaption>"""
+                    f"""{fltnohtml}: {captiontexthtml}"""
             else:
-                captionhtml = f"<figcaption>{fltnohtml}</figcaption>"
+                captionhtml = fltnohtml
+
+        captionhtml = (
+            f"""<figcaption><span class="center-if-single-line">"""
+            + captionhtml
+            + f"""</span></figcaption>"""
+        )
 
         figuretag_classes += ['float', f'float-{float_type}']
 

@@ -285,7 +285,7 @@ class ItemToHtmlCite(ItemToHtmlWrapTag):
                 s_items.append( f'&lt;{citekey_verbatim}&gt;' )
                 continue
 
-            logger.debug(f"Parsing citation {citekey_verbatim=}")
+            #logger.debug(f"Parsing citation {citekey_verbatim=}")
 
             if ':' in citekey_verbatim:
                 citation_key_prefix, citation_key = citekey_verbatim.split(':', 1)

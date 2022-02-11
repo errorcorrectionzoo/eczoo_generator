@@ -108,6 +108,9 @@ class SchemaData:
     def __iter__(self):
         return iter(self.data)
 
+    def items(self):
+        return self.data.items()
+
     def iter_with_field_info(self):
         if self.data_type == 'object':
             for fldinfo in self.fields_info:

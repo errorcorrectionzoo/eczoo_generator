@@ -673,7 +673,18 @@ logger.info("Generating JSON code dump ...")
 
 os.makedirs( os.path.join(Dirs.output_dir, 'dat'), exist_ok=True )
 
-all_codes_info = { code_id: codeobj.source_info
+def _get_schemadata_properties_as_json_tree(obj):
+    if isinstance(obj.data, list):
+        return [ _get_schemadata_properties_as_json_tree(o)
+                 for o in obj._data_sd ]
+    if isinstance(obj.data, dict):
+        return { k: _get_schemadata_properties_as_json_tree(o)
+                 for k, o in obj._data_sd.items() }
+    if hasattr(obj.data, 'text'):
+        return obj.data.text
+    return obj.data
+
+all_codes_info = { code_id: _get_schemadata_properties_as_json_tree(codeobj.schemadata)
                    for code_id, codeobj in zoo.all_codes().items() }
 with open(os.path.join(Dirs.output_dir, 'dat', 'all_codes_info_dump.json'), 'w',
           encoding='utf-8') as fw:
