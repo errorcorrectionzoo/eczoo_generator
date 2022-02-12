@@ -47,7 +47,7 @@ $tile-background-color: rgba(245,245,252,1.0);
 
         display: grid;
 
-        > span {
+        >.tile-content {
             grid-row: 2;
         }
     }

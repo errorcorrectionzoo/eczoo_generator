@@ -5,30 +5,43 @@
 {# Helper macro to display people #}
 
 {% macro person_tile(person) %}
-    {%- if person.pageurl -%}
-      {%- set use_url = person.pageurl -%}
-    {%- elif person.gscholaruser -%}
-      {%- set use_url = 'https://scholar.google.com/citations?user='+person.gscholaruser -%}
-    {%- else -%}
-      {%- set use_url = '' -%}
-    {% endif %}
-    {% if use_url %}<a href="{{use_url}}" target="_blank" {% else %}<span {% endif -%}
-       class="tile"
+    <div class="tile tile-person"
        {% if person.avatarurl %}
          data-tile-image="{{person.avatarurl}}"
        {% elif person.githubusername %}
          data-tile-image="https://github.com/{{person.githubusername}}.png"
+       {% else %}
+         data-tile-image="{{ 'static/icons/avatar-unknown.svg' | prebaseurl }}"
        {% endif %}
-       >
-      <span class="tile-content">
-        <span class="person-name">{{person.name}}</span>
-        {% if person.zoorole %}
+       >{#
+    #}<div class="tile-content">{#
+      #}<div class="tile-person-line tile-persion-name-line">{#
+        #}<span class="person-name">{{person.name}}</span>
+        {%- if person.zoorole %}
         <span class="person-zoorole">
           ({{person.zoorole}})
         </span>
-        {% endif %}
-      </span>
-    {%- if use_url %}</a>{% else %}</span>{% endif %}
+        {%- endif -%}
+        </div>{#
+      #}<div class="tile-person-line tile-person-links-line">
+          {%- if person.pageurl -%}
+            <span class="person-linkdetail person-pageurl">{#
+            #}<a href="{{person.pageurl}}" target="_blank">web</a></span>
+          {%- endif -%}
+          {%- if person.gscholaruser -%}
+            <span class="person-linkdetail person-gscholaruser">{#
+            #}<a href="https://scholar.google.com/citations?user={{person.gscholaruser}}"
+                 target="_blank">google scholar</a></span>
+          {%- endif -%}
+          {%- if person.githubusername -%}
+            <span class="person-linkdetail person-githubusername">{#
+            #}<a href="https://github.com/{{person.githubusername}}"
+               target="_blank">github</a></span>
+          {%- endif -%}
+            &nbsp;{#
+      #}</div>{#
+    #}</div>{#
+  #}</div>
 {%- endmacro %}
 
 
