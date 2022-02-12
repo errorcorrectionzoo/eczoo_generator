@@ -8,10 +8,19 @@
 {% for code in code_list %}
   <li>
     <span class="code-name">
-      {{code|code_ref}}
-      {%- if code.introduced %}<span class="code-introduced">{{code.introduced|to_html_with_notes(rc)}}</span>{% endif -%}
+      {{- code|code_ref -}}
+      {%- if code.introduced -%}
+        <span class="code-introduced">
+          {{- code.introduced|to_html_with_notes(rc) -}}
+        </span>
+      {%- endif -%}
     </span>
-    <span class="code-description">{{code.description|to_html_with_notes(rc)}}</span>
+    {%- if display_options.description_first_paragraph -%}
+      {%- set desc = code.description.get_first_paragraph() -%}
+    {%- else -%}
+      {%- set desc = code.description -%}
+    {%- endif -%}
+    <span class="code-description">{{desc|to_html_with_notes(rc)}}</span>
   </li>
 {% endfor %}
 </ol>

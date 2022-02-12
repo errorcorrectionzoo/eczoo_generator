@@ -52,8 +52,9 @@ h2 {
 }
 
 p, ul, ol {
-    margin-top: $parskip-half-length;
-    margin-bottom: $parskip-half-length;
+    // remember, top margin of next element overlaps with bottom margin of previous one
+    margin-top: 2*$parskip-half-length;
+    margin-bottom: 2*$parskip-half-length;
 }
 p:first-child, ul:first-child, ol:first-child {
     margin-top: 0px !important;
@@ -261,8 +262,8 @@ input.navbar-search {
     @include card-item;
 
     p, ul, ol {
-        margin-top: $inner-parskip-half-length;
-        margin-bottom: $inner-parskip-half-length;
+        margin-top: 2*$inner-parskip-half-length;
+        margin-bottom: 2*$inner-parskip-half-length;
     }
 }
 
@@ -407,7 +408,7 @@ a.code-link-with-icon {
 .paragraph-in-list {
     display: block;
     margin-top: 2*$inner-parskip-half-length;
-    margin-bottom: $inner-parskip-half-length;
+    margin-bottom: 2*$inner-parskip-half-length;
     margin-left: 1rem;
 }
 .paragraph-in-list:first-child {
@@ -425,13 +426,15 @@ a.code-link-with-icon {
     color: $text-dim-color;
 }
 
-.paragraph-in-list:only-child {
-    margin-left: 0px;
-    margin-top: $inner-parskip-half-length;
-}
-.paragraph-in-list:only-child::before {
-    display: none;
-}
+// always show "bullet"
+//
+// .paragraph-in-list:only-child {
+//     margin-left: 0px;
+//     margin-top: 2*$inner-parskip-half-length;
+// }
+// .paragraph-in-list:only-child::before {
+//     display: none;
+// }
 
 
 // info popup frames & detail

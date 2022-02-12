@@ -18,10 +18,11 @@ Expected context variables:
 {% for rel in use_relations %}
   <li class="paragraph-in-list">
     <span class="code-{{use_relation_type}}-1-code">{{ rel.code | code_ref }}</span>
-  {%- if rel.detail %}
-    <span class="code-{{use_relation_type}}-1-detail">({{rel.detail | to_html_with_notes(rc)}})</span>
+  {%- if rel.detail -%}
+    <span class="code-{{use_relation_type}}-1-detail">
+      <!-- whitespace, em dash, no-break space -->
+      &#x2014;&nbsp;{{rel.detail | to_html_with_notes(rc)}}</span>
   {%- endif -%}
-  {# {{- ", " if not loop.last else "" }} #}
   </li>
 {% endfor %}
 </ul>
