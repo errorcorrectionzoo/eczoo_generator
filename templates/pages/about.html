@@ -4,32 +4,31 @@
 
 {# Helper macro to display people #}
 
-{% macro person_tile(name, githubusername="", gscholaruser="", pageurl="", zootitle="", avatarurl="") -%}
-    {%- if pageurl -%}
-      {%- set use_url = pageurl -%}
-    {%- elif gscholaruser -%}
-      {%- set use_url = 'https://scholar.google.com/citations?user='+gscholaruser -%}
+{% macro person_tile(person) %}
+    {%- if person.pageurl -%}
+      {%- set use_url = person.pageurl -%}
+    {%- elif person.gscholaruser -%}
+      {%- set use_url = 'https://scholar.google.com/citations?user='+person.gscholaruser -%}
     {%- else -%}
       {%- set use_url = '' -%}
     {% endif %}
-    <a href="{{use_url}}"
-       target="_blank"
+    {% if use_url %}<a href="{{use_url}}" target="_blank" {% else %}<span {% endif -%}
        class="tile"
-       {% if avatarurl %}
-         data-tile-image="{{avatarurl}}"
-       {% elif githubusername %}
-         data-tile-image="https://github.com/{{githubusername}}.png"
+       {% if person.avatarurl %}
+         data-tile-image="{{person.avatarurl}}"
+       {% elif person.githubusername %}
+         data-tile-image="https://github.com/{{person.githubusername}}.png"
        {% endif %}
        >
       <span class="tile-content">
-        <span class="person-name">{{name}}</span>
-        {% if zootitle %}
-        <span class="person-zootitle">
-          ({{zootitle}})
+        <span class="person-name">{{person.name}}</span>
+        {% if zoorole %}
+        <span class="person-zoorole">
+          ({{person.zoorole}})
         </span>
         {% endif %}
       </span>
-    </a>
+    {%- if use_url %}</a>{% else %}</span>{% endif %}
 {%- endmacro %}
 
 
@@ -41,21 +40,13 @@
 
 <section class="tiles-collection person-list">
 
-{{
-   person_tile("Victor V. Albert",
-               githubusername="valbert4",
-               gscholaruser="hyddAfkAAAAJ",
-               pageurl="",
-               zootitle="zookeeper")
-}}
+{% for person in zoo_contributors_info.core %}
 
 {{
-   person_tile("Philippe Faist",
-               githubusername="phfaist",
-               gscholaruser="rdeNGqMAAAAJ",
-               pageurl="https://phfaist.com",
-               zootitle="architect")
+   person_tile(person)
 }}
+
+{% endfor %}
 
 </section>
 
@@ -67,23 +58,13 @@
 
 <section class="tiles-collection person-list">
 
-{# use argument `` avatarurl="..." `` to specify a photo for each person
-   if they do not have a github user ID and profile pic #}
+{% for person in zoo_contributors_info.veterinarians %}
 
 {{
-   person_tile("Daniel Gottesman",
-               pageurl="https://quics.umd.edu/people/daniel-gottesman")
+   person_tile(person)
 }}
 
-{{
-   person_tile("Alexander Barg",
-               pageurl="https://user.eng.umd.edu/~abarg/")
-}}
-
-{{
-   person_tile("Leonid Pryadko",
-               gscholaruser="S8iAOo4AAAAJ")
-}}
+{% endfor %}
 
 </section>
 
@@ -92,163 +73,13 @@
 
 <section class="tiles-collection person-list two-columns">
 
-{{
-   person_tile("Michael Vasmer",
-               githubusername="MikeVasmer",
-               gscholaruser="YWXgW2wAAAAJ")
-}}
+{% for person in zoo_contributors_info.code_contributors %}
 
 {{
-   person_tile("Joschka Roffe",
-               githubusername="quantumgizmos",
-               gscholaruser="vGDLxeoAAAAJ")
+   person_tile(person)
 }}
 
-{{
-   person_tile("Pavel Panteleev",
-               githubusername="",
-               gscholaruser="adjeaUkAAAAJ")
-}}
-
-{{
-   person_tile("Michael Gullans",
-               githubusername="mgullans",
-               gscholaruser="YP7rWbkAAAAJ")
-}}
-
-{{
-   person_tile("Nolan Coble",
-               pageurl="https://nolanjcoble.com")
-}}
-
-{{
-   person_tile("Dhruv Devulapalli")
-}}
-
-{{
-   person_tile("Xiaozhen Fu")
-}}
-
-{{
-   person_tile("Srilekha Gandhari")
-}}
-
-{{
-   person_tile("Joseph T. Iosue",
-               pageurl="https://jtiosue.github.io/pages/about/about.html")
-}}
-
-{{
-   person_tile("Jonathan Kunjummen")
-}}
-
-{{
-   person_tile("Seyed Sajjad Nezhadi",
-               pageurl="sajjad-nezhadi.github.io")
-}}
-
-{{
-   person_tile("Qingfeng (Kee) Wang")
-}}
-
-{{
-   person_tile("Yijia Xu",
-               pageurl="https://xuyij.github.io/homepage/")
-}}
-
-{{
-   person_tile("Elizabeth R. Bennewitz")
-}}
-
-{{
-   person_tile("Eric Kubischta")
-}}
-
-{{
-   person_tile("Jon Nelson")
-}}
-
-{{
-   person_tile("Marianna Podzorova")
-}}
-
-{{
-   person_tile("Benjamin Quiring")
-}}
-
-{{
-   person_tile("Joel Rajakumar")
-}}
-
-{{
-   person_tile("Manasi Shingane")
-}}
-
-{{
-   person_tile("Ian Teixeira")
-}}
-
-{{
-   person_tile("Finnegan Voichick")
-}}
-
-{{
-   person_tile("Siddharth Taneja")
-}}
-
-{{
-   person_tile("Xinyuan Zheng")
-}}
-
-{{
-   person_tile("Chris Fechisin")
-}}
-
-{{
-   person_tile("Antonio D. Córcoles",
-               githubusername="",
-               gscholaruser="_nYGfnIAAAAJ")
-}}
-
-{{
-   person_tile("Arpit Dua",
-               githubusername="dua-arpit",
-               gscholaruser="w4ASA38AAAAJ")
-}}
-
-{{
-   person_tile("Aleksander Kubica",
-               githubusername="",
-               gscholaruser="D8VDo7YAAAAJ")
-}}
-
-{{
-   person_tile("Liang Jiang",
-               githubusername="",
-               gscholaruser="-4vWibwAAAAJ")
-}}
-
-{{
-   person_tile("Steven T. Flammia",
-               githubusername="",
-               gscholaruser="-VnX0xYAAAAJ")
-}}
-
-{{
-   person_tile("Alexis Schotte")
-}}
-
-{{
-   person_tile("David Aasen",
-               githubusername="davidaasen",
-               gscholaruser="vNuuzc8AAAAJ")
-}}
-
-{{
-   person_tile("Lane G. Gunderman",
-               gscholaruser="L8OpvIIAAAAJ")
-}}
-
+{% endfor %}
 
 </section>
 

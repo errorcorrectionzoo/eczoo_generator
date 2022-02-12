@@ -87,6 +87,8 @@ class Dirs:
 
     code_tree_info = os.path.join(_root_dir, eczoo_site_setup['dirs']['code_tree_info'])
 
+    contributors = os.path.join(_root_dir, eczoo_site_setup['dirs']['contributors'])
+
     #
     # Where to output the website files:
     #
@@ -478,10 +480,18 @@ codelistpage_list.sort(
 # Prepare any global context for the templates
 #
 
+
+# Load the list of site contributors
+contributors_yml_fname = os.path.join(Dirs.contributors, 'contributors.yml')
+with open(contributors_yml_fname, encoding='utf-8') as f:
+    zoo_contributors_info = yaml.safe_load(f)
+
+
 global_context = {
     'domains': eczoo_domainshierarchy['domains'],
     'zoo': zoo,
     'codelistpage_list': codelistpage_list,
+    'zoo_contributors_info': zoo_contributors_info
 }
 
 
