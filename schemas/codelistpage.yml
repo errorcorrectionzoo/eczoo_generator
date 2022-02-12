@@ -32,19 +32,24 @@ properties:
         # completely free, determined by the template (TODO)
 
   codes:
-    type: array
-    items:
-      type: object
-      additionalProperties: false
-      properties:
-        property_set:
-          type: string
-        domain:
-          type: string
-        # kingdom:  # use child_of instead
-        #   type: string
-        descendant_of:
-          type: string
+    type: object
+    additionalProperties: false
+    required: ['select']
+    properties:
+      select:
+        type: array
+        items:
+          type: object
+          additionalProperties: false
+          properties:
+            property_set:
+              type: string
+            domain:
+              type: string
+            # kingdom:  # use descendant_of instead
+            #   type: string
+            descendant_of:
+              type: string
 
   sort:
     type: object

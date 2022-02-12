@@ -425,7 +425,7 @@ for (dirpath, dirnames, filenames) in os.walk(codelistpages_dir, followlinks=Tru
         list_of_codes = [
             code
             for code in zoo.all_codes().values()
-            if _code_select_predicates(code, codelistpage_sd['codes'])
+            if _code_select_predicates(code, codelistpage_sd['codes']['select'])
         ]
         sort_by = codelistpage_sd.getfield('sort.by', 'name')
         reverse = codelistpage_sd.getfield('sort.reverse', False)

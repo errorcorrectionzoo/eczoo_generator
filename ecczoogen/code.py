@@ -108,6 +108,9 @@ class Code:
 
     def is_descendant_of(self, other_code_id):
         # follow parents until we find other_code_id.
+
+        if self.code_id == other_code_id:
+            return True
         
         code_ids_checked = set()
 

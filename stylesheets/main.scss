@@ -617,6 +617,9 @@ a.code-self-edit {
     max-width: 400px;
 }
 
+.person-list.two-columns {
+    max-width: calc(max(400px, 90%));
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 //

@@ -33,7 +33,11 @@
       {%- endif -%}
     {%- elif col.property -%}
       {%- if col.link_to_code %}<a href="{{code|code_ref_href}}">{% endif -%}
-      {{ code[ col.property ] | to_html_with_notes(rc) }}
+        {%- if col.first_paragraph_only -%}
+          {{ code[ col.property ].get_first_paragraph() | to_html_with_notes(rc) }}
+        {%- else -%}
+          {{ code[ col.property ] | to_html_with_notes(rc) }}
+        {%- endif -%}
       {%- if col.link_to_code %}</a>{% endif -%}
     {%- endif -%}
   </td>
