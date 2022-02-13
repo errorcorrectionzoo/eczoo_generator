@@ -399,6 +399,11 @@ for (dirpath, dirnames, filenames) in os.walk(codelistpages_dir, followlinks=Tru
 
         # resolve code list, prepare all codes
         def _code_select_predicate(code, predinfo):
+            if 'not' in predinfo:
+                if _code_select_predicate(code, predinfo['not']):
+                    logger.debug(
+                      f"Code {code.code_id} fails to obey (NOT {predinfo['not']})")
+                    return False
             if 'property_set' in predinfo:
                 if not code.getfield(predinfo['property_set']):
                     logger.debug(
@@ -491,7 +496,7 @@ global_context = {
     'domains': eczoo_domainshierarchy['domains'],
     'zoo': zoo,
     'codelistpage_list': codelistpage_list,
-    'zoo_contributors_info': zoo_contributors_info
+    'zoo_contributors_info': zoo_contributors_info,
 }
 
 

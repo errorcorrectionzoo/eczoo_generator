@@ -95,7 +95,13 @@ Expected context variables:
 <!-- Relationships to other codes -->
 
 {% if code.relations.parents %}
-<h2 class="code-parents">Parent(s)</h2>
+<h2 class="code-parents">
+  {% if code.relations.parents|length > 1 %}
+    Parents
+  {% else %}
+    Parent
+  {% endif %}
+</h2>
 <div class="sectioncontent code-parents">
   {% set use_relation_type = 'parents' %}
   {% set use_relations = code.relations.parents %}
@@ -104,7 +110,13 @@ Expected context variables:
 {% endif %}
 
 {% if code.relations.parent_of %}
-<h2 class="code-parent-of">Parent of</h2>
+<h2 class="code-parent-of">
+  {% if code.relations.parent_of|length > 1 %}
+    Children
+  {% else %}
+    Child
+  {% endif %}
+</h2>
 <div class="sectioncontent code-parent-of">
   {% set use_relation_type = 'parent-of' %}
   {% set use_relations = code.relations.parent_of %}
@@ -113,7 +125,13 @@ Expected context variables:
 {% endif %}
 
 {% if code.relations.cousins or code.relations.cousin_of %}
-<h2 class="code-cousins">Cousin(s)</h2>
+<h2 class="code-cousins">
+  {% if code.relations.cousins|length + code.relations.cousin_of|length > 1 %}
+    Cousins
+  {% else %}
+    Cousin
+  {% endif %}
+</h2>
 <div class="sectioncontent code-cousins">
   {% set use_relation_type = 'cousins' %}
   {% set use_relations = [] + code.relations.cousins|list + code.relations.cousin_of|list %}
