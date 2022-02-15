@@ -1,0 +1,46 @@
+# TEST VERSION
+
+core:
+
+  - name: 'Victor V. Albert'
+    zoorole: zookeeper
+    githubusername: valbert4
+    gscholaruser: 'hyddAfkAAAAJ'
+
+  - name: 'Philippe Faist'
+    zoorole: architect
+    githubusername: phfaist
+    gscholaruser: 'rdeNGqMAAAAJ'
+    pageurl: 'https://phfaist.com'
+    
+
+
+veterinarians:
+
+  - name: "Daniel Gottesman"
+    pageurl: "https://quics.umd.edu/people/daniel-gottesman"
+
+  - name: "Alexander Barg"
+    pageurl: "https://user.eng.umd.edu/~abarg/"
+
+  - name: "Leonid Pryadko"
+    gscholaruser: "S8iAOo4AAAAJ"
+
+
+
+code_contributors:
+
+  - name: 'Michael Vasmer'
+    githubusername: 'MikeVasmer'
+    gscholaruser: 'YWXgW2wAAAAJ'
+
+  - name: 'Joschka Roffe'
+    githubusername: 'quantumgizmos'
+    gscholaruser: 'vGDLxeoAAAAJ'
+
+  - name: 'Pavel Panteleev'
+    githubusername: ''
+    gscholaruser: 'adjeaUkAAAAJ'
+
+  - name: 'X Y Z'
+

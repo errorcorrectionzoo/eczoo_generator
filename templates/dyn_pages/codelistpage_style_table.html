@@ -1,16 +1,19 @@
-{% extends 'layout/base_page.html' %}
+{% extends 'dyn_pages/codelistpage_base.html' %}
 
-{% block contents %}
+
+{% block div_bodycontents_class -%}
+  codelistpage codelistpage_style_table
+{%- endblock %}
+
 
 {% macro render_template_variable(variable) -%}
   {{variable}}
 {%- endmacro %}
 
-
-{{ codelistpage_data.intro|to_html_with_notes(rc) }}
-
 {% set colinfo = display_options.columns %}
 
+
+{% block listcontents %}
 <table class="codelistpage-table {{display_options.cssclass}}">
 <thead>
 <tr>
@@ -47,6 +50,4 @@
 </tbody>
 </table>
 
-{% include 'pieces/endnotes.html' %}
-
-{% endblock contents %}
+{% endblock %}

@@ -1,8 +1,12 @@
 {% extends 'layout/base_page.html' %}
 
-{% block contents %}
 
-{{ codelistpage_data.intro }}
+{% block div_bodycontents_class -%}
+  codelistpage codelistpage_style_index
+{%- endblock %}
+
+
+{% block listcontents %}
 
 <ol class="code-index">
 {% for code in code_list %}
@@ -25,6 +29,4 @@
 {% endfor %}
 </ol>
 
-{% include 'pieces/endnotes.html' %}
-
-{% endblock contents %}
+{% endblock %}

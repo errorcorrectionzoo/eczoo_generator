@@ -1,0 +1,35 @@
+{% extends 'layout/base_page.html' %}
+
+
+{% block div_bodycontents_class -%}
+  codelistpage
+{%- endblock %}
+
+
+{% block contents %}
+
+{# ** BLOCK INTRO ** #}
+{% block intro %}
+{%- if codelistpage_data.intro -%}
+  {{ codelistpage_data.intro|to_html_with_notes(rc) }}
+{%- endif -%}
+{% endblock %}
+{# **** #}
+
+{# ** BLOCK LISTCONTENTS ** #}
+{% block listcontents %}
+
+{% for code in code_list %}
+
+  {% include 'pieces/code_info_short.html' %}
+
+{% endfor %}
+
+{% include 'pieces/endnotes.html' %}
+
+{% endblock listcontents %}
+{# **** #}
+
+{% include 'pieces/endnotes.html' %}
+
+{% endblock contents %}

@@ -715,7 +715,16 @@ for encountered_image_filename in minilatex_scanner.get_encountered_image_filena
             raise ValueError(
                 f"Cannot find image file {full_path}, tried extentions {fig_exts}")
 
-        ofigname = hashlib.sha256(full_path_wext.encode('utf-8')).hexdigest()[:32]
+        with open(full_path_wext, 'rb') as fb:
+            hx = hashlib.sha256()
+            while True:
+                data = fb.read(2048)
+                if not data:
+                    break
+                hx.update(data)
+            image_file_hexdigest = hx.hexdigest()
+
+        ofigname = image_file_hexdigest[:32]
 
         # pick up the extension again, in case it was already in full_path
         _, ext = os.path.splitext(full_path_wext)

@@ -545,10 +545,6 @@ a.code-self-edit {
     // border: dotted 1px gray;
     // padding: 3px;
 
-    @include card-item;
-
-    opacity: 0.85;
-
     font-size: $small-font-size;
 
     margin-bottom: 20px;
@@ -560,7 +556,6 @@ a.code-self-edit {
 
     dt {
         font-style: normal;
-        min-width: 2.5em;
         text-align: right;
     }
 
@@ -581,6 +576,20 @@ a.code-self-edit {
     }
 
 }
+
+
+
+.codelistpage_style_cards #endnotes {
+
+    @include card-item;
+
+    opacity: 0.8;
+
+    dt {
+        min-width: 2em;
+    }
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////
 //

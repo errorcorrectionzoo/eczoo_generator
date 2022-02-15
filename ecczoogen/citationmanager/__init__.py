@@ -383,18 +383,22 @@ class CitationTextManager:
                 'title': d['title'],
 
             }
-            full_citation_text = _generate_citation_from_citeprocjsond(citeprocjsond,
-                                                                       bib_style=bib_style)
+            full_citation_text = _generate_citation_minilatex_from_citeprocjsond(
+                citeprocjsond,
+                bib_style=bib_style,
+                what=f"citation ‘arXiv:{arxividstr}’"
+            ).minilatex
 
             full_citation_text += \
                 fr" \href{{https://arxiv.org/abs/{arxividstr}}}{{{arxividstr}}}"
+
+            logger.debug(f"Citation arXiv:{arxividstr} → {full_citation_text}")
 
             citeobj.full_citation_text_minilatex = minilatextohtml.MiniLatex(
                 full_citation_text,
                 what=f"Citation ‘arXiv:{arxividstr}’",
             )
 
-            logger.debug(f"Citation arXiv:{arxividstr} → {full_citation_text}")
 
         # then go through the citation objects that were cited by DOI
 
@@ -410,7 +414,11 @@ class CitationTextManager:
 
             #logger.debug(f"{d=}")
 
-            full_citation_text = _generate_citation_from_citeprocjsond(d, bib_style=bib_style)
+            full_citation_text = _generate_citation_minilatex_from_citeprocjsond(
+                d,
+                bib_style=bib_style,
+                what=f'citation ‘doi:{doi}’'
+            ).minilatex
 
             full_citation_text += \
                 fr" \href{{https://doi.org/{doi}}}{{DOI}}"
@@ -420,13 +428,14 @@ class CitationTextManager:
                 full_citation_text += \
                     f"; \href{{https://arxiv.org/abs/{arxividstr}}}{{{arxividstr}}}"
 
+            logger.debug(f"Citation doi:{doi} → {full_citation_text!r}")
+
             citeobj.full_citation_text_minilatex = minilatextohtml.MiniLatex(
                 full_citation_text,
                 what=f"Citation ‘doi:{doi}’",
             )
-            
-            logger.debug(f"Citation doi:{doi} → {full_citation_text}")
-        
+
+       
         #
         # Process preset entries
         #
@@ -470,7 +479,7 @@ class CitationTextManager:
 
 
 
-def _generate_citation_from_citeprocjsond(citeprocjsond, bib_style):
+def _generate_citation_minilatex_from_citeprocjsond(citeprocjsond, bib_style, what):
 
     with warnings.catch_warnings():
         warnings.simplefilter('ignore', citeproc.source.MissingArgumentWarning)
@@ -533,13 +542,25 @@ def _generate_citation_from_citeprocjsond(citeprocjsond, bib_style):
             return bibliography_items[0]
 
         try:
-            return _gen_entry(citeprocjsond)
+            logger.debug(f"Attempting to generate entry for {citekey}...")
+            return minilatextohtml.MiniLatex(
+                _gen_entry(citeprocjsond),
+                what=what,
+                _silent=True # don't report errors on logger
+            )
         except Exception:
             logger.debug(f"Error while forming citation entry for {citekey}, trying "
                          f"again with minilatex sanitization")
 
         _sanitize(citeprocjsond)
-        return _gen_entry(citeprocjsond)
+        try:
+            return minilatextohtml.MiniLatex(
+                _gen_entry(citeprocjsond),
+                what=what
+            )
+        except Exception as e:
+            logger.critical(f"EXCEPTION!! {e!r}")
+            raise
 
 
 # def _get_full_citation_text_minilatex_for_pure_arxiv_entry(arxividstr, d):

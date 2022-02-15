@@ -1,8 +1,12 @@
-{% extends 'layout/base_page.html' %}
+{% extends 'dyn_pages/codelistpage_base.html' %}
 
-{% block contents %}
 
-{{ codelistpage_data.intro|to_html_with_notes(rc) }}
+{% block div_bodycontents_class -%}
+  codelistpage codelistpage_style_cards
+{%- endblock %}
+
+
+{% block listcontents %}
 
 {% for code in code_list %}
 
@@ -10,6 +14,4 @@
 
 {% endfor %}
 
-{% include 'pieces/endnotes.html' %}
-
-{% endblock contents %}
+{% endblock %}
