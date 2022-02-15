@@ -42,9 +42,12 @@ export class EczPopupInfoTool
                 interactive: true,
                 interactiveBorder: 30,
                 maxWidth: '450px',
-                popperOptions: {
-                    placement: 'bottom',
-                },
+                boundary: 'viewport',
+                flip: false,
+                placement: 'bottom',
+                // popperOptions: {
+                //     placement: 'bottom',
+                // },
                 theme: 'light',
             }
         );

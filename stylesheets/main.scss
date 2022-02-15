@@ -470,7 +470,6 @@ a.code-self-edit {
         margin-left: 0px;
         padding: 0px;
     
-
         background-color: rgba(240,240,255,0.5);
         padding: 5px;
 
@@ -483,6 +482,8 @@ a.code-self-edit {
         box-sizing: border-box;
         max-width: 100%;
         min-width: 100%;
+
+        user-select: contain;
     }
 
     > dd.bibtex {
