@@ -34,6 +34,11 @@ export class EczooSearchWidget
 
         this.initial_search_query = a.initial_search_query;
 
+        this.fields_boost = a.fields_boost;
+        if (typeof this.fields_boost == 'undefined') {
+            this.fields_boost = { name: 10, description: 5 };
+        }
+
         this.ref_field = a.ref_field;
         this.title_field = a.title_field;
         this.href_field = a.href_field;
@@ -98,7 +103,13 @@ export class EczooSearchWidget
             {
                 let obj = this;
                 obj.ref(_this.ref_field);
-                _this.fields.forEach( (fldname) => obj.field(fldname) );
+                _this.fields.forEach( (fldname) => {
+                    if (_this.fields_boost.hasOwnProperty(fldname)) {
+                        obj.field(fldname, {boost: _this.fields_boost[fldname]});
+                    } else {
+                        obj.field(fldname);
+                    }
+                } );
                 obj.metadataWhitelist = [ 'position' ];
             
                 Object.keys(_this.store).forEach(function (k) {
@@ -153,7 +164,7 @@ export class EczooSearchWidget
         let instructions_widget = document.createElement('div');
         instructions_widget.classList.add('search-instructions-tip');
         instructions_widget.innerHTML = 
-           `<p>Type query terms and hit RETURN to search. </p>
+           `<p>Type query term(s) and hit RETURN to search. </p>
             <p>Advanced usage:</p>
             <p class="search-instructions-item">
                 <code>+term</code> or <code>-term</code> to force the presence
@@ -183,9 +194,11 @@ export class EczooSearchWidget
                 interactive: true,
                 interactiveBorder: 30,
                 maxWidth: '450px',
-                popperOptions: {
-                    placement: 'bottom',
-                },
+                placement: 'bottom',
+                flip: false,
+                // popperOptions: {
+                //     placement: 'bottom',
+                // },
                 theme: 'light',
             }
         );
