@@ -7,11 +7,12 @@ $id: "https://errorcorrectionzoo.org/schemas/ecc_space"
 
 type: string
 enum:
-  - "bits"
+  - "bits" # classical
   - "q-ary_digits"
   - "matrices"
   - "rings"
-  - "qubits"
+  - "lattices"
+  - "qubits" # quantum
   - "qudits"
   - "galois"
   - "fermions"
