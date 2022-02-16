@@ -10,7 +10,6 @@ enum:
   - "bits"
   - "q-ary_digits"
   - "matrices"
-  - "modular"
   - "rings"
   - "qubits"
   - "qudits"
