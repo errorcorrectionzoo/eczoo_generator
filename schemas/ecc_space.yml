@@ -11,7 +11,9 @@ enum:
   - "q-ary_digits"
   - "matrices"
   - "rings"
+  - "points"
   - "lattices"
+  - "spheres"
   - "qubits" # quantum
   - "qudits"
   - "galois"
