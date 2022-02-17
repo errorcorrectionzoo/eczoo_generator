@@ -48,7 +48,7 @@ class Code:
         self.source_info_filename = None
 
         self.citation_info = {
-            'year': 2021 # FIXME: WHAT YEAR SHOULD WE SET?  FIND FILE/GIT MODIFICATION DATE?
+            'year': 2022 # FIXME: WHAT YEAR SHOULD WE SET?  FIND FILE/GIT MODIFICATION DATE?
         }
 
         code_id = info['code_id']
