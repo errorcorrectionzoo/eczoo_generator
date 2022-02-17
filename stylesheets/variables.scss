@@ -2,19 +2,21 @@
 // Base dimensions
 //
 
-$page-main-width: 850px;
+$page-max-width: 850px;
+$page-max-main-width: 625px;
+$page-collapse-layout-width: 600px;
 
 $page-main-margins: 15px;
 
-$page-sidebar-margin: 20px;
-$page-sidebar-width: 220px;
+// $page-home-box-margin: 20px;
+// $page-home-box-width: 220px;
 
 $page-header-bleed: 10px;
 $page-header-gap: 0px; //10px;
 
 $main-content-top-space: 1rem;
 
-$page-footer-gap: 10px;
+$page-footer-gap: 36px;
 
 
 //
@@ -60,6 +62,6 @@ $inner-heading-color: rgb(40,40,80); //lighten(desaturate($pageheader-background
 
 $discreet-border-color: rgba($text-dim-color,0.15);
 
-$sidebar-panel-background-color: rgba(245,245,255,1.0);
+$home-box-panel-background-color: rgba(245,245,255,1.0);
 
 $visual-highlight-color: rgba(255,230,70,0.8);

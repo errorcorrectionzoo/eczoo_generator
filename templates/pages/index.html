@@ -1,17 +1,23 @@
-{% set page_no_sidebar = True %}
+{% extends 'layout/base_page.html' %}
+
+{% set page_title_text = 'Home — Error Correction Zoo' %}
+{% set page_header_large_text = 'Welcome to the error correction zoo' %}
+
+
+{% set page_wide_layout = True %}
+{% set page_no_navigation = True %}
 {% set div_bodycontents_classes = ['page-index'] %}
 {% set extra_js = [ 'js/eczhomestuff.js' | prebaseurl ] %}
 
-{% extends 'layout/base_page.html' %}
+{# when displaying domains on the home page #}
+{% set max_num_codes = 3 %}
+{% set max_num_codes_later = 1 %}
 
-{% block block_page_title %}Welcome to the error correction zoo{% endblock %}
 
+{# ******************************************** #}
 {% block contents %}
 
 {% for domain in domains %}
-
-{% set max_num_codes = 3 %}
-{% set max_num_codes_later = 1 %}
 
 <nav class="page-index-box">
   <h1><a href="{{domain.htmlpage.path() | prebaseurl}}">{{domain.name}}</a></h1>
@@ -60,6 +66,7 @@
   <ul class="navlinks">
     <li><a href="{{ 'edit_code' | prebaseurl }}">Add new code</a></li>
     <li><a href="{{ 'additional_resources' | prebaseurl }}">Additional resources</a></li>
+    <li><a href="{{ 'team' | prebaseurl }}">Team</a></li>
     <li><a href="{{ 'about' | prebaseurl }}">About</a></li>
   </ul>
 </nav>
@@ -99,5 +106,5 @@
 </nav>
 
 
-
 {% endblock contents %}
+{# ******************************************** #}

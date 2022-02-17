@@ -7,7 +7,8 @@ Expected context variables:
 ################################################################################}
 
 {% if page_footnotes.footnotes or page_footnotes.citations %}
-   <div id="endnotes" class="{{divendnotesclass}}">
+  <div id="endnotes" class="{{divendnotesclass}}">
+    <h2>References</h2>
 {% if page_footnotes.footnotes %}
     <dl id="footnotes">
 {% for footnote in page_footnotes.footnotes %}
@@ -27,5 +28,5 @@ Expected context variables:
 {% endfor %}    
     </dl>
 {% endif %}
-   </div>
+  </div>
 {% endif %}

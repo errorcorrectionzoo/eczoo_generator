@@ -6,10 +6,7 @@
 {% block extra_meta %}{% endblock %}
 
   <title>
-    {% block block_page_title %}
-      {{ page_title_text if page_title_text else page_title }}
-    {% endblock %}
-    [error correction zoo]
+    {{ page_title_text }} [error correction zoo]
   </title>
 
   <!-- favicon generated with https://realfavicongenerator.net/ -->
@@ -53,9 +50,16 @@
 {% if page_app_full_width %}
   {% set div_bodycontents_classes = div_bodycontents_classes + ['app-full-width'] %}
 {% endif %}
-{% if page_no_sidebar %}
-  {% set div_bodycontents_classes = div_bodycontents_classes + ['page-no-sidebar'] %}
+{% if page_wide_layout %}
+  {% set div_bodycontents_classes = div_bodycontents_classes + ['page-wide-layout'] %}
 {% endif %}
+{% if page_no_navigation %}
+  {% set div_bodycontents_classes = div_bodycontents_classes + ['page-no-navigation'] %}
+{% endif %}
+{% if page_header_large_text %}
+  {% set div_bodycontents_classes = div_bodycontents_classes + ['page-header-has-text'] %}
+{% endif %}
+
 <div
   id="bodycontents"
   {% if div_bodycontents_classes %}
@@ -63,23 +67,39 @@
   {% endif %}
   >
 
+  {# header blue bar (no text or logo here yet) #}
+  <div id="header-bg-decoration"></div>
+
+  {# the logo with home page link #}
+  <a id="logo" href="{{ ''|prebaseurl }}"></a>
+
+  {# header element with the logo and possible large text, but not the navigation links #}
   <header id="header">
-    <h1>{{ page_title if page_title else self.block_page_title() }}</h1>
-  </header><!-- #header -->
+    {%- if page_header_large_text -%}
+      <h1>{{page_header_large_text}}</h1>
+    {%- endif -%}
+  </header>
 
   <main id="main">
 {% block contents %}
-<p style="color: #7f0000; font-size: 50px">(fill page contents here)</p>
+<p style="color: #7f0000; font-size: 50px; margin: 20px;">(fill page contents here)</p>
 {% endblock contents %}
   </main><!-- #main -->
 
-{% include 'layout/sidebar.html' %}
+{% if not page_no_navigation %}
+{% block navigation %}
+{% include 'layout/navigation.html' %}
+{% endblock navigation %}
+{% endif %}
 
+{# hide footer on code graph page #}
+{% if not page_app_full_width %}
   <footer id="footer">
     <div class="footer-stuff">
 {% include 'layout/footer.html' %}
     </div>
   </footer>
+{% endif %}
 
 </div>
 </body>

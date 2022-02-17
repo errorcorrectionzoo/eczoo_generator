@@ -1,8 +1,8 @@
 
 @mixin visual-highlight {
-    background-color: $visual-highlight-color;
+    background-color: $visual-highlight-color !important;
     box-shadow: $visual-highlight-color 0px 0px 10px;
-    //transition: background-color 0s;
+    transition: background-color 0.4s;
 }
 
 .visual-highlight {

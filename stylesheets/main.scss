@@ -91,13 +91,17 @@ dd {
 ////////////////////////////////////////////////////////////////////////////////
 
 $header-padding: 3px;
-$header-bgimage-gap: 13px;
+$header-bgimage-gap: 23px;
 $header-bgimage-width: 150px;
 $header-bgimage-width-mobile: 80px;
+$header-min-height: 80px;
+$header-min-height-mobile: 100px;
 
-#header {
+#header-bg-decoration {
     background-color: $pageheader-background-color;
     color: $pageheader-text-color;
+
+    min-height: $header-min-height;
 
     padding: $header-padding ($page-header-bleed+$header-padding);
 
@@ -105,109 +109,72 @@ $header-bgimage-width-mobile: 80px;
     margin-left: -$page-header-bleed;
     margin-right: -$page-header-bleed;
     margin-bottom: $page-header-gap;
-}
 
+    z-index: 70;
+    box-shadow: rgba(0,0,0,0.15) 5px 5px 10px;
+}
 // remove bleed for full-width pages
-#bodycontents.app-full-width  #header {
+#bodycontents.app-full-width  #header-bg-decoration {
     margin-left: 0px;
     margin-right: 0px;
     padding-left: $header-padding;
     padding-right: $header-padding;
+
+    box-shadow: none;
 }
 
+#logo, #header {
+    z-index: 80;
+
+    color: $pageheader-text-color;
+}
 
 //
-// Add logo as background-image with BETA marker
+// Logo (use background-image) -- includes BETA marker in icon
 //
-#header {
+#logo {
     background-image: url(prebaseurl('static/icons/eczoo-main-logo.svg'));
     background-repeat: no-repeat;
 
-    background-position-x: calc(100% - #{$header-padding});
+    background-position-x: 0%;
     background-position-y: center;
     background-size: $header-bgimage-width auto;
 
-    padding-right: ($header-bgimage-width + $header-padding + $header-bgimage-gap);
+    width: $header-bgimage-width;
 
-    z-index: 100;
-    box-shadow: rgba(0,0,0,0.15) 5px 5px 10px;
-}
-#bodycontents.app-full-width #header {
-    box-shadow: none;
-
-    padding-right: ($header-bgimage-width + $header-padding + $header-bgimage-gap);
+    margin-right: $header-bgimage-gap;
 }
 
-@media (max-width: $page-main-width+2*$page-main-margins) {
-#header {
+
+//
+// Collapse logo to a narrower form on narrow screens.  But only do that if
+// there is text in the header, as otherwise there is no need to save horizontal
+// space.
+//
+@media screen and (max-width: $page-collapse-layout-width) {
+#bodycontents.page-header-has-text #header-bg-decoration {
+    min-height: $header-min-height-mobile;
+}
+#bodycontents.page-header-has-text #logo {
     background-image: url(prebaseurl('static/icons/eczoo-main-logo-mobile.svg'));
+    width: $header-bgimage-width-mobile;
     background-size: $header-bgimage-width-mobile auto;
-    padding-right: ($header-bgimage-width-mobile + $header-padding + $header-bgimage-gap);
 }
 }
+
+
 
 
 
 
 ////////////////////////////////////////////////////////////////////////////////
 //
-// navigation sidebar styling
+// navigation box/links styling
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#sidebar {
-    min-width: $page-sidebar-width;
-}
+@import 'navigation.scss';
 
-
-// sidebar contents
-
-@mixin sidebar-panel-style {
-
-    //border: dotted 1px gray; /*rgba(127,0,0,0.25);*/
-    border: none 0px;
-
-    background-color: $sidebar-panel-background-color;
-    box-shadow: rgba(0,0,0,0.08) 3px 3px 6px;
-
-    padding: 5px;
-}
-
-#sidebar .sidebarbox {
-    @include sidebar-panel-style;
-
-    z-index: 90;
-}
-.app-full-width #sidebar .sidebarbox {
-    box-shadow: none;
-}
-
-
-nav h1 {
-    //font-size: 1.1rem;
-    font-size: 1rem;
-    font-weight: bold;
-    margin-bottom: 0.5em;
-}
-.navlinks {
-    list-style: none;
-    padding: 0px 0px 0px 1px;
-    margin: 0px;
-}
-.navlinks > li {
-    padding: 2px 0px;
-}
-
-
-input.navbar-search {
-    border: solid 1px rgba($text-dim-color,0.5);
-    border-radius: 3px;
-
-    padding: 6px 3px;
-    margin: 2px -3px;
-    width: 100%;
-    box-sizing: border-box;
-}
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -367,9 +334,9 @@ table.codelistpage-table {
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-.ecc-code.ecc-code-page {
-    border: none 0px;
-}
+// .ecc-code.ecc-code-page {
+//     border: none 0px;
+// }
 
 //
 // Code info page article appearance
@@ -583,6 +550,10 @@ a.code-self-edit {
 
     @include card-item;
 
+    >h2 {
+        display: none;
+    }
+
     opacity: 0.8;
 
     dt {
@@ -627,13 +598,13 @@ a.code-self-edit {
 
 
 .person-list {
-    max-width: 400px;
+    //max-width: 400px;
 }
 
 .person-list.two-columns {
-    max-width: calc(max(400px, 90%));
+    //max-width: calc(max(400px, 90%));
 }
-@media (max-width: 600px) {
+@media screen and (max-width: $page-collapse-layout-width) {
     .person-list.two-columns {
         // fall back to single column layout
         grid-template-columns: repeat(1, 1fr);
@@ -643,6 +614,7 @@ a.code-self-edit {
 
 
 .tile-person {
+    max-width: 20rem;
     .tile-person-line {
         display: block;
 

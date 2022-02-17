@@ -12,59 +12,138 @@ body {
     margin: 0px;
 }
 #bodycontents {
-    max-width: $page-main-width;
+    max-width: $page-max-width;
     padding: 0px $page-main-margins;
     margin: auto;
 }
 
 #bodycontents {
+
     display: grid;
-    grid-template-columns: 1fr 0fr;
+
+    // 3 grid columns are needed for header.
+    //
+    //   - The first column is the logo.
+    //
+    //   - The second is the space where either the large title gets placed
+    //     (e.g., home page), or the navigation links get compressed to on large
+    //     enough screens.
+    //
+    //   - The third column is used only when we show a "navigation shortcut"
+    //     link to scroll down the page to where the navigation links are.
+    //
+    grid-template-columns: 0fr 1fr 0fr;
+
     grid-template-rows: 0fr 1fr 0fr 0fr;
+
     gap: 0px;
 }
-#header {
+
+#header-bg-decoration {
     grid-column-start: 1;
+    grid-column-end: 4;
+    grid-row-start: 1;
+    grid-row-end: 2;
+}
+#logo {
+    grid-column-start: 1;
+    grid-column-end: 2;
+    grid-row-start: 1;
+    grid-row-end: 2;
+
+    z-index: 10;
+}
+#header {
+    grid-column-start: 2;
     grid-column-end: 3;
-}
-#sidebar {
-    margin-left: $page-sidebar-margin;
-    grid-row: 2;
-    grid-column: 2;
-}
-#bodycontents.app-full-width #sidebar {
-    margin-left: 0px;
-}
+    grid-row-start: 1;
+    grid-row-end: 2;
 
-#bodycontents.page-no-sidebar #sidebar {
-    display: none;
+    z-index: 10;
 }
 
 
+//
+// navigation links are by default at the bottom of the page.  On desktop sites
+// they'll get squeezed into the header bar.
+//
 
-// rules to collapse sidebar below the page
-@media (max-width: $page-main-width+2*$page-main-margins) {
-    #bodycontents:not(.app-full-width) #sidebar {
-        margin-left: 0px;
-        grid-row: 3;
-        grid-column: 1;
+#navigation {
+    grid-column-start: 1;
+    grid-column-end: 4;
+    grid-row-start: 3;
+    grid-row-end: 4;
+
+    z-index: 10;
+}
+#navigation-shortcuts {
+    grid-column-start: 3;
+    grid-column-end: 4;
+    grid-row-start: 1;
+    grid-row-end: 2;
+
+    z-index: 10;
+}
+
+// On large enough screens (desktops), squeeze the navigation links into the
+// header bar.
+@media not screen and (max-width: $page-collapse-layout-width) {
+    // cf https://stackoverflow.com/a/5771004/1694896
+
+    #navigation {
+        grid-column-start: 2;
+        grid-column-end: 3;
+        grid-row-start: 1;
+        grid-row-end: 2;
     }
+    #navigation-shortcuts {
+        display: none;
+    }
+}
 
-    // force #main to viewport width
-    #bodycontents:not(.app-full-width) #main {
+
+// rules to collapse layout for narrow screens
+@media screen and (max-width: $page-collapse-layout-width) {
+
+    // force <main> to viewport width
+    #bodycontents:not(.app-full-width) main {
         width: calc(100vw - #{2*$page-main-margins});
     }
+
 }
 
-#main {
-    grid-column: 1;
+main {
+    grid-column-start: 1;
+    grid-column-end: 4;
+    grid-row-start: 2;
+    grid-row-end: 3;
 
     margin-top: $main-content-top-space;
 }
 
-#footer {
+
+#bodycontents:not(.app-full-width):not(.page-wide-layout) {
+    main {
+        width: 100%;
+        max-width: $page-max-main-width;
+        margin: $main-content-top-space auto 0px;
+        padding: 0px;
+    }
+    footer {
+        width: 100%;
+        max-width: $page-max-main-width;
+        margin-left: auto;
+        margin-right: auto;
+        padding: 0px;
+    }
+}
+
+
+footer {
     margin-top: $page-footer-gap;
-    grid-column: 1;
+
+    grid-column-start: 1;
+    grid-column-end: 4;
     grid-row: 4;
 }
 
@@ -82,32 +161,23 @@ body {
     padding: 0px;
     margin: 0px;
 
-    #main {
+    main {
         grid-row-start: 2;
         grid-row-end: 5;
 
         margin-top: 0px;
+        margin: 0px;
     }
 
-    #footer {
-        margin-left: $page-sidebar-margin;
-        grid-column: 2;
-    }
-
-    // collapse sidebar on narrow screen
-    @media (max-width: $page-main-width) {
-        #sidebar {
-            margin-left: 0px;
-            grid-row: 3;
-            grid-column: 1;
-        }
-        #main {
+    // collapse layout on narrow screens; adjust main view height
+    @media screen and (max-width: $page-collapse-layout-width) {
+        main {
             height: 80vh;
             grid-row-end: 3;
         }
-        #footer {
-            margin-left: 0px;
-            grid-column: 1;
-        }
+        // footer {
+        //     margin-left: 0px;
+        //     grid-column: 1;
+        // }
     }
 }
