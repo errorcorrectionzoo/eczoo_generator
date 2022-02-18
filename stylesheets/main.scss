@@ -45,16 +45,16 @@ h1 {
     font-weight: 350;
     line-height: 1.6em;
 
-    margin-top: 1em;
-    margin-bottom: 0.25em;
+    // default heading margins
+    margin: 0.7em 0px 0.7em 0pxn;
 }
 h2 {
     font-size: 20px;
     font-weight: 550;
     line-height: 1.6em;
 
-    margin-top: 1em;
-    margin-bottom: 0.25em;
+    // default heading margins
+    margin: 0.7em 0px 0.7em 0pxn;
 }
 
 p, ul, ol {
@@ -133,6 +133,15 @@ $header-min-height-mobile: 100px;
     z-index: 80;
 
     color: $pageheader-text-color;
+}
+#header {
+    display: flex;
+
+    padding: 10px 0px;
+
+    > h1 {
+        margin: auto 0px;
+    }
 }
 
 //
