@@ -3,87 +3,129 @@
 // DON'T EDIT THIS FILE UNLESS YOU KNOW WHAT YOU ARE DOING OR ELSE YOU'RE
 // LOOKING FOR TROUBLE !
 
-html, 
-body {
-    width: 100%;
-    height: 100%;
-    font-size: 100%;
-    padding: 0px;
-    margin: 0px;
-}
-#bodycontents {
-    max-width: $page-max-width;
-    padding: 0px $page-main-margins;
-    margin: auto;
-}
 
-#bodycontents {
 
-    display: grid;
+@media screen {
 
-    // 3 grid columns are needed for header.
+    html, 
+    body {
+        width: 100%;
+        height: 100%;
+        font-size: 100%;
+        padding: 0px;
+        margin: 0px;
+    }
+    #bodycontents {
+        max-width: $page-max-width;
+        padding: 0px $page-main-margins;
+        margin: auto;
+    }
+
+    #bodycontents {
+
+        display: grid;
+
+        // 3 grid columns are needed for header.
+        //
+        //   - The first column is the logo.
+        //
+        //   - The second is the space where either the large title gets placed
+        //     (e.g., home page), or the navigation links get compressed to on large
+        //     enough screens.
+        //
+        //   - The third column is used only when we show a "navigation shortcut"
+        //     link to scroll down the page to where the navigation links are.
+        //
+        grid-template-columns: 0fr 1fr 0fr;
+
+        grid-template-rows: 0fr 1fr 0fr 0fr;
+
+        gap: 0px;
+    }
+
+    #header-bg-decoration {
+        grid-column-start: 1;
+        grid-column-end: 4;
+        grid-row-start: 1;
+        grid-row-end: 2;
+    }
+    #logo {
+        grid-column-start: 1;
+        grid-column-end: 2;
+        grid-row-start: 1;
+        grid-row-end: 2;
+
+        z-index: 10;
+    }
+    #header {
+        grid-column-start: 2;
+        grid-column-end: 3;
+        grid-row-start: 1;
+        grid-row-end: 2;
+
+        z-index: 10;
+    }
+
+
     //
-    //   - The first column is the logo.
+    // navigation links are by default at the bottom of the page.  On desktop sites
+    // they'll get squeezed into the header bar.
     //
-    //   - The second is the space where either the large title gets placed
-    //     (e.g., home page), or the navigation links get compressed to on large
-    //     enough screens.
-    //
-    //   - The third column is used only when we show a "navigation shortcut"
-    //     link to scroll down the page to where the navigation links are.
-    //
-    grid-template-columns: 0fr 1fr 0fr;
 
-    grid-template-rows: 0fr 1fr 0fr 0fr;
+    #navigation {
+        grid-column-start: 1;
+        grid-column-end: 4;
+        grid-row-start: 3;
+        grid-row-end: 4;
 
-    gap: 0px;
-}
+        z-index: 10;
+    }
+    #navigation-shortcuts {
+        grid-column-start: 3;
+        grid-column-end: 4;
+        grid-row-start: 1;
+        grid-row-end: 2;
 
-#header-bg-decoration {
-    grid-column-start: 1;
-    grid-column-end: 4;
-    grid-row-start: 1;
-    grid-row-end: 2;
-}
-#logo {
-    grid-column-start: 1;
-    grid-column-end: 2;
-    grid-row-start: 1;
-    grid-row-end: 2;
-
-    z-index: 10;
-}
-#header {
-    grid-column-start: 2;
-    grid-column-end: 3;
-    grid-row-start: 1;
-    grid-row-end: 2;
-
-    z-index: 10;
-}
+        z-index: 10;
+    }
 
 
-//
-// navigation links are by default at the bottom of the page.  On desktop sites
-// they'll get squeezed into the header bar.
-//
+    main {
+        grid-column-start: 1;
+        grid-column-end: 4;
+        grid-row-start: 2;
+        grid-row-end: 3;
 
-#navigation {
-    grid-column-start: 1;
-    grid-column-end: 4;
-    grid-row-start: 3;
-    grid-row-end: 4;
+        margin-top: $main-content-top-space;
+    }
 
-    z-index: 10;
-}
-#navigation-shortcuts {
-    grid-column-start: 3;
-    grid-column-end: 4;
-    grid-row-start: 1;
-    grid-row-end: 2;
+    #bodycontents:not(.app-full-width):not(.page-wide-layout) {
+        main {
+            width: 100%;
+            max-width: $page-max-main-width;
+            margin: $main-content-top-space auto 0px;
+            padding: 0px;
+        }
+        footer {
+            width: 100%;
+            max-width: $page-max-main-width;
+            margin-left: auto;
+            margin-right: auto;
+            padding: 0px;
+        }
+    }
 
-    z-index: 10;
-}
+    footer {
+        margin-top: $page-footer-gap;
+
+        grid-column-start: 1;
+        grid-column-end: 4;
+        grid-row: 4;
+    }
+
+} // @media screen
+
+
 
 // On large enough screens (desktops), squeeze the navigation links into the
 // header bar.
@@ -112,61 +154,26 @@ body {
 
 }
 
-main {
-    grid-column-start: 1;
-    grid-column-end: 4;
-    grid-row-start: 2;
-    grid-row-end: 3;
-
-    margin-top: $main-content-top-space;
-}
-
-
-#bodycontents:not(.app-full-width):not(.page-wide-layout) {
-    main {
-        width: 100%;
-        max-width: $page-max-main-width;
-        margin: $main-content-top-space auto 0px;
-        padding: 0px;
-    }
-    footer {
-        width: 100%;
-        max-width: $page-max-main-width;
-        margin-left: auto;
-        margin-right: auto;
-        padding: 0px;
-    }
-}
-
-
-footer {
-    margin-top: $page-footer-gap;
-
-    grid-column-start: 1;
-    grid-column-end: 4;
-    grid-row: 4;
-}
-
-
-
 //
 // Version of the page for space-sensitive apps (e.g., code graph)
 //
 #bodycontents.app-full-width
 {
-    max-width: 100vw;
-    width: 100vw;
-    height: 100vh;
+    @media screen {
+        max-width: 100vw;
+        width: 100vw;
+        height: 100vh;
 
-    padding: 0px;
-    margin: 0px;
-
-    main {
-        grid-row-start: 2;
-        grid-row-end: 5;
-
-        margin-top: 0px;
+        padding: 0px;
         margin: 0px;
+
+        main {
+            grid-row-start: 2;
+            grid-row-end: 5;
+
+            margin-top: 0px;
+            margin: 0px;
+        }
     }
 
     // collapse layout on narrow screens; adjust main view height
@@ -175,9 +182,5 @@ footer {
             height: 80vh;
             grid-row-end: 3;
         }
-        // footer {
-        //     margin-left: 0px;
-        //     grid-column: 1;
-        // }
     }
 }

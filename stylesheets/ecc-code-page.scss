@@ -40,13 +40,15 @@ article.ecc-code-page {
         display: none;
     }
 
-    >div.sectioncontent.code-name {
-        grid-column-end: 2;
-    }
-    >div.sectioncontent.info-popup-button-container {
-        margin-top: 0px;
-        grid-column-start: 2;
-        grid-row-start: 1;
+    @media screen {
+        >div.sectioncontent.code-name {
+            grid-column-end: 2;
+        }
+        >div.sectioncontent.info-popup-button-container {
+            margin-top: 0px;
+            grid-column-start: 2;
+            grid-row-start: 1;
+        }
     }
 
     // style appearance:
