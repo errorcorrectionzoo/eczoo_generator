@@ -77,9 +77,10 @@ article.ecc-code-page {
         margin: 0px 10px 0px 0px;
         display: inline-block;
 
-        .code-introduced .cite {
+        .code-introduced {
+            // make citation not too large
+            font-size: 1.5rem;
             font-weight: normal;
-            font-size: 1rem;
         }
     }
 

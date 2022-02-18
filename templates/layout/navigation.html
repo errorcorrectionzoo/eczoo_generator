@@ -1,30 +1,12 @@
-
   <nav id="navigation">
-    <!--<div class="sidebarbox">-->
-      <!--<h1>Pages</h1>-->
-      <ul class="navlinks">
-        <li><a href="{{ '' | prebaseurl }}">Home</a></li>
-        <li><a href="{{ 'code_graph' | prebaseurl }}">Code graph</a></li>
-        <li><a href="{{ 'lists' | prebaseurl }}">Code lists</a></li>
-        <li><a href="{{ 'search' | prebaseurl }}">Search</a></li>
-      </ul>
-{% for domain in domains %}
-      <h1><a href="{{domain.htmlpage.path() | prebaseurl}}">{{domain.name}}</a></h1>
-      <ul class="navlinks">
-        {% for kingdom in domain.kingdoms %}
-        <li><a href="{{ kingdom.htmlpage.path() | prebaseurl }}">{{kingdom.name}}</a></li>
-        {% endfor %}
-      </ul>
-{% endfor %}
-      <h1>More</h1>
-      <ul class="navlinks">
-        <li><a href="{{ 'edit_code' | prebaseurl }}">Add new code</a></li>
-        <!--<li><a href="{{ 'additional_resources' | prebaseurl }}">Additional resources</a></li>-->
-        <li><a href="{{ 'team' | prebaseurl }}">Team</a></li>
-        <li><a href="{{ 'about' | prebaseurl }}">About</a></li>
-      </ul>
-  </nav><!-- #navigation -->
 
+{% if code %}
+{%- include 'pieces/navigation_links_codepage.html' -%}
+{% else %}
+{%- include 'pieces/navigation_links_default.html' -%}
+{% endif %}
+
+  </nav><!-- #navigation -->
 
   <nav id="navigation-shortcuts">
     <a href="#navigation" id="nav-shortcut-to-navigation-links">&#8801;</a>

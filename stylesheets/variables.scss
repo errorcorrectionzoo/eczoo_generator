@@ -34,9 +34,12 @@ $base-font-size: 16px;
 
 $small-font-size: 0.9rem;
 
-$endnote-superscript-font-size: 0.8rem;
+// "em" instead of "rem" e.g. for citation marks in headings
+$endnote-superscript-font-size: 0.8em;
 
 $tiny-fine-print-font-size: 0.8rem;
+
+$pageheader-navigation-font-size: 0.95rem;
 
 
 $parskip-half-length: 0.5em;
@@ -50,6 +53,10 @@ $inner-parskip-half-length: 0.3em;
 // page header
 $pageheader-background-color: rgb(0,0,127);
 $pageheader-text-color: rgba(255,255,255,0.9);
+
+$pageheader-navigation-text-color: rgb(255, 194, 164);
+$pageheader-navigation-links-color: rgb(255, 194, 164);
+$pageheader-navigation-links-highlight-color: lighten($pageheader-navigation-links-color, 5%);
 
 // page contents
 
