@@ -546,6 +546,7 @@ class HtmlPageCollection:
 
         self.jinja2env.filters['code_ref'] = self._jfilter_code_ref
         self.jinja2env.filters['code_ref_href'] = self._jfilter_code_ref_href
+        self.jinja2env.filters['short_code_ref'] = self._jfilter_short_code_ref
         self.jinja2env.filters['format_footnote_label_html'] = \
             lambda foot_no: markupsafe.Markup( self.format_footnote_label_html(foot_no) )
         self.jinja2env.filters['format_citation_label_html'] = \
@@ -654,18 +655,23 @@ class HtmlPageCollection:
 
 
     def _jfilter_code_ref(self, code):
-        # need str(code.code_id) since for now we brutally wrap all the entire
-        # code object into an _HtmlObjectWrapper instance
-        code_href = self.get_code_href( str(code.code_id) )
+        code_href = self.get_code_href( code.code_id )
         page_url_html = markupsafe.escape(code_href)
         code_name_html = markupsafe.escape(code.name)
         return markupsafe.Markup(
             f'''<a href="{page_url_html}">{code_name_html}</a>'''
         )
+
     def _jfilter_code_ref_href(self, code):
-        # need str(code.code_id) since for now we brutally wrap all the entire
-        # code object into an _HtmlObjectWrapper instance
-        return self.get_code_href( str(code.code_id) )
+        return self.get_code_href( code.code_id )
+
+    def _jfilter_short_code_ref(self, code):
+        code_href = self.get_code_href( code.code_id )
+        page_url_html = markupsafe.escape(code_href)
+        code_short_name_html = markupsafe.escape(code.short_name())
+        return markupsafe.Markup(
+            f'''<a href="{page_url_html}">{code_short_name_html}</a>'''
+        )
 
     def update_global_context(self, d):
         self.global_context.update(d)

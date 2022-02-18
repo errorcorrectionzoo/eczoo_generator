@@ -73,6 +73,8 @@ class Code:
         self.family_generation_level = None
         self.family_root_code = None
 
+    def short_name(self):
+        return self.getfield('short_name', self.name)
 
     def __getitem__(self, key):
         return self.schemadata[key]

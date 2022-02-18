@@ -4,13 +4,13 @@
 {%- for reltype in ['parents', 'parent_of', 'cousins', 'cousin_of'] -%}
   {% set max_rel = 3 if reltype in ['parents', 'parent_of'] else 2 %}
   {%- for rel in code.relations[reltype][:max_rel] -%}
-    <li>{{ rel.code|code_ref }}</li>
+    <li>{{ rel.code|short_code_ref }}</li>
     {%- if reltype == 'parents' and rel.code and loop.index0 == 0 -%}
       {#- climb up the direct parent hierarchy (first parents only) a couple levels -#}
       {%- if rel.code.relations.parents -%}
-        <li>{{ rel.code.relations.parents[0].code|code_ref }}</li>
+        <li>{{ rel.code.relations.parents[0].code|short_code_ref }}</li>
         {%- if rel.code.relations.parents[0].code.relations.parents -%}
-          <li>{{ rel.code.relations.parents[0].code.relations.parents[0].code|code_ref }}</li>
+          <li>{{ rel.code.relations.parents[0].code.relations.parents[0].code|short_code_ref }}</li>
         {%- endif -%}
       {%- endif -%}
     {%- endif -%}
