@@ -1,6 +1,7 @@
 import os
 import os.path
 import re
+import json
 
 import logging
 logger = logging.getLogger(__name__)
@@ -558,6 +559,8 @@ class HtmlPageCollection:
 
         self.jinja2env.filters['to_html_with_notes'] = self._jfilter_to_html_with_notes
 
+        self.jinja2env.filters['to_json'] = self._jfilter_to_json
+
         # # access raw minilatex code on objects wrapped as _HtmlObjectWrapper
         # self.jinja2env.filters['raw_minilatex_code'] = \
         #     lambda wrapperobj: wrapperobj.obj
@@ -672,6 +675,9 @@ class HtmlPageCollection:
         return markupsafe.Markup(
             f'''<a href="{page_url_html}">{code_short_name_html}</a>'''
         )
+
+    def _jfilter_to_json(self, obj):
+        return json.dumps(obj)
 
     def update_global_context(self, d):
         self.global_context.update(d)
