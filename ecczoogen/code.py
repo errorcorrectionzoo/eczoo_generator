@@ -3,7 +3,7 @@ logger = logging.getLogger(__name__)
 
 
 from .schemadata import SchemaData
-
+from minilatextohtml import MiniLatex
 
 
 
@@ -74,7 +74,14 @@ class Code:
         self.family_root_code = None
 
     def short_name(self):
-        return self.getfield('short_name', self.name)
+        if 'short_name' in self.schemadata:
+            return self.schemadata['short_name']
+        name = self.name
+        if name.minilatex.endswith(" code"):
+            return MiniLatex( name.minilatex[:-len(" code")],
+                              what=f"{name.what} (short)",
+                              resource_parent=name.resource_parent )
+        return name
 
     def __getitem__(self, key):
         return self.schemadata[key]

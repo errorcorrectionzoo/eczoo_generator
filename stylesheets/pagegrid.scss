@@ -1,8 +1,10 @@
+//
 // Basic page layout
+//
 
-// DON'T EDIT THIS FILE UNLESS YOU KNOW WHAT YOU ARE DOING OR ELSE YOU'RE
-// LOOKING FOR TROUBLE !
-
+//
+// CAREFUL IF YOU EDIT THIS FILE.  EDITS CAN BREAK PAGE LAYOUTS UNEXPECTEDLY.
+//
 
 
 @media screen {
@@ -129,7 +131,7 @@
 
 // On large enough screens (desktops), squeeze the navigation links into the
 // header bar.
-@media not screen and (max-width: $page-collapse-layout-width) {
+@media screen and (min-width: $page-collapse-layout-width) {
     // cf https://stackoverflow.com/a/5771004/1694896
 
     #navigation {
@@ -144,14 +146,14 @@
 }
 
 
+//
 // rules to collapse layout for narrow screens
+//
+// force <main> to viewport width
 @media screen and (max-width: $page-collapse-layout-width) {
-
-    // force <main> to viewport width
     #bodycontents:not(.app-full-width) main {
         width: calc(100vw - #{2*$page-main-margins});
     }
-
 }
 
 //

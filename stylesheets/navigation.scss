@@ -1,12 +1,4 @@
 
-@mixin navigation-panel-style {
-    border: none 0px;
-    background-color: $home-box-panel-background-color;
-    box-shadow: rgba(0,0,0,0.08) 3px 3px 6px;
-    padding: 5px;
-}
-
-
 #navigation {
     z-index: 200;
 }
@@ -60,9 +52,13 @@ input.navbar-search {
 //
 // Styling of navigation box at bottom of the page (mobile or narrow screen)
 //
-@media screen and (max-width: $page-collapse-layout-width) {
+@media screen { //and (max-width: $page-collapse-layout-width) {
     #navigation {
-        @include navigation-panel-style;
+        border: none 0px;
+        background-color: $home-box-panel-background-color;
+        //box-shadow: rgba(0,0,0,0.08) 3px 3px 6px;
+        margin-top: 1rem;
+        padding: 5px;
 
         a {
             display: block;
@@ -81,12 +77,16 @@ input.navbar-search {
 //
 // Styling of navigation links when they are embedded in the main header
 //
-@media not screen and (max-width: $page-collapse-layout-width) {
+@media screen and (min-width: $page-collapse-layout-width) {
     #navigation {
         color: $pageheader-navigation-text-color;
         margin: auto 0px auto 0px;
         font-size: $pageheader-navigation-font-size;
         line-height: 1.2;
+
+        border: 0px;
+        box-shadow: none;
+        background-color: transparent;
 
         padding: 12px 12px 12px 0px;
 
@@ -121,6 +121,15 @@ input.navbar-search {
             }
         }
 
+        // cancel any properties set by the global "@media screen" rule for
+        // narrow screens
+        a {
+            display: inline;
+            padding: 0px;
+            margin: 0px;
+            background-color: transparent;
+            border: none 0px;
+        }
         a, a:link, a:visited {
             color: $pageheader-navigation-links-color;
         }

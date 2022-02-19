@@ -1,19 +1,25 @@
-{# Navigation links to use on code pages #}
-<!--<h1>Related</h1>-->
+{#- Navigation links to use on code pages -#}
+<!-- <h1>Related codes</h1> -->
+{#- -#}
 <ul class="navlinks">
 {%- for reltype in ['parents', 'parent_of', 'cousins', 'cousin_of'] -%}
-  {% set max_rel = 3 if reltype in ['parents', 'parent_of'] else 2 %}
+  {% set max_rel = 4 if reltype in ['parents', 'parent_of'] else 3 %}
   {%- for rel in code.relations[reltype][:max_rel] -%}
-    <li>{{ rel.code|short_code_ref }}</li>
-    {%- if reltype == 'parents' and rel.code and loop.index0 == 0 -%}
-      {#- climb up the direct parent hierarchy (first parents only) a couple levels -#}
-      {%- if rel.code.relations.parents -%}
-        <li>{{ rel.code.relations.parents[0].code|short_code_ref }}</li>
-        {%- if rel.code.relations.parents[0].code.relations.parents -%}
-          <li>{{ rel.code.relations.parents[0].code.relations.parents[0].code|short_code_ref }}</li>
+    {#- {%- if reltype == 'parents' and loop.index0 == 0 -%}
+      { #- very first code in the listing --- use longer name -# }
+      <li>{{ rel.code|code_ref }}</li>
+    {%- else -%} -#}
+      <li>{{ rel.code|short_code_ref }}</li>
+      {%- if reltype == 'parents' and rel.code and loop.index0 == 0 -%}
+        {#- climb up the direct parent hierarchy (first parents only) a couple levels -#}
+        {%- if rel.code.relations.parents -%}
+          <li>{{ rel.code.relations.parents[0].code|short_code_ref }}</li>
+          {%- if rel.code.relations.parents[0].code.relations.parents -%}
+            <li>{{ rel.code.relations.parents[0].code.relations.parents[0].code|short_code_ref }}</li>
+          {%- endif -%}
         {%- endif -%}
       {%- endif -%}
-    {%- endif -%}
+    {#- {%- endif -%} -#}
   {%- endfor -%}
 {%- endfor -%}
 </ul>
@@ -21,7 +27,7 @@
 {%- for domain in domains -%}
   <h1><a href="{{domain.htmlpage.path() | prebaseurl}}">{{domain.name}}</a></h1>
 {%- endfor -%}
-{##################}
+{#-##############-#}
 <h1></h1>{#- use empty <h1> for new section in navigation header links -#}
 {#- -#}
 <ul class="navlinks">

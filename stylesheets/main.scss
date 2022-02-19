@@ -161,15 +161,6 @@ $header-min-height-mobile: 100px;
 }
 
 
-@media print {
-    #logo {
-        // make logo appear in print
-        -webkit-print-color-adjust: exact !important; // Chrome, Safari
-        color-adjust: exact !important;  // Firefox
-    }
-}
-
-
 //
 // Collapse logo to a narrower form on narrow screens.  But only do that if
 // there is text in the header, as otherwise there is no need to save horizontal
@@ -210,7 +201,7 @@ $header-min-height-mobile: 100px;
 #footer {
     font-style: italic;
     font-size: $tiny-fine-print-font-size;
-    font-color: $text-dim-color;
+    //color: $text-dim-color;
     padding: 4px;
 
     margin-bottom: 20px;

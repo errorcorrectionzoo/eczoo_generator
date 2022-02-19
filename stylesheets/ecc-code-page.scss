@@ -51,6 +51,12 @@ article.ecc-code-page {
         }
     }
 
+    @media screen {
+        .display-print-citation {
+            display: none !important;
+        }
+    }
+
     // style appearance:
 
     h2 {

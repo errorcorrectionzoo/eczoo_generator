@@ -15,6 +15,16 @@ Expected context variables:
      dd -> div class="sectioncontent"
   -->
 
+{%- macro code_text_citation(code) -%}
+  “{{code.name|minilatex}}”, The Error Correction Zoo (V. V. Albert & P. Faist, eds.), {{code.citation_info.year}}. https://errorcorrectionzoo.org{{code|code_ref_href}}
+{%- endmacro -%}
+
+{%- macro code_edit_github_url(code) -%}
+  https://github.com/errorcorrectionzoo/eczoo_data/tree/main/codes/{{code.source_info_filename}}
+{%- endmacro -%}
+
+
+
 <article class="ecc-code-page info-popup-button-zone" id="ecc_{{code.code_id}}">
 
 <!--<h2></h2>-->
@@ -158,7 +168,7 @@ Expected context variables:
     #}<p><a class="code-link-with-icon code-show-github"
        target="_blank"
        title="Edit code information directly on github.com"
-       href="https://github.com/errorcorrectionzoo/eczoo_data/tree/main/codes/{{code.source_info_filename}}">on github.com (edit &amp; pull request)</a></p>{#
+       href="{{ code_edit_github_url(code) }}">on github.com (edit &amp; pull request)</a></p>{#
     #}<p><a class="code-link-with-icon code-self-edit"
        target="_blank"
        title="edit code information on this site without using github"
@@ -171,7 +181,7 @@ Expected context variables:
      data-popup-button-class-list="code-show-citation">
   <dl class="show-citation">
     <dt>Cite as:</dt>
-    <dd>“{{code.name|minilatex}}”, The Error Correction Zoo (V. V. Albert & P. Faist, eds.), {{code.citation_info.year}}. https://errorcorrectionzoo.org{{code|code_ref_href}}</dd>
+    <dd>{{ code_text_citation(code) }}</dd>
     <dt>BibTeX:</dt>
     <dd class="bibtex">{#
 #}@incollection{{ '{' }}eczoo_{{code.code_id}},
@@ -195,6 +205,22 @@ url={{'{'}}https://errorcorrectionzoo.org{{code|code_ref_href}}{{'}'}}
 
 {% set divendnotesclass="sectioncontent" %}
 {% include 'pieces/endnotes.html' %}
+
+
+
+<!-- "Cite As" citation, for paper printouts -->
+
+<h2 class="display-print-citation">
+  Cite as:
+</h2>
+<div class="sectioncontent display-print-citation">
+  <p>{{- code_text_citation(code) -}}</p>
+
+  <p>Github: <a href="{{ code_edit_github_url(code) }}"
+                class="ashowurl"
+                target="_blank">{{ code_edit_github_url(code) }}</a>.</p>
+</div>
+
 
 
 </article>
