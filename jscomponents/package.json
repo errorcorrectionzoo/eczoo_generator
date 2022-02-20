@@ -13,6 +13,7 @@
     "@popperjs/core": "^2.11.0",
     "@uiw/react-codemirror": "^4.4.3",
     "core-js": "3",
+    "js-yaml": "^4.1.0",
     "lunr": "^2.3.9",
     "raw-loader": "^4.0.2",
     "react": "^17.0.2",
@@ -24,7 +25,7 @@
     "sass": "^1.44.0",
     "style-loader": "^3.3.1",
     "tippy.js": "^6.3.7",
-    "yaml": "^2.0.0-9"
+    "yaml": "^2.0.0-10"
   },
   "scripts": {
     "webpack-dev-server": "webpack-dev-server --mode development",

@@ -1,6 +1,11 @@
 import React from 'react';
 
+// use yaml library for exporting cause I figured out how to tweak the options
+// in the way we like them.  But its parser seems to fail on some of our codes,
+// e.g., it doesn't seem it can parse multi-line strings.
 import YAML from 'yaml';
+
+import jsyaml from 'js-yaml';
 
 
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
@@ -165,8 +170,8 @@ export default class EczEditCodeApp extends React.Component
 
 
     _confirm_clear() {
+        console.log("Confirm discarding data? ", this.state.code_data);
         if ( this.state.code_data && Object.keys(this.state.code_data).length ) {
-            console.log("Confirm discarding data? ", this.state.code_data);
             if (!window.confirm("Current data fields will be lost. Continue?")) {
                 return false;
             }
@@ -197,10 +202,10 @@ export default class EczEditCodeApp extends React.Component
 
         let code_data = {};
         try {
-            code_data = YAML.parse( yaml_text );
+            code_data = jsyaml.load( yaml_text );
             console.log("parsed YAML data to object: ", code_data);
         } catch (exc) {
-            alert("Error parsing YAML file: " + exc);
+            alert("Error parsing YAML file!\n\n" + exc);
             return;
         }
 

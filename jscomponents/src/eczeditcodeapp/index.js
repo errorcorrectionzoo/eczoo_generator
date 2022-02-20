@@ -1,7 +1,8 @@
 import React from "react";
 import ReactDOM from "react-dom";
 
-import YAML from 'yaml';
+//import YAML from 'yaml'; // yaml fails to parse multi-line strings !?
+import jsyaml from 'js-yaml';
 
 import EczSchemaRefResolver from '../eczschemarefresolver';
 
@@ -45,7 +46,7 @@ class EczEditCodeAppInstaller {
                 async (response) => {
                     const response_data = await response.text();
                     try {
-                        _this.code_data = YAML.parse( response_data );
+                        _this.code_data = jsyaml.load( response_data );
                     } catch (e) {
                         console.log("Error in YAML source file.", response_data);
                         console.log(e);
@@ -71,8 +72,10 @@ class EczEditCodeAppInstaller {
         } else {
 
             // prepare empty data structure
-            this.code_data = {
-                code_id: code_id
+            if (code_id) {
+                this.code_data = { code_id: code_id };
+            } else {
+                this.code_data = { };
             }
 
         }
@@ -87,10 +90,11 @@ class EczEditCodeAppInstaller {
         // Render the app
         //
         ReactDOM.render(
-            <EczEditCodeApp code_id={this.code_id}
-                            code_yml_basename={(this.code_yml_filename||'').split('/').pop()}
-                            code_schema={this.code_schema}
-                            code_data={this.code_data} />,
+            <EczEditCodeApp
+                code_id={this.code_id}
+                code_yml_basename={(this.code_yml_filename||'').split('/').pop()}
+                code_schema={this.code_schema}
+                code_data={this.code_data} />,
             this.root_element
         );
     }
