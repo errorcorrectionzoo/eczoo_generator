@@ -513,7 +513,7 @@ os.makedirs(os.path.join(Dirs.output_dir, output_js_prefix), exist_ok=True)
 
 root_js_list = [
     ('misc.js', 'misc.js'),
-    ('edit_code.js', 'edit_code.js'),
+    #('edit_code.js', 'edit_code.js'),
     ('mathjaxinit.js', 'mathjaxinit.js'),
 ]
 
