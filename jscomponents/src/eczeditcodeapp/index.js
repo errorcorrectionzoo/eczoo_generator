@@ -44,7 +44,21 @@ class EczEditCodeAppInstaller {
             this.fetch_code_data_promise = fetch(fetch_codeyml_url).then(
                 async (response) => {
                     const response_data = await response.text();
-                    _this.code_data = YAML.parse( response_data );
+                    try {
+                        _this.code_data = YAML.parse( response_data );
+                    } catch (e) {
+                        console.log("Error in YAML source file.", response_data);
+                        console.log(e);
+                        alert(
+                            "Sorry! There is an error in the source YAML file.  Please "
+                           +"report this issue to us. You could file an issue on our "
+                           +"github repo at "
+                           +"https://github.com/errorcorrectionzoo/eczoo_data/issues .\n\n"
+                           +e
+                        );
+                        _this.code_yml_filename = null;
+                        _this.code_data = {};
+                    }
                     console.log("Got code data."); // -> ", _this.code_data);
                 }
             );
