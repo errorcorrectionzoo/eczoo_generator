@@ -23,6 +23,13 @@ Expected context variables:
   https://github.com/errorcorrectionzoo/eczoo_data/tree/main/codes/{{code.source_info_filename}}
 {%- endmacro -%}
 
+{%- macro code_edit_onsite_url(code) -%}
+  {{ ( 'edit_code.html?code_id='
+       + (code.code_id | urlencode)
+       + '&code_yml_filename='
+       + (code.source_info_filename | urlencode) ) | prebaseurl }}
+{%- endmacro -%}
+
 
 
 <article class="ecc-code-page info-popup-button-zone" id="ecc_{{code.code_id}}">
@@ -172,7 +179,7 @@ Expected context variables:
     #}<p><a class="code-link-with-icon code-self-edit"
        target="_blank"
        title="edit code information on this site without using github"
-       href="{{ ('edit_code?code_id='+code.code_id) | prebaseurl }}">edit on this site</a></p>{#
+       href="{{ code_edit_onsite_url(code) }}">edit on this site</a></p>{#
     #}<p class="zoo-code-id">Zoo Code ID: <code>{{code.code_id}}</code>{#
   #}</div>{#
 #}<div class="code-popup-info-frame"

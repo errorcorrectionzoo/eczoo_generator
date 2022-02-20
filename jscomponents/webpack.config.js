@@ -326,6 +326,11 @@ const EczEditCodeApp = {
                     // Compiles Sass to CSS
                     'sass-loader'
                 ]
+            },
+            {
+                test: /\.(md)$/,
+                exclude: /(node_modules|bower_components)/,
+                loader: "raw-loader"
             }
         ]
     },

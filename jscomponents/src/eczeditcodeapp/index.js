@@ -17,7 +17,7 @@ class EczEditCodeAppInstaller {
         let _this = this;
 
         this.root_element = root_element;
-        this.code_id = code_id;
+        this.code_id = code_id || '';
         this.code_yml_filename = code_yml_filename;
 
         this.schema_resolver = new EczSchemaRefResolver();
@@ -26,7 +26,7 @@ class EczEditCodeAppInstaller {
         this.resolve_ecc_schema_promise =
             this.schema_resolver.resolve('/schemas/ecc')
             .then( (schema) => {
-                console.log("resolved ecc schema: ", schema);
+                console.log("resolved ecc schema."); //: ", schema);
                 _this.code_schema = schema;
             } );
         
@@ -45,7 +45,7 @@ class EczEditCodeAppInstaller {
                 async (response) => {
                     const response_data = await response.text();
                     _this.code_data = YAML.parse( response_data );
-                    console.log("Got code data -> ", _this.code_data);
+                    console.log("Got code data."); // -> ", _this.code_data);
                 }
             );
 
@@ -74,6 +74,7 @@ class EczEditCodeAppInstaller {
         //
         ReactDOM.render(
             <EczEditCodeApp code_id={this.code_id}
+                            code_yml_basename={(this.code_yml_filename||'').split('/').pop()}
                             code_schema={this.code_schema}
                             code_data={this.code_data} />,
             this.root_element

@@ -8,12 +8,15 @@
 
 #main {
     display: grid;
-    grid-template-columns: 900px 1fr;
+    grid-template-columns: 1fr min-contents;
     gap: 0px;
 }
 
 .EczEditCodeApp_main_pane {
-    padding-left: 2rem;
+    grid-row: 1;
+    grid-column: 1;
+
+    padding-left: 3rem;
     margin-left: 0px;
 
     padding-right: 2rem;
@@ -21,13 +24,77 @@
 
     overflow: auto;
 }
-.EczEditCodeApp_helpers {
+
+
+.EczEditCodeAppSidebar {
+    grid-row: 1;
+    grid-column: 2;
+
+    width: calc( max(400px, min(550px,45vw)) );
+    &.collapsed {
+        width: 25px;
+        .sidebar-contents { display: none; }
+    }
+
     background-color: rgba(red, 0.2);
+
+    overflow: auto;
+
+    .help_text {
+        font-size: $small-font-size;
+
+        padding: 0rem 1rem 1rem;
+
+        h1 {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+        h2 {
+            font-size: 1.0rem;
+            font-weight: bold;
+        }
+        ul {
+            padding-left: 2rem;
+        }
+        pre {
+            overflow-x: auto;
+        }
+    }
+}
+
+
+.EczEditCodeApp_bottombar {
+    grid-row: 2;
+    grid-column-start: 1;
+    grid-column-end: 3;
+
+    background-color: darkgreen;
+    color: white;
+    a, a:link, a:visited { color: rgb(200,220,255); }
+    a:hover, a:active { color: white; }
+
+    padding: 8px;
+
+    display: flex;
+
+    .spacer {
+        flex: auto;
+    }
+
+    button {
+        min-height: 30px;
+        font-size: 1.1rem;
+        margin-right: 1rem;
+    }
+
+    .no-display {
+        display: none;
+    }
 }
 
 
 .EczEditSchemaField {
-    margin: 1rem 0px 1rem 3rem;
+    margin: 1rem 0px 1rem 0px;
 
     .EczEditSchemaField_fieldname {
         font-weight: bold;
@@ -43,6 +110,20 @@
         color: rgba(darkgreen,0.8);
     }
 
+
+    .array_item {
+        > button {
+            float: left;
+            //margin-left: -3em;
+        }
+
+        > .EczEditSchemaField {
+            margin-left: 4rem;
+        }
+    }
+
+
+
     input, textarea, select {
         width: 100%;
         max-width: 100%;
@@ -55,7 +136,12 @@
     //     height: 10em;
     // }
 
+    .cm-content {
+        font-size: 14px;
+        font-family: "Menlo", "DejaVu Sans Mono", "Droid Mono", monospace;
+    }
 }
+
 
 
 //
