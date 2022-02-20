@@ -24,7 +24,7 @@ Expected context variables:
 {%- endmacro -%}
 
 {%- macro code_edit_onsite_url(code) -%}
-  {{ ( 'edit_code.html?code_id='
+  {{ ( 'edit_code?code_id='
        + (code.code_id | urlencode)
        + '&code_yml_filename='
        + (code.source_info_filename | urlencode) ) | prebaseurl }}
