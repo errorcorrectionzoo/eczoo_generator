@@ -56,8 +56,21 @@
         ul {
             padding-left: 2rem;
         }
+        code {
+            background-color: rgba(0,0,0,0.1);
+            padding: 1px 3px;
+            display: inline-block;
+        }
         pre {
-            overflow-x: auto;
+            >code {
+                display: block;
+                padding: 5px;
+                overflow-x: auto;
+            }
+        }
+        li {
+            margin-top: 2*$parskip-half-length;
+            margin-bottom: 2*$parskip-half-length;
         }
     }
 }

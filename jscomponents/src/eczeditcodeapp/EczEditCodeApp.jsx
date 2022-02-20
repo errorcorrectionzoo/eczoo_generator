@@ -13,7 +13,9 @@ import 'react-tabs/style/react-tabs.css';
 
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import rehypeRaw from 'rehype-raw'
+//import remarkToc from 'remark-toc';
+import rehypeRaw from 'rehype-raw';
+
 
 import EczEditSchemaField from './EczEditSchemaField.jsx';
 
@@ -22,6 +24,39 @@ import './EczEditCodeApp_style.scss';
 import welcome_md from './welcome.md';
 import latexlike_md from './latexlike.md';
 
+
+
+
+class EczSidebarDocPage extends React.Component {
+    shouldComponentUpdate(newProps, newState) {
+        return false;
+    }
+    render() {
+        return (<div className={"help_text " + this.props.pageClassName}>
+            <ReactMarkdown
+                components={{
+                    a: ({node, ...props}) => {
+                        let apr = {};
+                        if (props.href) {
+                            apr.href = props.href;
+                            if (!props.href.startsWith("#")) {
+                                apr.target = "_blank";
+                            }
+                        }
+                        if (props.title) {
+                            apr.title = props.title;
+                        }
+                        return ( <a {... apr}>{props.children}</a> );
+                    }
+                }}
+                rehypePlugins={[rehypeRaw]}
+                remarkPlugins={[remarkGfm]}
+            >
+                {this.props.children}
+            </ReactMarkdown>
+        </div>);
+    }
+}
 
 class EczEditCodeAppSidebar extends React.Component
 {
@@ -53,20 +88,14 @@ class EczEditCodeAppSidebar extends React.Component
                         </TabList>
 
                         <TabPanel key={"welcome"}>
-                            <div className="tab_page help_text welcome">
-                                <ReactMarkdown rehypePlugins={[rehypeRaw]}
-                                               remarkPlugins={[remarkGfm]}>
-                                    {welcome_md}
-                                </ReactMarkdown>
-                            </div>
+                            <EczSidebarDocPage pageClassName="tab_page welcome">
+                                {welcome_md}
+                            </EczSidebarDocPage>
                         </TabPanel>
                         <TabPanel key={"latexlike"}>
-                            <div className="tab_page help_text latex-like">
-                                <ReactMarkdown rehypePlugins={[rehypeRaw]}
-                                               remarkPlugins={[remarkGfm]}>
-                                    {latexlike_md}
-                                </ReactMarkdown>
-                            </div>
+                            <EczSidebarDocPage pageClassName="tab_page latex-like">
+                                {latexlike_md}
+                            </EczSidebarDocPage>
                         </TabPanel>
                         <TabPanel key={"lookup_page"}>
                             <div className="tab_page lookup_page">
@@ -90,6 +119,10 @@ class EczBottomBar extends React.Component {
     render() {
         const mailtolink = "mailto:errorcorrectionzoo@XXXXXX?subject=code data&body=Please attach the downloaded file and send this email, replacing '@XXXXXX' in the email address by '@gmail.com'. Thanks for your contribution! You can add additional notes to our attention below:";
 
+                // <button key={'validate'}
+                //         onClick={
+                //             this.props.onClickValidate
+                //         }>Prelim. Check</button>
         return (
             <div key={'bottombar'} className="EczEditCodeApp_bottombar">
                 <div key={'spc'} className="spacer" />
@@ -161,6 +194,7 @@ export default class EczEditCodeApp extends React.Component
                 onClickSubmit={() => this.do_submit()}
             />
         ];
+        //                 onClickValidate={() => this.do_validate()}
     }
 
     set_new_code_data(new_code_data) {
@@ -216,6 +250,12 @@ export default class EczEditCodeApp extends React.Component
             code_data: code_data,
         })
     }
+
+
+    // do_validate() {
+    //     // do a simple validation of the entries against the schema
+    //     .....
+    // }
 
 
     do_submit() {
