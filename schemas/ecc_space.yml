@@ -19,6 +19,7 @@ enum:
   - "galois"
   - "fermions"
   - "oscillators"
+  - "spins"
   - "rigid_bodies"
   - "groups"
   - "categories"
