@@ -1,10 +1,10 @@
 
-section.ecc-code {
+article.ecc-code-page {
 
     display: grid;
     grid-template-columns: 1fr auto;
 
-    > h2 {
+    h2 {
         grid-column-start: 1;
         grid-column-end: 3;
         margin: 0px; // reset margin; margin will be set below
@@ -24,7 +24,7 @@ section.ecc-code {
     //     padding: 2px 0px;
     //     margin-bottom: 10px;
     // }
-    >h2 {
+    h2 {
         padding: 0px;
         margin-top: 0.5rem;
         margin-bottom: .8rem;
@@ -40,18 +40,26 @@ section.ecc-code {
         display: none;
     }
 
-    >div.sectioncontent.code-name {
-        grid-column-end: 2;
+    @media screen {
+        >div.sectioncontent.code-name {
+            grid-column-end: 2;
+        }
+        >div.sectioncontent.info-popup-button-container {
+            margin-top: 0px;
+            grid-column-start: 2;
+            grid-row-start: 1;
+        }
     }
-    >div.sectioncontent.info-popup-button-container {
-        margin-top: 0px;
-        grid-column-start: 2;
-        grid-row-start: 1;
+
+    @media screen {
+        .display-print-citation {
+            display: none !important;
+        }
     }
 
     // style appearance:
 
-    >h2 {
+    h2 {
         // give these dt elements an inner header style -- we should probably
         // have rendered these as <h2> elements... oh well...
         font-size: 1.1rem;
@@ -68,9 +76,20 @@ section.ecc-code {
         color: $text-dim-color;
     }
 
-    .code-name {
-        font-size: 1.1rem;
-        font-weight: bold;
+    // .code-name {
+    //     font-size: 1.1rem;
+    //     font-weight: bold;
+    // }
+
+    h1.code-name {
+        margin: 0px 10px 0px 0px;
+        display: inline-block;
+
+        .code-introduced {
+            // make citation not too large
+            font-size: 1.5rem;
+            font-weight: normal;
+        }
     }
 
     .code-relations-list {
@@ -87,12 +106,12 @@ section.ecc-code {
 }
 
 // adjustments for small screens
-@media (max-width: $page-main-width+2*$page-main-margins) {
-    section.ecc-code {
+@media (max-width: $page-collapse-layout-width) {
+    article.ecc-code-page {
         display: block;
         margin-top: 0px;
 
-        > h2 {
+        h2 {
             display: block;
 
             margin-bottom: 3px;
@@ -103,7 +122,7 @@ section.ecc-code {
         }
 
         // hide label "Name:" on narrow screens
-        >h2.code-name {
+        h2.code-name {
             display: none;
         }
 

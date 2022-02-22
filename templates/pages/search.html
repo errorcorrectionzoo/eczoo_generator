@@ -1,11 +1,13 @@
-{% set extra_js = [ 'js/eczsearch.js'|prebaseurl ] %}
-{% extends 'layout/base_page.html' %}
+{% extends 'layout/static_page.html' %}
 
-{% block block_page_title %}Search{% endblock %}
+{% set page_title_text = 'Search' %}
+
+{% set extra_js = [ 'js/eczsearch.js'|prebaseurl ] %}
+
 
 {% block contents %}
 
-{# <h1>Search the error correction zoo</h1> #}
+<!-- <h1>Search</h1> -->
 
 <div
   id="EczooSearchWidget"

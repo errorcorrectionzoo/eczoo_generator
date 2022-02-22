@@ -1,4 +1,5 @@
 import re
+import os.path
 
 import PIL
 import PIL.Image
@@ -88,6 +89,10 @@ _rx_dimen = re.compile(r'^\s*(?P<dimension>[0-9.e+-]+)\s*(?P<unit>'
                        + r')?\s*$')
 
 
+
+_source_size_threshold = 1e5   # 100 kB
+
+
 def get_image_file_info_svg(filename):
     
     tree = ET.parse(filename)
@@ -120,10 +125,17 @@ def get_image_file_info_svg(filename):
     width_pt = width_dimension_u * _pt_per_u[width_unit]
     height_pt = height_dimension_u * _pt_per_u[height_unit]
 
-    return {
+    d = {
         'type': 'vector',
         'physical_dimensions': (
             ( _uniform_svg_scale * width_pt, 'pt' ),
             ( _uniform_svg_scale * height_pt, 'pt' ),
         )
     }
+
+    if os.path.getsize(filename) < _source_size_threshold:
+        # for small enough files, get the SVG source for direct inclusion.
+        # Reconverting to string should remove "<?xml" tags etc.
+        d['svg_source'] = tree.tostring(root, encoding='unicode')
+
+    return d

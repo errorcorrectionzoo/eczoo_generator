@@ -28,6 +28,18 @@ properties:
       The name of the code.  It is listed in multiple places, so don't make it
       too long.
 
+  # when the name is long, we can provide a short name to display in places
+  # where space is precious (e.g. navigation links in the header bar)
+  short_name:
+    type: string
+    _minilatex: 'simple'
+    _single_line_string: true
+    _description: >-
+      (Optional.) A short name in case the 'name' field is long.  The short name
+      is used in places where space is precious, such as in the navigation links
+      in the header bar.  If no 'short_name' is provided, the 'name' field is
+      used in those places instead.
+
   # every code must have a description.
   description:
     type: string

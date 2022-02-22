@@ -15,22 +15,38 @@ Expected context variables:
      dd -> div class="sectioncontent"
   -->
 
-<section class="ecc-code ecc-code-page info-popup-button-zone" id="ecc_{{code.code_id}}">
+{%- macro code_text_citation(code) -%}
+  “{{code.name|minilatex}}”, The Error Correction Zoo (V. V. Albert & P. Faist, eds.), {{code.citation_info.year}}. https://errorcorrectionzoo.org{{code|code_ref_href}}
+{%- endmacro -%}
+
+{%- macro code_edit_github_url(code) -%}
+  https://github.com/errorcorrectionzoo/eczoo_data/tree/main/codes/{{code.source_info_filename}}
+{%- endmacro -%}
+
+{%- macro code_edit_onsite_url(code) -%}
+  {{ ( 'edit_code?code_id='
+       + (code.code_id | urlencode)
+       + '&code_yml_filename='
+       + (code.source_info_filename | urlencode) ) | prebaseurl }}
+{%- endmacro -%}
+
+
+
+<article class="ecc-code-page info-popup-button-zone" id="ecc_{{code.code_id}}">
 
 <!--<h2></h2>-->
 <div class="sectioncontent info-popup-button-container"></div>
 
-<h2 id="code_name" class="code-name">Name</h2>
+<!-- <h2 id="code_name" class="code-name">Name</h2> -->
 <div class="sectioncontent code-name">
   <span class="code-name-cell">
-  <span class="code-name">{{code.name}}</span>
-  {%- if code.introduced -%}
-    <span class="code-introduced">{{code.introduced | to_html_with_notes(rc)}}</span>
-  {%- endif -%}
+    <h1 class="code-name">
+      {{code.name}}
+      {%- if code.introduced -%}
+      <span class="code-introduced">{{code.introduced | to_html_with_notes(rc)}}</span>
+      {%- endif -%}
+    </h1>
   </span>
-  <!--<a class="code-info-corner-icon code-self-permalink"
-   title="permanent link to this code (click and then copy the location in the address bar)"
-   href="{{code|code_ref_href}}">&nbsp;</a>-->
 </div>
 
 
@@ -159,11 +175,11 @@ Expected context variables:
     #}<p><a class="code-link-with-icon code-show-github"
        target="_blank"
        title="Edit code information directly on github.com"
-       href="https://github.com/errorcorrectionzoo/eczoo_data/tree/main/codes/{{code.source_info_filename}}">on github.com (edit &amp; pull request)</a></p>{#
+       href="{{ code_edit_github_url(code) }}">on github.com (edit &amp; pull request)</a></p>{#
     #}<p><a class="code-link-with-icon code-self-edit"
        target="_blank"
        title="edit code information on this site without using github"
-       href="{{ ('edit_code?code_id='+code.code_id) | prebaseurl }}">edit on this site</a></p>{#
+       href="{{ code_edit_onsite_url(code) }}">edit on this site</a></p>{#
     #}<p class="zoo-code-id">Zoo Code ID: <code>{{code.code_id}}</code>{#
   #}</div>{#
 #}<div class="code-popup-info-frame"
@@ -172,7 +188,7 @@ Expected context variables:
      data-popup-button-class-list="code-show-citation">
   <dl class="show-citation">
     <dt>Cite as:</dt>
-    <dd>“{{code.name|minilatex}}”, The Error Correction Zoo (V. V. Albert & P. Faist, eds.), {{code.citation_info.year}}. https://errorcorrectionzoo.org{{code|code_ref_href}}</dd>
+    <dd>{{ code_text_citation(code) }}</dd>
     <dt>BibTeX:</dt>
     <dd class="bibtex">{#
 #}@incollection{{ '{' }}eczoo_{{code.code_id}},
@@ -183,7 +199,7 @@ editor={Albert, Victor V. and Faist, Philippe},
 url={{'{'}}https://errorcorrectionzoo.org{{code|code_ref_href}}{{'}'}}
 {{ '}' }}{#
   #}</dd>
-    <h2>Permanent link:</h2>
+    <dt>Permanent link:</dt>
     <dd>https://errorcorrectionzoo.org{{code|code_ref_href}}</dd>
   </dl>
 </div>
@@ -194,9 +210,24 @@ url={{'{'}}https://errorcorrectionzoo.org{{code|code_ref_href}}{{'}'}}
 
 <!-- endnotes -->
 
-<h2>References</h2>
 {% set divendnotesclass="sectioncontent" %}
 {% include 'pieces/endnotes.html' %}
 
 
-</section>
+
+<!-- "Cite As" citation, for paper printouts -->
+
+<h2 class="display-print-citation">
+  Cite as:
+</h2>
+<div class="sectioncontent display-print-citation">
+  <p>{{- code_text_citation(code) -}}</p>
+
+  <p>Github: <a href="{{ code_edit_github_url(code) }}"
+                class="ashowurl"
+                target="_blank">{{ code_edit_github_url(code) }}</a>.</p>
+</div>
+
+
+
+</article>

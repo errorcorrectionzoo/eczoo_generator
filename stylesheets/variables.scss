@@ -2,19 +2,21 @@
 // Base dimensions
 //
 
-$page-main-width: 850px;
+$page-max-width: 850px;
+$page-max-main-width: 625px;
+$page-collapse-layout-width: 600px;
 
 $page-main-margins: 15px;
 
-$page-sidebar-margin: 20px;
-$page-sidebar-width: 220px;
+// $page-home-box-margin: 20px;
+// $page-home-box-width: 220px;
 
 $page-header-bleed: 10px;
 $page-header-gap: 0px; //10px;
 
 $main-content-top-space: 1rem;
 
-$page-footer-gap: 10px;
+$page-footer-gap: 36px;
 
 
 //
@@ -32,9 +34,12 @@ $base-font-size: 16px;
 
 $small-font-size: 0.9rem;
 
-$endnote-superscript-font-size: 0.8rem;
+// "em" instead of "rem" e.g. for citation marks in headings
+$endnote-superscript-font-size: 0.8em;
 
 $tiny-fine-print-font-size: 0.8rem;
+
+$pageheader-navigation-font-size: 0.95rem;
 
 
 $parskip-half-length: 0.5em;
@@ -49,6 +54,10 @@ $inner-parskip-half-length: 0.3em;
 $pageheader-background-color: rgb(0,0,127);
 $pageheader-text-color: rgba(255,255,255,0.9);
 
+$pageheader-navigation-text-color: rgb(255, 194, 164);
+$pageheader-navigation-links-color: rgb(255, 194, 164);
+$pageheader-navigation-links-highlight-color: lighten($pageheader-navigation-links-color, 5%);
+
 // page contents
 
 $page-link-color: rgba(50,50,200,1.0);
@@ -60,6 +69,6 @@ $inner-heading-color: rgb(40,40,80); //lighten(desaturate($pageheader-background
 
 $discreet-border-color: rgba($text-dim-color,0.15);
 
-$sidebar-panel-background-color: rgba(245,245,255,1.0);
+$home-box-panel-background-color: rgba(245,245,255,1.0);
 
 $visual-highlight-color: rgba(255,230,70,0.8);

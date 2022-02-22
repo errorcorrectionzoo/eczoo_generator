@@ -1,6 +1,7 @@
 import os
 import os.path
 import re
+import json
 
 import logging
 logger = logging.getLogger(__name__)
@@ -11,123 +12,6 @@ from . import code
 
 
 import minilatextohtml
-
-
-# ------------------------------------------------------------------------------
-
-# _id_fields = ('code_id', )
-
-# class _HtmlObjectWrapper:
-#     def __init__(self, obj, tohtmlconverter, whatobject):
-#         super().__init__()
-#         self.obj = obj
-#         self.tohtmlconverter = tohtmlconverter
-#         self.whatobject = whatobject
-
-#     def _to_html_str(self, value, whatobject):
-#         return self.tohtmlconverter.to_html(value, what=whatobject)
-
-#     def _wrap_obj(self, val, whatobject):
-#         if val is None:
-#             return None
-#         if isinstance(val, _HtmlObjectWrapper):
-#             # already wrapped (?!)
-#             return val
-#         if isinstance(val, (int, float, bool)):
-#             return val # don't wrap ints, floats, or bools
-#         if isinstance(val, str):
-#             return _HtmlStringWrapper(val, self.tohtmlconverter, whatobject)
-#         if isinstance(val, list):
-#             return _HtmlListObjectWrapper(val, self.tohtmlconverter, whatobject)
-#         if isinstance(val, dict):
-#             return _HtmlDictObjectWrapper(val, self.tohtmlconverter, whatobject)
-#         #logger.debug(f"Got attr value ‘{val!r}’, generic type {type(val)}")
-#         return _HtmlObjectWrapper(val, self.tohtmlconverter, whatobject)
-
-#     def __bool__(self):
-#         return True if self.obj else False
-
-#     def __call__(self, *args, **kwargs):
-#         return self._wrap_obj(self.obj(*args, **kwargs), self.whatobject+'()')
-
-#     def __iter__(self):
-#         for j, a in enumerate(self.obj):
-#             yield self._wrap_obj(a, '{}[{}]'.format(self.whatobject, j))
-
-#     def __getattr__(self, attr):
-#         # special exception for internal identificator fields (e.g., code_id)
-#         if attr in _id_fields:
-#             return getattr(self.obj, attr)
-#         return self._wrap_obj( getattr(self.obj, attr) ,
-#                                '{}.{}'.format(self.whatobject, attr))
-
-#     def __getitem__(self, key):
-#         if key in _id_fields:
-#             return self.obj[key]
-#         return self._wrap_obj( self.obj[key] ,
-#                               '{}[{!r}]'.format(self.whatobject, key) )
-
-#     def __repr__(self):
-#         return f'_HtmlObjectWrapper({self.obj!r})'
-
-
-# class _HtmlStringWrapper(_HtmlObjectWrapper):
-#     def __init__(self, *args, **kwargs):
-#         super().__init__(*args, **kwargs)
-
-#     # __bool__ def'd in base class
-
-#     def __str__(self):
-#         return self._to_html_str(self.obj, self.whatobject)
-
-#     # The __html__() method will ensure this string is seen as "HTML-safe" by
-#     # `markup.escape()`.
-#     #
-#     # This method works as an alternative to `markupsafe.Markup(..)`, for
-#     # strings that we don't want to pre-compile before we're sure that the
-#     # actual string is needed.
-#     def __html__(self):
-#         return self._to_html_str(self.obj, self.whatobject)
-
-#     def __add__(self, other):
-#         return self._wrap_obj(self.obj + other, '('+self.whatobject+'+str)')
-#     def __radd__(self, other):
-#         return self._wrap_obj(other + self.obj, '(str+'+self.whatobject+')')
-
-
-# class _HtmlListObjectWrapper(_HtmlObjectWrapper):
-#     def __init__(self, *args, **kwargs):
-#         super().__init__(*args, **kwargs)
-
-#     # __bool__, __getitem__, __iter__ def'd in base class
-
-#     def __len__(self):
-#         return len(self.obj)
-
-#     def __bool__(self):
-#         return (True if self.obj else False)
-
-#     # custom conversion to string
-#     def __str__(self):
-#         return "".join([f"<span class=\"paragraph-in-list\">{item}</span>" for item in self])
-
-#     # see the string wrapper object above (_HtmlStringWrapper) for info about
-#     # __html__
-#     def __html__(self):
-#         return "".join([f"<span class=\"paragraph-in-list\">{item}</span>" for item in self])
-
-
-# class _HtmlDictObjectWrapper(_HtmlObjectWrapper):
-#     def __init__(self, *args, **kwargs):
-#         super().__init__(*args, **kwargs)
-
-#     def keys(self):
-#         return self.obj.keys()
-
-#     def items(self):
-#         the_items = [ (k, self._wrap_obj(v, '{}[{!r}]'.format(self.whatobject, k)))
-#                       for (k,v) in self.obj.items() ]
-#         return the_items
 
 
 # ------------------------------------------------------------------------------
@@ -169,7 +53,6 @@ class HtmlPage:
 # ------------------------------------------------------------------------------
 
 
-
 class HtmlFootnote:
     def __init__(self, *, no=None, footnote_text_html=None):
         self.no = no
@@ -208,25 +91,38 @@ class HtmlFloat:
             )
             imgpath = floatinfo['prefixed_path']
             image_info = floatinfo['image_info']
-            if image_info['type'] == 'vector':
-                width_dimunit, height_dimunit = image_info['physical_dimensions']
-                width_dim, width_unit = width_dimunit
-                height_dim, height_unit = height_dimunit
-            else:
-                # specify dimensions in pixels; I'm not sure that makes a huge
-                # difference...
-                width_dim, height_dim = image_info['pixel_dimensions']
-                dpi = image_info['dpi']
-                pxfactor = dpi/96
-                width_dim = width_dim / pxfactor
-                height_dim = height_dim / pxfactor
-                width_unit, height_unit = 'px', 'px'
-            style = (
-                f"width: {width_dim:.6f}{width_unit}; "
-                f"height: {height_dim:.6f}{height_unit}"
-            )
-            float_inner_contents_html = \
-                f"""<img src="{imgpath}" style="{style}" alt="(float)">"""
+            #
+            # ### Hmmm, let's NOT embed SVG data inline. We might have issues of
+            # ### clashing node ID's, etc.
+            #
+            # if 'svg_source' in image_info:
+            #     # there is source SVG that we can include directly
+            #     float_inner_contents_html = (
+            #         f"<!-- SVG {imgpath} -->"
+            #         + image_info['svg_source']
+            #         f"<!-- END SVG -->"
+            #     )
+            # else:
+            if True:
+                if image_info['type'] == 'vector':
+                    width_dimunit, height_dimunit = image_info['physical_dimensions']
+                    width_dim, width_unit = width_dimunit
+                    height_dim, height_unit = height_dimunit
+                else:
+                    # specify dimensions in pixels; I'm not sure that makes a huge
+                    # difference...
+                    width_dim, height_dim = image_info['pixel_dimensions']
+                    dpi = image_info['dpi']
+                    pxfactor = dpi/96
+                    width_dim = width_dim / pxfactor
+                    height_dim = height_dim / pxfactor
+                    width_unit, height_unit = 'px', 'px'
+                style = (
+                    f"width: {width_dim:.6f}{width_unit}; "
+                    f"height: {height_dim:.6f}{height_unit}"
+                )
+                float_inner_contents_html = \
+                    f"""<img src="{imgpath}" style="{style}" alt="(float)">"""
         else:
             raise ValueError("I don't know how to display the float {!r}"
                              .format(self.float_obj))
@@ -546,6 +442,7 @@ class HtmlPageCollection:
 
         self.jinja2env.filters['code_ref'] = self._jfilter_code_ref
         self.jinja2env.filters['code_ref_href'] = self._jfilter_code_ref_href
+        self.jinja2env.filters['short_code_ref'] = self._jfilter_short_code_ref
         self.jinja2env.filters['format_footnote_label_html'] = \
             lambda foot_no: markupsafe.Markup( self.format_footnote_label_html(foot_no) )
         self.jinja2env.filters['format_citation_label_html'] = \
@@ -556,6 +453,8 @@ class HtmlPageCollection:
         #     lambda obj: self.wrap_object_with_minilatex_properties(obj)
 
         self.jinja2env.filters['to_html_with_notes'] = self._jfilter_to_html_with_notes
+
+        self.jinja2env.filters['to_json'] = self._jfilter_to_json
 
         # # access raw minilatex code on objects wrapped as _HtmlObjectWrapper
         # self.jinja2env.filters['raw_minilatex_code'] = \
@@ -654,18 +553,26 @@ class HtmlPageCollection:
 
 
     def _jfilter_code_ref(self, code):
-        # need str(code.code_id) since for now we brutally wrap all the entire
-        # code object into an _HtmlObjectWrapper instance
-        code_href = self.get_code_href( str(code.code_id) )
+        code_href = self.get_code_href( code.code_id )
         page_url_html = markupsafe.escape(code_href)
         code_name_html = markupsafe.escape(code.name)
         return markupsafe.Markup(
             f'''<a href="{page_url_html}">{code_name_html}</a>'''
         )
+
     def _jfilter_code_ref_href(self, code):
-        # need str(code.code_id) since for now we brutally wrap all the entire
-        # code object into an _HtmlObjectWrapper instance
-        return self.get_code_href( str(code.code_id) )
+        return self.get_code_href( code.code_id )
+
+    def _jfilter_short_code_ref(self, code):
+        code_href = self.get_code_href( code.code_id )
+        page_url_html = markupsafe.escape(code_href)
+        code_short_name_html = markupsafe.escape(code.short_name())
+        return markupsafe.Markup(
+            f'''<a href="{page_url_html}">{code_short_name_html}</a>'''
+        )
+
+    def _jfilter_to_json(self, obj):
+        return json.dumps(obj)
 
     def update_global_context(self, d):
         self.global_context.update(d)

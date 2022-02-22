@@ -1,0 +1,13 @@
+  <nav id="navigation">
+
+{% if code %}
+{%- include 'pieces/navigation_links_codepage.html' -%}
+{% else %}
+{%- include 'pieces/navigation_links_default.html' -%}
+{% endif %}
+
+  </nav><!-- #navigation -->
+
+  <nav id="navigation-shortcuts">
+    <a href="#navigation" id="nav-shortcut-to-navigation-links">&#8801;</a>
+  </nav>

@@ -269,9 +269,11 @@ class PagePrettyCodeGraph:
             n = {
                 'data': {
                     'id': node_id_code(code_id),
-                    'label': code.name.text,
+                    'label': code.short_name().text,
 
+                    '_code_name': code.name.text,
                     '_is_code': 1,
+                    '_is_plain_concrete_code': (0 if code_is_abstract or is_kingdom else 1),
                     '_is_abstract_code': \
                         1 if code_is_abstract else 0,
                     '_description': short_description,
@@ -419,7 +421,7 @@ class PagePrettyCodeGraph:
 
         with open(output_data_js_fname, 'w', encoding='utf-8') as fw:
             fw.write("GENERATED_pretty_code_graph_data = ")
-            json.dump(data, fw, indent=4)
+            json.dump(data, fw) #, indent=4)
             fw.write(";")
 
 
