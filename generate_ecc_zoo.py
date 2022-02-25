@@ -418,6 +418,11 @@ for (dirpath, dirnames, filenames) in os.walk(codelistpages_dir, followlinks=Tru
                     logger.debug(
                         f"Code {code.code_id} is not descendant of {predinfo['descendant_of']}")
                     return False
+            if 'cousin_of' in predinfo:
+                if not code.is_cousin_of(predinfo['cousin_of']):
+                    logger.debug(
+                        f"Code {code.code_id} is not cousin of {predinfo['cousin_of']}")
+                    return False
             return True
 
         def _code_select_predicates(code, preds_info):

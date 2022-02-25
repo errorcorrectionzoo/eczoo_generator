@@ -50,6 +50,8 @@ properties:
             #   type: string
             descendant_of:
               type: string
+            cousin_of:
+              type: string
 
   sort:
     type: object

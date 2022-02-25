@@ -153,6 +153,16 @@ class Code:
                 return True
         return False
 
+    def is_cousin_of(self, other_code_id):
+        for rel in self.relations.cousins:
+            if rel.code.code_id == other_code_id:
+                return True
+        for rel in self.relations.cousin_of:
+            if rel.code.code_id == other_code_id:
+                return True
+        return False
 
+    # provides info on where to look for external resources (eg figures) in
+    # minilatex strings
     def resource_parent_id(self):
         return ('code', self.code_id)
