@@ -11,8 +11,6 @@ def htmlescape(x):
 
 import logging
 logger = logging.getLogger(__name__)
-logger_debug = logger.debug
-logger_error = logger.error
 
 
 from pylatexenc import latexnodes, latexwalker, macrospec
@@ -30,42 +28,50 @@ from pylatexenc.macrospec import LatexArgumentSpec
 # --------------------------------------------------------------------
 
 
-class _ItemToHtmlSpec(object):
-    def __init__(self, *args, item_to_html=None, **kwargs):
-        super(_ItemToHtmlSpec, self).__init__(*args, **kwargs)
-        if item_to_html is None:
-            self.item_to_html = ItemToHtmlVerbatim()
-        elif isinstance(item_to_html, str):
-            self.item_to_html = ItemToHtmlConst(item_to_html)
-        else:
-            self.item_to_html = item_to_html
+# class _ItemToHtmlSpec(object):
+#     def __init__(self, *args, item_to_html=None, **kwargs):
+#         super().__init__(*args, **kwargs)
+#         if item_to_html is None:
+#             self.item_to_html = ItemToHtmlVerbatim()
+#         elif isinstance(item_to_html, str):
+#             self.item_to_html = ItemToHtmlConst(item_to_html)
+#         else:
+#             self.item_to_html = item_to_html
+
+def make_item_to_html(item_to_html):
+    if item_to_html is None:
+        return ItemToHtmlVerbatim()
+    elif isinstance(item_to_html, str):
+        return ItemToHtmlConst(item_to_html)
+    else:
+        return item_to_html
 
 
-class MiniHtmlMacroSpec(_ItemToHtmlSpec, macrospec.MacroSpec):
+class MiniHtmlMacroSpec(macrospec.MacroSpec):
     def __init__(self, macroname, arguments_spec_list=None, item_to_html=None):
-        super(MiniHtmlMacroSpec, self).__init__(
+        super().__init__(
             macroname,
             arguments_spec_list=arguments_spec_list,
-            item_to_html=item_to_html,
         )
+        self.item_to_html = make_item_to_html(item_to_html)
 
-class MiniHtmlEnvironmentSpec(macrospec.EnvironmentSpec, _ItemToHtmlSpec):
+class MiniHtmlEnvironmentSpec(macrospec.EnvironmentSpec):
     def __init__(self, macroname, arguments_spec_list=None, body_parser=None,
                  item_to_html=None):
-        super(MiniHtmlEnvironmentSpec, self).__init__(
+        super().__init__(
             macroname,
             arguments_spec_list=arguments_spec_list,
             body_parser=body_parser,
-            item_to_html=item_to_html,
         )
+        self.item_to_html = make_item_to_html(item_to_html)
 
-class MiniHtmlSpecialsSpec(macrospec.SpecialsSpec, _ItemToHtmlSpec):
+class MiniHtmlSpecialsSpec(macrospec.SpecialsSpec):
     def __init__(self, specials_chars, arguments_spec_list=None, item_to_html=None):
-        super(MiniHtmlSpecialsSpec, self).__init__(
+        super().__init__(
             specials_chars,
             arguments_spec_list=arguments_spec_list,
-            item_to_html=item_to_html,
         )
+        self.item_to_html = make_item_to_html(item_to_html)
 
 # ------------------
 
@@ -82,7 +88,7 @@ def html_wrap_in_tag(tagname, htmlcontent, *, attrs=None, class_=None):
     s += '>'
     s += str(htmlcontent)
     s += f'</{tagname}>'
-    #logger_debug(f"html_wrap_in_tag: code is ‘{s}’")
+    #logger.debug(f"html_wrap_in_tag: code is ‘{s}’")
     return s
 
 # ----
@@ -159,7 +165,7 @@ class ItemToHtmlVerbatimWrapTag(ItemToHtmlWrapTag):
 
 class ItemToHtmlVerbatimContentsWrapTag(ItemToHtmlVerbatimWrapTag):
     def __init__(self, class_="verbatim", is_environment=False):
-        super(ItemToHtmlVerbatimContentsWrapTag, self).__init__(
+        super().__init__(
             tagname='span',
             class_=class_,
         )
@@ -194,7 +200,7 @@ class ItemToHtmlRef(ItemToHtmlWrapTag):
         (target_html, target_href) = self.get_ref(reftarget, doccontext)
         if display_html is None:
             display_html = target_html
-        logger_debug(f"Ref: ‘{reftarget}’ → ‘{display_html}’")
+        logger.debug(f"Ref: ‘{reftarget}’ → ‘{display_html}’")
         return html_wrap_in_tag(
             'a',
             display_html,
@@ -262,7 +268,7 @@ class ItemToHtmlCite(ItemToHtmlWrapTag):
         # ('', ',') and represents a citation key.  It was parsed using
         # pylatexenc3's LatexCharsCommaSeparatedListParser.
 
-        #logger_debug(f"Citation key nodes: {citekeylist_nodelist=}")
+        #logger.debug(f"Citation key nodes: {citekeylist_nodelist=}")
 
         s_items = []
         for citekeygroupnode in citekeylist_nodelist:
@@ -310,7 +316,7 @@ class ItemToHtmlCite(ItemToHtmlWrapTag):
 
         s = "".join(s_items)
 
-        #logger_debug(f"Citation: ‘{mn.latex_verbatim()}’ → ‘{s}’")
+        #logger.debug(f"Citation: ‘{mn.latex_verbatim()}’ → ‘{s}’")
         return s
 
     def as_text(self, node, doccontext):
@@ -690,6 +696,8 @@ def _make_lw_context():
         }
     )
 
+    # ignore unknown macros -- TODO !! only ignore in math mode !!  (note
+    # unknown macro instances are still caught and reported at to-html time)
     lw_context.set_unknown_macro_spec(MiniHtmlMacroSpec(''))
     lw_context.set_unknown_environment_spec(MiniHtmlEnvironmentSpec(''))
 
@@ -1030,7 +1038,7 @@ class MiniLatex:
                 raise ValueError(f"No argument named ‘{arg_i}’ found in node {node=}")
             arg_i = j
         if arg_i >= len(node.nodeargd.argnlist):
-            logger_error(f"Invalid argument #{arg_i} for macro ‘\\{node.macroname}’")
+            logger.error(f"Invalid argument #{arg_i} for macro ‘\\{node.macroname}’")
             raise ValueError(f"Invalid argument #{arg_i} for macro ‘\\{node.macroname}’")
         argnode = node.nodeargd.argnlist[arg_i]
         if argnode is None:

@@ -515,6 +515,8 @@ root_js_list = [
     ('misc.js', 'misc.js'),
     #('edit_code.js', 'edit_code.js'),
     ('mathjaxinit.js', 'mathjaxinit.js'),
+    ('canvas2svg.js', 'canvas2svg.js'),
+    ('cytoscape-svg.js', 'cytoscape-svg.js'),
 ]
 
 for root_js, root_js_out in root_js_list:

@@ -20,4 +20,15 @@
         src="https://unpkg.com/cytoscape-fcose/cytoscape-fcose.js"></script>
 
 
+<!-- so that we can export to SVG from the console -->
+<script type="text/javascript"
+        src="{{ 'js/canvas2svg.js' | prebaseurl }}"></script>
+<script type="text/javascript"
+        src="{{ 'js/cytoscape-svg.js' | prebaseurl }}"></script>
+
+
+
+
 {% endblock contents %}
+
+{#    (function(){var a=document.createElement("a");a.setAttribute("href", codegraph.cy.jpeg());a.setAttribute("download", "test.jpeg"); a.click();})()    #}
