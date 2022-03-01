@@ -13,18 +13,20 @@
   <li>
     <span class="code-name">
       {{- code|code_ref -}}
-      {%- if code.introduced -%}
+      {%- if display_options.show_introduced and code.introduced -%}
         <span class="code-introduced">
           {{- code.introduced|to_html_with_notes(rc) -}}
         </span>
       {%- endif -%}
     </span>
-    {%- if display_options.description_first_paragraph -%}
-      {%- set desc = code.description.get_first_paragraph() -%}
-    {%- else -%}
-      {%- set desc = code.description -%}
+    {%- if display_options.show_description -%}
+      {%- if display_options.description_first_paragraph -%}
+        {%- set desc = code.description.get_first_paragraph() -%}
+      {%- else -%}
+        {%- set desc = code.description -%}
+      {%- endif -%}
+      <span class="code-description">{{desc|to_html_with_notes(rc)}}</span>
     {%- endif -%}
-    <span class="code-description">{{desc|to_html_with_notes(rc)}}</span>
   </li>
 {% endfor %}
 </ol>
