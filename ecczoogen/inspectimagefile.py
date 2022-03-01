@@ -90,7 +90,7 @@ _rx_dimen = re.compile(r'^\s*(?P<dimension>[0-9.e+-]+)\s*(?P<unit>'
 
 
 
-_source_size_threshold = 1e5   # 100 kB
+#_source_size_threshold = 1e5   # 100 kB
 
 
 def get_image_file_info_svg(filename):
@@ -133,9 +133,12 @@ def get_image_file_info_svg(filename):
         )
     }
 
-    if os.path.getsize(filename) < _source_size_threshold:
-        # for small enough files, get the SVG source for direct inclusion.
-        # Reconverting to string should remove "<?xml" tags etc.
-        d['svg_source'] = tree.tostring(root, encoding='unicode')
+    # ### Don't paste in the source SVG into the HTML, it's a bad idea (risk of
+    # ### ideas / resources clashing, etc.)
+    #
+    #if os.path.getsize(filename) < _source_size_threshold:
+    #    # for small enough files, get the SVG source for direct inclusion.
+    #    # Reconverting to string should remove "<?xml" tags etc.
+    #    d['svg_source'] = ET.tostring(root, encoding='unicode')
 
     return d
