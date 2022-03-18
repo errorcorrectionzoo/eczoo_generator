@@ -162,6 +162,16 @@ class Code:
                 return True
         return False
 
+    def get_relationship_to(self, other_code_id):
+        for rel_field in ('parents', 'parent_of', 'cousins', 'cousin_of'):
+            for rel in getattr(self.relations, rel_field):
+                if rel.code.code_id == other_code_id:
+                    return rel
+        return None
+        
+
+
+
     # provides info on where to look for external resources (eg figures) in
     # minilatex strings
     def resource_parent_id(self):
