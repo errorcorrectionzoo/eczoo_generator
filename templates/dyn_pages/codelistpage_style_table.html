@@ -34,13 +34,23 @@
       {%- else -%}
         ??
       {%- endif -%}
-    {%- elif col.property -%}
+    {%- else -%}
+      {%- if col.relationship_property -%}
+        {%- set relobj = code.get_relationship_to(col.relationship_property) -%}
+        {%- set display_value = (relobj[col.property] if relobj else None) -%}
+      {%- elif col.property -%}
+        {%- set display_value = code[col.property] -%}
+      {%- else -%}
+        {%- set display_value = None -%}
+      {%- endif -%}
       {%- if col.link_to_code %}<a href="{{code|code_ref_href}}">{% endif -%}
+      {%- if display_value is not none -%}
         {%- if col.first_paragraph_only -%}
-          {{ code[ col.property ].get_first_paragraph() | to_html_with_notes(rc) }}
+          {{ display_value.get_first_paragraph() | to_html_with_notes(rc) }}
         {%- else -%}
-          {{ code[ col.property ] | to_html_with_notes(rc) }}
+          {{ display_value | to_html_with_notes(rc) }}
         {%- endif -%}
+      {%- endif -%}
       {%- if col.link_to_code %}</a>{% endif -%}
     {%- endif -%}
   </td>
