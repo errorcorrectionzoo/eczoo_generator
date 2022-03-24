@@ -21,8 +21,9 @@ enum:
   - "oscillators"
   - "spins"
   - "rigid_bodies"
-  - "groups"
   - "categories"
+  - "groups" #classical and quantum
+
 
 # type: string
 # pattern: '^[a-z0-9_.-]+$'
