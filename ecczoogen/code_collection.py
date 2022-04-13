@@ -29,6 +29,9 @@ class CodeCollection:
         # register the collection on the Code object
         code.collection = self
 
+
+    # ------------------
+
     def finish(self):
         r"""
         Call this method when you finished constructing the code collection and you
@@ -155,6 +158,8 @@ class CodeCollection:
                                                   root_code)
 
 
+    # ------------------
+
     # methods for accessing codes:
 
     def all_codes(self):
@@ -201,3 +206,4 @@ class CodeCollection:
         #logger.debug(f"code family tree for ‘{parent_code_id}’ -> ‘{all_children}’")
 
         return all_children
+

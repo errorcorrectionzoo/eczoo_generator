@@ -136,3 +136,76 @@ class Zoo:
 
     def get_code_family_tree(self, *args, **kwargs):
         return self._collection.get_code_family_tree(*args, **kwargs)
+
+
+    def generate_stats(self, domains, stats):
+
+        statsgen = _ZooStatsGenerator(self, domains)
+
+        result_stats = []
+
+        for (stat_name, stat_args) in stats:
+
+            logger.debug(f"Generating stat {stat_name} with {stat_args!r}")
+            
+            result_stats += getattr(statsgen, stat_name)(*stat_args)
+            
+        return result_stats
+
+
+class _ZooStatsGenerator:
+    def __init__(self, zoo, domains):
+        self.zoo = zoo
+        self.domains = domains
+
+    def total_num_codes(self, label):
+        return [ (len(self.zoo.all_codes()), label) ]
+
+    def total_num_domains(self, label):
+        return [ (len(self.domains), label) ]
+
+    def total_num_kingdoms(self, label):
+        return [ (sum( len(d['kingdoms']) for d in self.domains ), label) ]
+
+    def domain_ids_and_codetypes(self, *list_domain_ids_and_codetypes):
+
+        # first, generate a dict with all codes by domain
+        all_codes_by_domain = {}
+        codes_seen = set()
+        for domain in self.domains:
+            domain_id = domain['domain_id']
+            all_codes_by_domain[domain_id] = []
+            for kingdom in domain['kingdoms']:
+                for kc in self.zoo.get_code_family_tree(kingdom['code_id']):
+                    if kc.code_id in codes_seen:
+                        continue
+                    all_codes_by_domain[domain_id].append(kc)
+                    codes_seen.add(kc.code_id)
+        # now seek out all remaining codes that didn't belong to a specific domain
+        all_codes_by_domain[None] = []
+        for ac_code_id, ac in self.zoo.all_codes().items():
+            if ac_code_id in codes_seen:
+                continue
+            all_codes_by_domain[None].append(ac)
+            codes_seen.add(ac_code_id)
+
+        #logger.debug(f"{all_codes_by_domain=!r}")
+
+        # --- 
+
+        return [
+            ( len(all_codes_by_domain[domain_id]), codetype )
+            for domain_id, codetype in list_domain_ids_and_codetypes
+        ]
+    
+    
+    def code_familyhead_ids_and_codetypes(self, *list_code_familyhead_ids_and_codetypes):
+        thestats = []
+        for code_id, codetype in list_code_familyhead_ids_and_codetypes:
+            code = self.zoo.get_code_or_None(code_id)
+            if code is None:
+                continue
+            thestats.append(
+                ( len( self.zoo.get_code_family_tree(code_id) ) - 1, codetype )
+            )
+        return thestats
