@@ -13,6 +13,7 @@
     "@popperjs/core": "^2.11.0",
     "@uiw/react-codemirror": "^4.4.3",
     "core-js": "3",
+    "eczpytranscrypt": "link:./eczpytranscrypt/eczpytranscrypt",
     "js-yaml": "^4.1.0",
     "jsonschema": "^1.4.0",
     "lunr": "^2.3.9",

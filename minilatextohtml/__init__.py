@@ -288,7 +288,13 @@ class ItemToHtmlCite(ItemToHtmlWrapTag):
 
             if doccontext.add_citation is None:
                 #logger.debug("Missing doc context to add citation %s", node.latex_verbatim())
-                s_items.append( f'&lt;{citekey_verbatim}&gt;' )
+                s_items.append(
+                    html_wrap_in_tag(
+                        'span',
+                        htmlescape(f'[{citekey_verbatim}]'),
+                        class_='cite'
+                    )
+                )
                 continue
 
             #logger.debug(f"Parsing citation {citekey_verbatim=}")

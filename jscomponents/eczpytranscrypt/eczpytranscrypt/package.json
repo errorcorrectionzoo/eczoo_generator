@@ -1,0 +1,7 @@
+{
+    "name": "eczpytranscrypt",
+    "version": "0.0.1",
+    "description": "Automatically translated javascript version of a subset of the python ECZOO sources",
+    "type": "module",
+    "private": true
+}

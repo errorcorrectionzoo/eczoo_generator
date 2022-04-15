@@ -19,6 +19,7 @@ requests = "^2.26.0"
 backoff = "^1.11.1"
 citeproc-py = {'git' = "https://github.com/phfaist/citeproc-py.git"}
 Pillow = "^9.0.1"
+Transcrypt = "^3.9.0"
 
 [tool.poetry.dev-dependencies]
 

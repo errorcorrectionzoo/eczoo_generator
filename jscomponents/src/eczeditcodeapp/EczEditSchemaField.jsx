@@ -5,6 +5,12 @@ import { StreamLanguage } from '@codemirror/stream-parser';
 import { stex } from '@codemirror/legacy-modes/mode/stex';
 import { EditorView } from '@codemirror/view';
 
+import { MiniLatex } from 'eczpytranscrypt/minilatextohtml.js';
+import { repr, __kwargtrans__ } from 'eczpytranscrypt/org.transcrypt.__runtime__.js';
+const $$kw = __kwargtrans__;
+
+
+
 //import "./EczEditSchemaField_style.scss";
 
 
@@ -204,8 +210,27 @@ class EczEditSchemaFieldScalarType extends React.Component
 
         const height = (schema._single_line_string ? '2em': '18em');
 
-        return (
-            <CodeMirror
+        let minilatex_result = null;
+        try {
+            const html_result = MiniLatex(value).to_html();
+            minilatex_result = (
+                <div
+                    className="minilatex-html-preview"
+                    dangerouslySetInnerHTML={{__html: html_result}} />
+            );
+        } catch (err) {
+            console.error(err);
+            minilatex_result = (
+                <pre className="minilatex-html-error"
+                     style={{color: 'red', fontWeight: 'bold', whiteSpace: 'pre-wrap'}}>
+                {err.__args__.join('\n')}
+                </pre>
+            );
+        }
+
+        const nodes = (
+            <div>
+              <CodeMirror
                 placeholder="<<< Type text here. >>>"
                 value={value}
                 min-height={height}
@@ -213,8 +238,12 @@ class EczEditSchemaFieldScalarType extends React.Component
                 onChange={(value, viewUpdate) => {
                     this.props.onChange(value);
                 }}
-            />
+              />
+              {minilatex_result}
+            </div>
         );
+
+        return nodes;
     }
 }
 
