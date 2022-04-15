@@ -5,14 +5,10 @@ import { StreamLanguage } from '@codemirror/stream-parser';
 import { stex } from '@codemirror/legacy-modes/mode/stex';
 import { EditorView } from '@codemirror/view';
 
-import { MiniLatex } from 'eczpytranscrypt/minilatextohtml.js';
-import { repr, __kwargtrans__ } from 'eczpytranscrypt/org.transcrypt.__runtime__.js';
-const $$kw = __kwargtrans__;
-
+import { MiniLatexPreviewPane } from './MiniLatexPreviewPane.jsx';
 
 
 import "./EczEditSchemaField_style.scss";
-
 
 
 class EczEditSchemaFieldObjectType extends React.Component
@@ -210,24 +206,6 @@ class EczEditSchemaFieldScalarType extends React.Component
 
         const height = (schema._single_line_string ? '2em': '18em');
 
-        let minilatex_result = null;
-        try {
-            const html_result = MiniLatex(value).to_html();
-            minilatex_result = (
-                <div
-                    className="minilatex-html-preview"
-                    dangerouslySetInnerHTML={{__html: html_result}} />
-            );
-        } catch (err) {
-            console.error(err);
-            minilatex_result = (
-                <pre className="minilatex-html-error"
-                     style={{color: 'red', fontWeight: 'bold', whiteSpace: 'pre-wrap'}}>
-                {err.__args__.join('\n')}
-                </pre>
-            );
-        }
-
         const nodes = (
             <div>
               <CodeMirror
@@ -239,13 +217,9 @@ class EczEditSchemaFieldScalarType extends React.Component
                     this.props.onChange(value);
                 }}
               />
-              {minilatex_result}
+              <MiniLatexPreviewPane minilatex={value} />
             </div>
         );
-
-        if (typeof MathJax != 'undefined') {
-            MathJax.typesetPromise([this.element_container]);
-        }
 
         return nodes;
     }
