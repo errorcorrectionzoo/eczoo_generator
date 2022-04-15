@@ -1,0 +1,14 @@
+
+.minilatex-html-preview {
+    background-color: #ece8df;
+    color: #595443;
+    margin-top: 0.33rem;
+    padding: 1.5rem;
+
+    &::before {
+        display: block;
+        color: #b5ac96;
+        content: 'PREVIEW';
+        font-size: 0.65rem;
+    }
+}

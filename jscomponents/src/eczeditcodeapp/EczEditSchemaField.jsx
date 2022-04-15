@@ -11,7 +11,7 @@ const $$kw = __kwargtrans__;
 
 
 
-//import "./EczEditSchemaField_style.scss";
+import "./EczEditSchemaField_style.scss";
 
 
 
@@ -242,6 +242,10 @@ class EczEditSchemaFieldScalarType extends React.Component
               {minilatex_result}
             </div>
         );
+
+        if (typeof MathJax != 'undefined') {
+            MathJax.typesetPromise([this.element_container]);
+        }
 
         return nodes;
     }

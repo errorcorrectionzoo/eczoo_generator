@@ -1,4 +1,4 @@
-/* 000001 */ // Transcrypt'ed from Python, 2022-04-15 23:06:53
+/* 000001 */ // Transcrypt'ed from Python, 2022-04-16 00:56:59
 /* 000037 */ var logging = {};
 /* 000037 */ var re = {};
 /* 000037 */ import {AssertionError, AttributeError, BaseException, DeprecationWarning, Exception, IndexError, IterableError, KeyError, NotImplementedError, RuntimeWarning, StopIteration, UserWarning, ValueError, Warning, __JsIterator__, __PyIterator__, __Terminal__, __add__, __and__, __call__, __class__, __envir__, __eq__, __floordiv__, __ge__, __get__, __getcm__, __getitem__, __getslice__, __getsm__, __gt__, __i__, __iadd__, __iand__, __idiv__, __ijsmod__, __ilshift__, __imatmul__, __imod__, __imul__, __in__, __init__, __ior__, __ipow__, __irshift__, __isub__, __ixor__, __jsUsePyNext__, __jsmod__, __k__, __kwargtrans__, __le__, __lshift__, __lt__, __matmul__, __mergefields__, __mergekwargtrans__, __mod__, __mul__, __ne__, __neg__, __nest__, __or__, __pow__, __pragma__, __pyUseJsNext__, __rshift__, __setitem__, __setproperty__, __setslice__, __sort__, __specialattrib__, __sub__, __super__, __t__, __terminal__, __truediv__, __withblock__, __xor__, abs, all, any, assert, bool, bytearray, bytes, callable, chr, copy, deepcopy, delattr, dict, dir, divmod, enumerate, filter, float, format, getattr, hasattr, input, int, isinstance, issubclass, len, list, map, max, min, object, ord, pow, print, property, py_TypeError, py_iter, py_metatype, py_next, py_reversed, py_typeof, range, repr, round, set, setattr, sorted, str, sum, tuple, zip} from './org.transcrypt.__runtime__.js';
@@ -9,7 +9,7 @@
 /* 000038 */ __nest__ (logging, '', __module_logging__);
 /* 000037 */ import * as __module_re__ from './re.js';
 /* 000037 */ __nest__ (re, '', __module_re__);
-/* 000037 */ export {LatexToken, LatexTokenReaderBase, LatexWalkerTokenParseError, LatexWalkerEndOfStream};
+/* 000037 */ export {LatexTokenReaderBase, LatexWalkerTokenParseError, LatexWalkerEndOfStream, LatexToken};
 /* 000001 */ var __name__ = 'pylatexenc.latexnodes._tokenreader';
 /* 000039 */ export var logger = (function () {
 /* 000039 */ 	var __accu0__ = logging;
@@ -593,196 +593,198 @@
 /* 000344 */ 		if (__t__ (parsing_state.in_math_mode)) {
 /* 000346 */ 			var expecting_close = parsing_state._math_expecting_close_delim_info;
 /* 000349 */ 			if (__t__ (expecting_close !== null)) {
-/* 000350 */ 				// pass;
-/* 000353 */ 				var expecting_close_delim = __getitem__ (expecting_close, 'close_delim');
-/* 000354 */ 				var expecting_close_tok = __getitem__ (expecting_close, 'tok');
-/* 000355 */ 				if (__t__ ((function () {
-/* 000355 */ 					var __accu0__ = s;
-/* 000355 */ 					return __call__ (__accu0__.startswith, __accu0__, expecting_close_delim, pos);
-/* 000355 */ 				}) ())) {
-/* 000356 */ 					return (function () {
-/* 000356 */ 						var __accu0__ = self;
-/* 000357 */ 						return __call__ (__accu0__.make_token, __accu0__, __kwargtrans__ ({tok: expecting_close_tok, arg: expecting_close_delim, pos: pos, pos_end: __add__ (pos, __call__ (len, null, expecting_close_delim)), pre_space: pre_space}));
-/* 000357 */ 					}) ();
-/* 000357 */ 				}
-/* 000357 */ 			}
-/* 000357 */ 		}
-/* 000370 */ 		var __iterable0__ = parsing_state._math_all_delims_by_len;
-/* 000370 */ 		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
-/* 000370 */ 			var __left0__ = __getitem__ (__iterable0__, __index0__);
-/* 000370 */ 			var delim = __left0__ [0];
-/* 000370 */ 			var tok_type = __left0__ [1];
-/* 000371 */ 			if (__t__ ((function () {
-/* 000371 */ 				var __accu0__ = s;
-/* 000371 */ 				return __call__ (__accu0__.startswith, __accu0__, delim, pos);
-/* 000371 */ 			}) ())) {
-/* 000372 */ 				return (function () {
-/* 000372 */ 					var __accu0__ = self;
-/* 000373 */ 					return __call__ (__accu0__.make_token, __accu0__, __kwargtrans__ ({tok: tok_type, arg: delim, pos: pos, pos_end: __add__ (pos, __call__ (len, null, delim)), pre_space: pre_space}));
-/* 000373 */ 				}) ();
-/* 000373 */ 			}
-/* 000373 */ 		}
-/* 000376 */ 		return null;
-/* 000376 */ 	});},
-/* 000379 */ 	get impl_read_macro () {return __get__ (this, function (self, s, pos, parsing_state, pre_space) {
-/* 000379 */ 		if (arguments.length) {
-/* 000379 */ 			var __ilastarg0__ = arguments.length - 1;
-/* 000379 */ 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-/* 000379 */ 				var __allkwargs0__ = arguments [__ilastarg0__--];
-/* 000379 */ 				for (var __attrib0__ in __allkwargs0__) {
-/* 000379 */ 					switch (__attrib0__) {
-/* 000379 */ 						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-/* 000379 */ 						case 's': var s = __allkwargs0__ [__attrib0__]; break;
-/* 000379 */ 						case 'pos': var pos = __allkwargs0__ [__attrib0__]; break;
-/* 000379 */ 						case 'parsing_state': var parsing_state = __allkwargs0__ [__attrib0__]; break;
-/* 000379 */ 						case 'pre_space': var pre_space = __allkwargs0__ [__attrib0__]; break;
-/* 000379 */ 					}
-/* 000379 */ 				}
-/* 000379 */ 			}
-/* 000379 */ 		}
-/* 000379 */ 		else {
-/* 000379 */ 		}
-/* 000381 */ 		if (__t__ (__ne__ (__getitem__ (s, pos), '\\'))) {
-/* 000382 */ 			var __except0__ = __call__ (ValueError, null, "Internal error, expected '\\' in impl_read_macro()");
-/* 000382 */ 			__except0__.__cause__ = null;
-/* 000382 */ 			throw __except0__;
-/* 000382 */ 		}
-/* 000386 */ 		if (__t__ (__ge__ (__add__ (pos, 1), __call__ (len, null, s)))) {
-/* 000391 */ 			var __except0__ = __call__ (LatexWalkerTokenParseError, null, __kwargtrans__ ({s: s, pos: __add__ (pos, 1), msg: 'Expected macro name after ‘\\’ escape character', recovery_token_placeholder: (function () {
-/* 000391 */ 				var __accu0__ = self;
-/* 000391 */ 				return __call__ (__accu0__.make_token, __accu0__, __kwargtrans__ ({tok: 'char', arg: '', pos: pos, pos_end: pos, pre_space: pre_space}));
-/* 000398 */ 			}) (), recovery_token_at_pos: __call__ (len, null, s)}));
-/* 000398 */ 			__except0__.__cause__ = null;
-/* 000398 */ 			throw __except0__;
-/* 000398 */ 		}
-/* 000401 */ 		var c = __getitem__ (s, __add__ (pos, 1));
-/* 000402 */ 		var macro = c;
-/* 000405 */ 		var isalphamacro = __in__ (c, parsing_state.macro_alpha_chars);
-/* 000406 */ 		var posi = __add__ (pos, 2);
-/* 000407 */ 		if (__t__ (isalphamacro)) {
-/* 000408 */ 			while (__t__ (__t__ (__lt__ (posi, __call__ (len, null, s))) && __in__ (__getitem__ (s, posi), parsing_state.macro_alpha_chars))) {
-/* 000409 */ 				var macro = __call__ (__iadd__, null, macro, __getitem__ (s, posi));
-/* 000410 */ 				var posi = __call__ (__iadd__, null, posi, 1);
-/* 000410 */ 			}
+/* 000350 */ 				var expecting_close_delim = __getitem__ (expecting_close, 'close_delim');
+/* 000351 */ 				var expecting_close_tok = __getitem__ (expecting_close, 'tok');
+/* 000352 */ 				// pass;
+/* 000356 */ 				if (__t__ ((function () {
+/* 000356 */ 					var __accu0__ = s;
+/* 000356 */ 					return __call__ (__accu0__.startswith, __accu0__, expecting_close_delim, pos);
+/* 000356 */ 				}) ())) {
+/* 000357 */ 					// pass;
+/* 000362 */ 					return (function () {
+/* 000362 */ 						var __accu0__ = self;
+/* 000365 */ 						return __call__ (__accu0__.make_token, __accu0__, __kwargtrans__ ({tok: expecting_close_tok, arg: expecting_close_delim, pos: pos, pos_end: __add__ (pos, __call__ (len, null, expecting_close_delim)), pre_space: pre_space}));
+/* 000365 */ 					}) ();
+/* 000365 */ 				}
+/* 000365 */ 			}
+/* 000365 */ 		}
+/* 000377 */ 		var __iterable0__ = parsing_state._math_all_delims_by_len;
+/* 000377 */ 		for (var __index0__ = 0; __index0__ < len (__iterable0__); __index0__++) {
+/* 000377 */ 			var __left0__ = __getitem__ (__iterable0__, __index0__);
+/* 000377 */ 			var delim = __left0__ [0];
+/* 000377 */ 			var tok_type = __left0__ [1];
+/* 000378 */ 			if (__t__ ((function () {
+/* 000378 */ 				var __accu0__ = s;
+/* 000378 */ 				return __call__ (__accu0__.startswith, __accu0__, delim, pos);
+/* 000378 */ 			}) ())) {
+/* 000379 */ 				// pass;
+/* 000384 */ 				return (function () {
+/* 000384 */ 					var __accu0__ = self;
+/* 000385 */ 					return __call__ (__accu0__.make_token, __accu0__, __kwargtrans__ ({tok: tok_type, arg: delim, pos: pos, pos_end: __add__ (pos, __call__ (len, null, delim)), pre_space: pre_space}));
+/* 000385 */ 				}) ();
+/* 000385 */ 			}
+/* 000385 */ 		}
+/* 000388 */ 		return null;
+/* 000388 */ 	});},
+/* 000391 */ 	get impl_read_macro () {return __get__ (this, function (self, s, pos, parsing_state, pre_space) {
+/* 000391 */ 		if (arguments.length) {
+/* 000391 */ 			var __ilastarg0__ = arguments.length - 1;
+/* 000391 */ 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+/* 000391 */ 				var __allkwargs0__ = arguments [__ilastarg0__--];
+/* 000391 */ 				for (var __attrib0__ in __allkwargs0__) {
+/* 000391 */ 					switch (__attrib0__) {
+/* 000391 */ 						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+/* 000391 */ 						case 's': var s = __allkwargs0__ [__attrib0__]; break;
+/* 000391 */ 						case 'pos': var pos = __allkwargs0__ [__attrib0__]; break;
+/* 000391 */ 						case 'parsing_state': var parsing_state = __allkwargs0__ [__attrib0__]; break;
+/* 000391 */ 						case 'pre_space': var pre_space = __allkwargs0__ [__attrib0__]; break;
+/* 000391 */ 					}
+/* 000391 */ 				}
+/* 000391 */ 			}
+/* 000391 */ 		}
+/* 000391 */ 		else {
+/* 000391 */ 		}
+/* 000393 */ 		if (__t__ (__ne__ (__getitem__ (s, pos), '\\'))) {
+/* 000394 */ 			var __except0__ = __call__ (ValueError, null, "Internal error, expected '\\' in impl_read_macro()");
+/* 000394 */ 			__except0__.__cause__ = null;
+/* 000394 */ 			throw __except0__;
+/* 000394 */ 		}
+/* 000398 */ 		if (__t__ (__ge__ (__add__ (pos, 1), __call__ (len, null, s)))) {
+/* 000403 */ 			var __except0__ = __call__ (LatexWalkerTokenParseError, null, __kwargtrans__ ({s: s, pos: __add__ (pos, 1), msg: 'Expected macro name after ‘\\’ escape character', recovery_token_placeholder: (function () {
+/* 000403 */ 				var __accu0__ = self;
+/* 000403 */ 				return __call__ (__accu0__.make_token, __accu0__, __kwargtrans__ ({tok: 'char', arg: '', pos: pos, pos_end: pos, pre_space: pre_space}));
+/* 000410 */ 			}) (), recovery_token_at_pos: __call__ (len, null, s)}));
+/* 000410 */ 			__except0__.__cause__ = null;
+/* 000410 */ 			throw __except0__;
 /* 000410 */ 		}
-/* 000413 */ 		var post_space = '';
-/* 000414 */ 		if (__t__ (isalphamacro)) {
-/* 000416 */ 			var __left0__ = (function () {
-/* 000416 */ 				var __accu0__ = self;
-/* 000416 */ 				return __call__ (__accu0__.impl_peek_space_chars, __accu0__, s, posi, parsing_state);
-/* 000416 */ 			}) ();
-/* 000416 */ 			var post_space = __left0__ [0];
-/* 000416 */ 			var post_space_pos = __left0__ [1];
-/* 000416 */ 			var post_space_pos_end = __left0__ [2];
-/* 000417 */ 			var posi = post_space_pos_end;
-/* 000417 */ 		}
-/* 000419 */ 		return (function () {
-/* 000419 */ 			var __accu0__ = self;
-/* 000419 */ 			return __call__ (__accu0__.make_token, __accu0__, __kwargtrans__ ({tok: 'macro', arg: macro, pos: pos, pos_end: posi, pre_space: pre_space, post_space: post_space}));
-/* 000419 */ 		}) ();
-/* 000419 */ 	});},
-/* 000424 */ 	get impl_read_environment () {return __get__ (this, function (self, s, pos, parsing_state, beginend, pre_space) {
-/* 000424 */ 		if (arguments.length) {
-/* 000424 */ 			var __ilastarg0__ = arguments.length - 1;
-/* 000424 */ 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-/* 000424 */ 				var __allkwargs0__ = arguments [__ilastarg0__--];
-/* 000424 */ 				for (var __attrib0__ in __allkwargs0__) {
-/* 000424 */ 					switch (__attrib0__) {
-/* 000424 */ 						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-/* 000424 */ 						case 's': var s = __allkwargs0__ [__attrib0__]; break;
-/* 000424 */ 						case 'pos': var pos = __allkwargs0__ [__attrib0__]; break;
-/* 000424 */ 						case 'parsing_state': var parsing_state = __allkwargs0__ [__attrib0__]; break;
-/* 000424 */ 						case 'beginend': var beginend = __allkwargs0__ [__attrib0__]; break;
-/* 000424 */ 						case 'pre_space': var pre_space = __allkwargs0__ [__attrib0__]; break;
-/* 000424 */ 					}
-/* 000424 */ 				}
-/* 000424 */ 			}
-/* 000424 */ 		}
-/* 000424 */ 		else {
-/* 000424 */ 		}
-/* 000426 */ 		if (__t__ (__ne__ (__getslice__ (s, pos, __add__ (__add__ (pos, 1), __call__ (len, null, beginend)), 1), __add__ (parsing_state.macro_escape_char, beginend)))) {
-/* 000428 */ 			var __except0__ = __call__ (ValueError, null, (function () {
-/* 000428 */ 				var __accu0__ = 'Internal error, expected ‘\\{}’ in read_environment()';
-/* 000428 */ 				return __call__ (__accu0__.format, __accu0__, beginend);
-/* 000428 */ 			}) ());
-/* 000428 */ 			__except0__.__cause__ = null;
-/* 000428 */ 			throw __except0__;
-/* 000428 */ 		}
-/* 000432 */ 		var pos_envname = __add__ (__add__ (pos, 1), __call__ (len, null, beginend));
-/* 000435 */ 		var __left0__ = (function () {
-/* 000435 */ 			var __accu0__ = self;
-/* 000435 */ 			return __call__ (__accu0__._parse_latex_environment_name, __accu0__, s, pos, beginend, pos_envname);
-/* 000435 */ 		}) ();
-/* 000435 */ 		var environment_name = __left0__ [0];
-/* 000435 */ 		var environment_pos_end = __left0__ [1];
-/* 000437 */ 		// pass;
-/* 000445 */ 		if (__t__ (environment_name === null)) {
-/* 000446 */ 			var tokarg = __add__ (parsing_state.macro_escape_char, beginend);
-/* 000448 */ 			var __except0__ = __call__ (LatexWalkerTokenParseError, null, __kwargtrans__ ({msg: (function () {
-/* 000448 */ 				var __accu0__ = 'Bad ‘\\{}’ call: expected {{environmentname}}';
-/* 000448 */ 				return __call__ (__accu0__.format, __accu0__, beginend);
-/* 000457 */ 			}) (), pos: pos, recovery_token_placeholder: __call__ (LatexToken, null, __kwargtrans__ ({tok: 'char', arg: tokarg, pos: pos, pos_end: __add__ (pos, __call__ (len, null, tokarg)), pre_space: pre_space})), recovery_token_at_pos: __add__ (pos, __call__ (len, null, tokarg))}));
-/* 000457 */ 			__except0__.__cause__ = null;
-/* 000457 */ 			throw __except0__;
-/* 000457 */ 		}
-/* 000460 */ 		var env_token = (function () {
-/* 000460 */ 			var __accu0__ = self;
-/* 000460 */ 			return __call__ (__accu0__.make_token, __accu0__, __kwargtrans__ ({tok: __add__ (beginend, '_environment'), arg: environment_name, pos: pos, pos_end: environment_pos_end, pre_space: pre_space}));
-/* 000460 */ 		}) ();
-/* 000467 */ 		// pass;
-/* 000470 */ 		return env_token;
-/* 000470 */ 	});},
-/* 000472 */ 	get impl_read_comment () {return __get__ (this, function (self, s, pos, parsing_state, pre_space) {
-/* 000472 */ 		if (arguments.length) {
-/* 000472 */ 			var __ilastarg0__ = arguments.length - 1;
-/* 000472 */ 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-/* 000472 */ 				var __allkwargs0__ = arguments [__ilastarg0__--];
-/* 000472 */ 				for (var __attrib0__ in __allkwargs0__) {
-/* 000472 */ 					switch (__attrib0__) {
-/* 000472 */ 						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-/* 000472 */ 						case 's': var s = __allkwargs0__ [__attrib0__]; break;
-/* 000472 */ 						case 'pos': var pos = __allkwargs0__ [__attrib0__]; break;
-/* 000472 */ 						case 'parsing_state': var parsing_state = __allkwargs0__ [__attrib0__]; break;
-/* 000472 */ 						case 'pre_space': var pre_space = __allkwargs0__ [__attrib0__]; break;
-/* 000472 */ 					}
-/* 000472 */ 				}
-/* 000472 */ 			}
-/* 000472 */ 		}
-/* 000472 */ 		else {
-/* 000472 */ 		}
-/* 000474 */ 		if (__t__ (__ne__ (__getitem__ (s, pos), parsing_state.comment_char))) {
-/* 000475 */ 			var __except0__ = __call__ (ValueError, null, (function () {
-/* 000475 */ 				var __accu0__ = 'Internal error, expected comment char ‘{}’ in read_comment()';
-/* 000475 */ 				return __call__ (__accu0__.format, __accu0__, parsing_state.comment_char);
-/* 000475 */ 			}) ());
-/* 000475 */ 			__except0__.__cause__ = null;
-/* 000475 */ 			throw __except0__;
-/* 000475 */ 		}
-/* 000478 */ 		var sppos = (function () {
-/* 000478 */ 			var __accu0__ = s;
-/* 000478 */ 			return __call__ (__accu0__.find, __accu0__, '\n', pos);
-/* 000478 */ 		}) ();
-/* 000479 */ 		if (__t__ (__eq__ (sppos, __neg__ (1)))) {
-/* 000481 */ 			var comment_pos_end = __call__ (len, null, s);
-/* 000482 */ 			var comment_with_whitespace_pos_end = __call__ (len, null, s);
-/* 000483 */ 			var post_space = '';
-/* 000483 */ 		}
+/* 000413 */ 		var c = __getitem__ (s, __add__ (pos, 1));
+/* 000414 */ 		var macro = c;
+/* 000417 */ 		var isalphamacro = __in__ (c, parsing_state.macro_alpha_chars);
+/* 000418 */ 		var posi = __add__ (pos, 2);
+/* 000419 */ 		if (__t__ (isalphamacro)) {
+/* 000420 */ 			while (__t__ (__t__ (__lt__ (posi, __call__ (len, null, s))) && __in__ (__getitem__ (s, posi), parsing_state.macro_alpha_chars))) {
+/* 000421 */ 				var macro = __call__ (__iadd__, null, macro, __getitem__ (s, posi));
+/* 000422 */ 				var posi = __call__ (__iadd__, null, posi, 1);
+/* 000422 */ 			}
+/* 000422 */ 		}
+/* 000425 */ 		var post_space = '';
+/* 000426 */ 		if (__t__ (isalphamacro)) {
+/* 000428 */ 			var __left0__ = (function () {
+/* 000428 */ 				var __accu0__ = self;
+/* 000428 */ 				return __call__ (__accu0__.impl_peek_space_chars, __accu0__, s, posi, parsing_state);
+/* 000428 */ 			}) ();
+/* 000428 */ 			var post_space = __left0__ [0];
+/* 000428 */ 			var post_space_pos = __left0__ [1];
+/* 000428 */ 			var post_space_pos_end = __left0__ [2];
+/* 000429 */ 			var posi = post_space_pos_end;
+/* 000429 */ 		}
+/* 000431 */ 		return (function () {
+/* 000431 */ 			var __accu0__ = self;
+/* 000431 */ 			return __call__ (__accu0__.make_token, __accu0__, __kwargtrans__ ({tok: 'macro', arg: macro, pos: pos, pos_end: posi, pre_space: pre_space, post_space: post_space}));
+/* 000431 */ 		}) ();
+/* 000431 */ 	});},
+/* 000436 */ 	get impl_read_environment () {return __get__ (this, function (self, s, pos, parsing_state, beginend, pre_space) {
+/* 000436 */ 		if (arguments.length) {
+/* 000436 */ 			var __ilastarg0__ = arguments.length - 1;
+/* 000436 */ 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+/* 000436 */ 				var __allkwargs0__ = arguments [__ilastarg0__--];
+/* 000436 */ 				for (var __attrib0__ in __allkwargs0__) {
+/* 000436 */ 					switch (__attrib0__) {
+/* 000436 */ 						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+/* 000436 */ 						case 's': var s = __allkwargs0__ [__attrib0__]; break;
+/* 000436 */ 						case 'pos': var pos = __allkwargs0__ [__attrib0__]; break;
+/* 000436 */ 						case 'parsing_state': var parsing_state = __allkwargs0__ [__attrib0__]; break;
+/* 000436 */ 						case 'beginend': var beginend = __allkwargs0__ [__attrib0__]; break;
+/* 000436 */ 						case 'pre_space': var pre_space = __allkwargs0__ [__attrib0__]; break;
+/* 000436 */ 					}
+/* 000436 */ 				}
+/* 000436 */ 			}
+/* 000436 */ 		}
+/* 000436 */ 		else {
+/* 000436 */ 		}
+/* 000438 */ 		if (__t__ (__ne__ (__getslice__ (s, pos, __add__ (__add__ (pos, 1), __call__ (len, null, beginend)), 1), __add__ (parsing_state.macro_escape_char, beginend)))) {
+/* 000440 */ 			var __except0__ = __call__ (ValueError, null, (function () {
+/* 000440 */ 				var __accu0__ = 'Internal error, expected ‘\\{}’ in read_environment()';
+/* 000440 */ 				return __call__ (__accu0__.format, __accu0__, beginend);
+/* 000440 */ 			}) ());
+/* 000440 */ 			__except0__.__cause__ = null;
+/* 000440 */ 			throw __except0__;
+/* 000440 */ 		}
+/* 000444 */ 		var pos_envname = __add__ (__add__ (pos, 1), __call__ (len, null, beginend));
+/* 000447 */ 		var __left0__ = (function () {
+/* 000447 */ 			var __accu0__ = self;
+/* 000447 */ 			return __call__ (__accu0__._parse_latex_environment_name, __accu0__, s, pos, beginend, pos_envname);
+/* 000447 */ 		}) ();
+/* 000447 */ 		var environment_name = __left0__ [0];
+/* 000447 */ 		var environment_pos_end = __left0__ [1];
+/* 000449 */ 		// pass;
+/* 000457 */ 		if (__t__ (environment_name === null)) {
+/* 000458 */ 			var tokarg = __add__ (parsing_state.macro_escape_char, beginend);
+/* 000460 */ 			var __except0__ = __call__ (LatexWalkerTokenParseError, null, __kwargtrans__ ({msg: (function () {
+/* 000460 */ 				var __accu0__ = 'Bad ‘\\{}’ call: expected {{environmentname}}';
+/* 000460 */ 				return __call__ (__accu0__.format, __accu0__, beginend);
+/* 000469 */ 			}) (), pos: pos, recovery_token_placeholder: __call__ (LatexToken, null, __kwargtrans__ ({tok: 'char', arg: tokarg, pos: pos, pos_end: __add__ (pos, __call__ (len, null, tokarg)), pre_space: pre_space})), recovery_token_at_pos: __add__ (pos, __call__ (len, null, tokarg))}));
+/* 000469 */ 			__except0__.__cause__ = null;
+/* 000469 */ 			throw __except0__;
+/* 000469 */ 		}
+/* 000472 */ 		var env_token = (function () {
+/* 000472 */ 			var __accu0__ = self;
+/* 000472 */ 			return __call__ (__accu0__.make_token, __accu0__, __kwargtrans__ ({tok: __add__ (beginend, '_environment'), arg: environment_name, pos: pos, pos_end: environment_pos_end, pre_space: pre_space}));
+/* 000472 */ 		}) ();
+/* 000479 */ 		// pass;
+/* 000482 */ 		return env_token;
+/* 000482 */ 	});},
+/* 000484 */ 	get impl_read_comment () {return __get__ (this, function (self, s, pos, parsing_state, pre_space) {
+/* 000484 */ 		if (arguments.length) {
+/* 000484 */ 			var __ilastarg0__ = arguments.length - 1;
+/* 000484 */ 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+/* 000484 */ 				var __allkwargs0__ = arguments [__ilastarg0__--];
+/* 000484 */ 				for (var __attrib0__ in __allkwargs0__) {
+/* 000484 */ 					switch (__attrib0__) {
+/* 000484 */ 						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+/* 000484 */ 						case 's': var s = __allkwargs0__ [__attrib0__]; break;
+/* 000484 */ 						case 'pos': var pos = __allkwargs0__ [__attrib0__]; break;
+/* 000484 */ 						case 'parsing_state': var parsing_state = __allkwargs0__ [__attrib0__]; break;
+/* 000484 */ 						case 'pre_space': var pre_space = __allkwargs0__ [__attrib0__]; break;
+/* 000484 */ 					}
+/* 000484 */ 				}
+/* 000484 */ 			}
+/* 000484 */ 		}
 /* 000484 */ 		else {
-/* 000488 */ 			var __left0__ = (function () {
-/* 000488 */ 				var __accu0__ = self;
-/* 000488 */ 				return __call__ (__accu0__.impl_peek_space_chars, __accu0__, s, sppos, parsing_state);
-/* 000488 */ 			}) ();
-/* 000488 */ 			var post_space = __left0__ [0];
-/* 000488 */ 			var post_space_pos = __left0__ [1];
-/* 000488 */ 			var post_space_pos_end = __left0__ [2];
-/* 000489 */ 			var comment_pos_end = sppos;
-/* 000490 */ 			var comment_with_whitespace_pos_end = post_space_pos_end;
-/* 000490 */ 		}
-/* 000492 */ 		return (function () {
-/* 000492 */ 			var __accu0__ = self;
-/* 000492 */ 			return __call__ (__accu0__.make_token, __accu0__, __kwargtrans__ ({tok: 'comment', arg: __getslice__ (s, __add__ (pos, 1), comment_pos_end, 1), pos: pos, pos_end: comment_with_whitespace_pos_end, pre_space: pre_space, post_space: post_space}));
-/* 000492 */ 		}) ();
-/* 000492 */ 	});}
-/* 000492 */ });
+/* 000484 */ 		}
+/* 000486 */ 		if (__t__ (__ne__ (__getitem__ (s, pos), parsing_state.comment_char))) {
+/* 000487 */ 			var __except0__ = __call__ (ValueError, null, (function () {
+/* 000487 */ 				var __accu0__ = 'Internal error, expected comment char ‘{}’ in read_comment()';
+/* 000487 */ 				return __call__ (__accu0__.format, __accu0__, parsing_state.comment_char);
+/* 000487 */ 			}) ());
+/* 000487 */ 			__except0__.__cause__ = null;
+/* 000487 */ 			throw __except0__;
+/* 000487 */ 		}
+/* 000490 */ 		var sppos = (function () {
+/* 000490 */ 			var __accu0__ = s;
+/* 000490 */ 			return __call__ (__accu0__.find, __accu0__, '\n', pos);
+/* 000490 */ 		}) ();
+/* 000491 */ 		if (__t__ (__eq__ (sppos, __neg__ (1)))) {
+/* 000493 */ 			var comment_pos_end = __call__ (len, null, s);
+/* 000494 */ 			var comment_with_whitespace_pos_end = __call__ (len, null, s);
+/* 000495 */ 			var post_space = '';
+/* 000495 */ 		}
+/* 000496 */ 		else {
+/* 000500 */ 			var __left0__ = (function () {
+/* 000500 */ 				var __accu0__ = self;
+/* 000500 */ 				return __call__ (__accu0__.impl_peek_space_chars, __accu0__, s, sppos, parsing_state);
+/* 000500 */ 			}) ();
+/* 000500 */ 			var post_space = __left0__ [0];
+/* 000500 */ 			var post_space_pos = __left0__ [1];
+/* 000500 */ 			var post_space_pos_end = __left0__ [2];
+/* 000501 */ 			var comment_pos_end = sppos;
+/* 000502 */ 			var comment_with_whitespace_pos_end = post_space_pos_end;
+/* 000502 */ 		}
+/* 000504 */ 		return (function () {
+/* 000504 */ 			var __accu0__ = self;
+/* 000504 */ 			return __call__ (__accu0__.make_token, __accu0__, __kwargtrans__ ({tok: 'comment', arg: __getslice__ (s, __add__ (pos, 1), comment_pos_end, 1), pos: pos, pos_end: comment_with_whitespace_pos_end, pre_space: pre_space, post_space: post_space}));
+/* 000504 */ 		}) ();
+/* 000504 */ 	});}
+/* 000504 */ });
 /* 000037 */ 
 //# sourceMappingURL=pylatexenc.latexnodes._tokenreader.map
