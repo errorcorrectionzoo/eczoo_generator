@@ -217,7 +217,13 @@ class EczEditSchemaFieldScalarType extends React.Component
                     this.props.onChange(value);
                 }}
               />
-              <MiniLatexPreviewPane minilatex={value} />
+              {
+                  value
+                  ?
+                      <MiniLatexPreviewPane minilatex={value} />
+                  :
+                      []
+              }
             </div>
         );
 

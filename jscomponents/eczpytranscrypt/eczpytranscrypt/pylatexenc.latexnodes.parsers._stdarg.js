@@ -1,4 +1,4 @@
-/* 000001 */ // Transcrypt'ed from Python, 2022-04-16 00:56:58
+/* 000001 */ // Transcrypt'ed from Python, 2022-04-16 19:30:52
 /* 000038 */ var logging = {};
 /* 000038 */ import {AssertionError, AttributeError, BaseException, DeprecationWarning, Exception, IndexError, IterableError, KeyError, NotImplementedError, RuntimeWarning, StopIteration, UserWarning, ValueError, Warning, __JsIterator__, __PyIterator__, __Terminal__, __add__, __and__, __call__, __class__, __envir__, __eq__, __floordiv__, __ge__, __get__, __getcm__, __getitem__, __getslice__, __getsm__, __gt__, __i__, __iadd__, __iand__, __idiv__, __ijsmod__, __ilshift__, __imatmul__, __imod__, __imul__, __in__, __init__, __ior__, __ipow__, __irshift__, __isub__, __ixor__, __jsUsePyNext__, __jsmod__, __k__, __kwargtrans__, __le__, __lshift__, __lt__, __matmul__, __mergefields__, __mergekwargtrans__, __mod__, __mul__, __ne__, __neg__, __nest__, __or__, __pow__, __pragma__, __pyUseJsNext__, __rshift__, __setitem__, __setproperty__, __setslice__, __sort__, __specialattrib__, __sub__, __super__, __t__, __terminal__, __truediv__, __withblock__, __xor__, abs, all, any, assert, bool, bytearray, bytes, callable, chr, copy, deepcopy, delattr, dict, dir, divmod, enumerate, filter, float, format, getattr, hasattr, input, int, isinstance, issubclass, len, list, map, max, min, object, ord, pow, print, property, py_TypeError, py_iter, py_metatype, py_next, py_reversed, py_typeof, range, repr, round, set, setattr, sorted, str, sum, tuple, zip} from './org.transcrypt.__runtime__.js';
 /* 000053 */ import {LatexDelimitedVerbatimParser} from './pylatexenc.latexnodes.parsers._verbatim.js';
@@ -11,7 +11,7 @@
 /* 000041 */ import {LatexWalkerParseError, LatexWalkerTokenParseError} from './pylatexenc.latexnodes._exctypes.js';
 /* 000038 */ import * as __module_logging__ from './logging.js';
 /* 000038 */ __nest__ (logging, '', __module_logging__);
-/* 000038 */ export {LatexEnvironmentNode, ParsedMacroArgs, LatexDelimitedExpressionParserInfo, LatexNode, LatexWalkerParseError, LatexDelimitedVerbatimParser, LatexDelimitedGroupParserInfo, LatexMathNode, LatexOptionalCharsMarkerParser, LatexNodeList, LatexCharsNode, LatexGroupNode, LatexGeneralNodesParser, LatexWalkerTokenParseError, LatexMacroNode, LatexExpressionParser, _update_posposend_from_nodelist, LatexParserBase, LatexSpecialsNode, LatexDelimitedGroupParser, _unicode_from_str, LatexCommentNode, __all__};
+/* 000038 */ export {LatexWalkerTokenParseError, LatexExpressionParser, ParsedMacroArgs, _unicode_from_str, LatexMathNode, LatexMacroNode, LatexDelimitedGroupParser, LatexWalkerParseError, LatexDelimitedExpressionParserInfo, LatexCommentNode, LatexNodeList, _update_posposend_from_nodelist, LatexDelimitedVerbatimParser, LatexGroupNode, LatexDelimitedGroupParserInfo, LatexParserBase, LatexEnvironmentNode, LatexCharsNode, LatexSpecialsNode, LatexNode, LatexOptionalCharsMarkerParser, __all__, LatexGeneralNodesParser};
 /* 000001 */ var __name__ = 'pylatexenc.latexnodes.parsers._stdarg';
 /* 000039 */ export var logger = (function () {
 /* 000039 */ 	var __accu0__ = logging;
@@ -360,7 +360,7 @@
 /* 000306 */ });
 /* 000314 */ export var LatexCharsCommaSeparatedListParser =  __class__ ('LatexCharsCommaSeparatedListParser', [LatexDelimitedGroupParser], {
 /* 000314 */ 	__module__: __name__,
-/* 000317 */ 	get __init__ () {return __get__ (this, function (self, comma_char, delimiters, enable_comments, enable_groups) {
+/* 000317 */ 	get __init__ () {return __get__ (this, function (self, comma_char, delimiters, enable_comments, enable_groups, keep_empty_parts) {
 /* 000317 */ 		if (typeof comma_char == 'undefined' || (comma_char != null && comma_char.hasOwnProperty ("__kwargtrans__"))) {;
 /* 000317 */ 			var comma_char = ',';
 /* 000317 */ 		};
@@ -372,6 +372,9 @@
 /* 000317 */ 		};
 /* 000317 */ 		if (typeof enable_groups == 'undefined' || (enable_groups != null && enable_groups.hasOwnProperty ("__kwargtrans__"))) {;
 /* 000317 */ 			var enable_groups = true;
+/* 000317 */ 		};
+/* 000317 */ 		if (typeof keep_empty_parts == 'undefined' || (keep_empty_parts != null && keep_empty_parts.hasOwnProperty ("__kwargtrans__"))) {;
+/* 000317 */ 			var keep_empty_parts = false;
 /* 000317 */ 		};
 /* 000317 */ 		var kwargs = dict ();
 /* 000317 */ 		if (arguments.length) {
@@ -385,6 +388,7 @@
 /* 000317 */ 						case 'delimiters': var delimiters = __allkwargs0__ [__attrib0__]; break;
 /* 000317 */ 						case 'enable_comments': var enable_comments = __allkwargs0__ [__attrib0__]; break;
 /* 000317 */ 						case 'enable_groups': var enable_groups = __allkwargs0__ [__attrib0__]; break;
+/* 000317 */ 						case 'keep_empty_parts': var keep_empty_parts = __allkwargs0__ [__attrib0__]; break;
 /* 000317 */ 						default: kwargs [__attrib0__] = __allkwargs0__ [__attrib0__];
 /* 000317 */ 					}
 /* 000317 */ 				}
@@ -393,237 +397,265 @@
 /* 000317 */ 		}
 /* 000317 */ 		else {
 /* 000317 */ 		}
-/* 000319 */ 		__call__ (__call__ (__super__, null, LatexCharsCommaSeparatedListParser, '__init__'), null, self, __kwargtrans__ (__mergekwargtrans__ ({delimiters: delimiters, delimited_expression_parser_info_class: LatexCharsCommaSeparatedListParser.CommaSepParserInfo}, kwargs)));
-/* 000326 */ 		self.comma_char = comma_char;
-/* 000327 */ 		self.enable_comments = enable_comments;
-/* 000328 */ 		self.enable_groups = enable_groups;
-/* 000330 */ 	});},
-/* 000330 */ 	CommaSepParserInfo: __class__ ('CommaSepParserInfo', [LatexDelimitedGroupParserInfo], {
-/* 000330 */ 		__module__: __name__,
-/* 000331 */ 		get initialize () {return __get__ (this, function (self) {
-/* 000331 */ 			if (arguments.length) {
-/* 000331 */ 				var __ilastarg0__ = arguments.length - 1;
-/* 000331 */ 				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-/* 000331 */ 					var __allkwargs0__ = arguments [__ilastarg0__--];
-/* 000331 */ 					for (var __attrib0__ in __allkwargs0__) {
-/* 000331 */ 						switch (__attrib0__) {
-/* 000331 */ 							case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-/* 000331 */ 						}
-/* 000331 */ 					}
-/* 000331 */ 				}
-/* 000331 */ 			}
-/* 000331 */ 			else {
-/* 000331 */ 			}
-/* 000332 */ 			self.comma_char = self.delimited_expression_parser.comma_char;
-/* 000334 */ 			self.contents_parsing_state = (function () {
-/* 000334 */ 				var __accu0__ = self.group_parsing_state;
-/* 000334 */ 				return __call__ (__accu0__.sub_context, __accu0__, __kwargtrans__ ({enable_macros: false, enable_environments: false, enable_comments: self.delimited_expression_parser.enable_comments, enable_groups: self.delimited_expression_parser.enable_groups, enable_specials: false, enable_math: false}));
-/* 000334 */ 			}) ();
-/* 000342 */ 			self.child_parsing_state = self.parsing_state;
-/* 000344 */ 			self.parsed_delimiters = (function () {
-/* 000344 */ 				var __accu0__ = self;
-/* 000344 */ 				return __call__ (__accu0__.get_parsed_delimiters, __accu0__);
-/* 000344 */ 			}) ();
-/* 000346 */ 			// pass;
-/* 000346 */ 		});},
-/* 000350 */ 		get make_content_parser () {return __get__ (this, function (self, latex_walker, token_reader) {
-/* 000350 */ 			if (arguments.length) {
-/* 000350 */ 				var __ilastarg0__ = arguments.length - 1;
-/* 000350 */ 				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-/* 000350 */ 					var __allkwargs0__ = arguments [__ilastarg0__--];
-/* 000350 */ 					for (var __attrib0__ in __allkwargs0__) {
-/* 000350 */ 						switch (__attrib0__) {
-/* 000350 */ 							case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-/* 000350 */ 							case 'latex_walker': var latex_walker = __allkwargs0__ [__attrib0__]; break;
-/* 000350 */ 							case 'token_reader': var token_reader = __allkwargs0__ [__attrib0__]; break;
-/* 000350 */ 						}
-/* 000350 */ 					}
-/* 000350 */ 				}
-/* 000350 */ 			}
-/* 000350 */ 			else {
-/* 000350 */ 			}
-/* 000351 */ 			return __call__ (_CommaSepContentCustomParser, null, self);
-/* 000351 */ 		});}
-/* 000351 */ 	})
-/* 000351 */ });
-/* 000354 */ export var _CommaSepContentCustomParser =  __class__ ('_CommaSepContentCustomParser', [LatexParserBase], {
-/* 000354 */ 	__module__: __name__,
-/* 000355 */ 	get __init__ () {return __get__ (this, function (self, contents_parser_info) {
-/* 000355 */ 		if (arguments.length) {
-/* 000355 */ 			var __ilastarg0__ = arguments.length - 1;
-/* 000355 */ 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-/* 000355 */ 				var __allkwargs0__ = arguments [__ilastarg0__--];
-/* 000355 */ 				for (var __attrib0__ in __allkwargs0__) {
-/* 000355 */ 					switch (__attrib0__) {
-/* 000355 */ 						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-/* 000355 */ 						case 'contents_parser_info': var contents_parser_info = __allkwargs0__ [__attrib0__]; break;
-/* 000355 */ 					}
-/* 000355 */ 				}
-/* 000355 */ 			}
-/* 000355 */ 		}
-/* 000355 */ 		else {
-/* 000355 */ 		}
-/* 000356 */ 		__call__ (__call__ (__super__, null, _CommaSepContentCustomParser, '__init__'), null, self);
-/* 000357 */ 		self.contents_parser_info = contents_parser_info;
-/* 000358 */ 		self.main_content_parser = __call__ (LatexGeneralNodesParser, null, __kwargtrans__ ({stop_token_condition: self.stop_token_condition, make_child_parsing_state: contents_parser_info.make_child_parsing_state, require_stop_condition_met: true, handle_stop_condition_token: self.handle_stop_condition_token, stop_condition_message: 'Expected ending of ‘{}’-separated group contents'.format (self.contents_parser_info.comma_char)}));
-/* 000370 */ 		self.current_parsing_state = self.contents_parser_info.contents_parsing_state;
-/* 000371 */ 		self.comma_sep_arg_list = [];
-/* 000372 */ 		self.carryover_info = null;
-/* 000373 */ 		self.parse_more = true;
-/* 000374 */ 		self.last_delimiter_token = null;
-/* 000375 */ 		self.last_element_pos_end = null;
-/* 000375 */ 	});},
-/* 000377 */ 	get stop_token_condition () {return __get__ (this, function (self, token) {
-/* 000377 */ 		if (arguments.length) {
-/* 000377 */ 			var __ilastarg0__ = arguments.length - 1;
-/* 000377 */ 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-/* 000377 */ 				var __allkwargs0__ = arguments [__ilastarg0__--];
-/* 000377 */ 				for (var __attrib0__ in __allkwargs0__) {
-/* 000377 */ 					switch (__attrib0__) {
-/* 000377 */ 						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-/* 000377 */ 						case 'token': var token = __allkwargs0__ [__attrib0__]; break;
-/* 000377 */ 					}
-/* 000377 */ 				}
-/* 000377 */ 			}
-/* 000377 */ 		}
-/* 000377 */ 		else {
-/* 000377 */ 		}
-/* 000378 */ 		// pass;
-/* 000381 */ 		if (__t__ (__t__ (__eq__ (token.tok, 'brace_close')) && __eq__ (token.arg, __getitem__ (self.contents_parser_info.parsed_delimiters, 1)))) {
-/* 000383 */ 			return true;
-/* 000383 */ 		}
-/* 000384 */ 		if (__t__ (__eq__ (token.tok, 'char'))) {
-/* 000385 */ 			if (__t__ (__eq__ (token.arg, __getitem__ (self.contents_parser_info.parsed_delimiters, 1)))) {
-/* 000386 */ 				return true;
-/* 000386 */ 			}
-/* 000387 */ 			else if (__t__ (__eq__ (token.arg, self.contents_parser_info.comma_char))) {
-/* 000388 */ 				return true;
-/* 000388 */ 			}
-/* 000389 */ 			return false;
-/* 000389 */ 		}
-/* 000390 */ 		return false;
-/* 000390 */ 	});},
-/* 000392 */ 	get handle_stop_condition_token () {return __get__ (this, function (self, token, latex_walker, token_reader, parsing_state) {
-/* 000392 */ 		if (arguments.length) {
-/* 000392 */ 			var __ilastarg0__ = arguments.length - 1;
-/* 000392 */ 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-/* 000392 */ 				var __allkwargs0__ = arguments [__ilastarg0__--];
-/* 000392 */ 				for (var __attrib0__ in __allkwargs0__) {
-/* 000392 */ 					switch (__attrib0__) {
-/* 000392 */ 						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-/* 000392 */ 						case 'token': var token = __allkwargs0__ [__attrib0__]; break;
-/* 000392 */ 						case 'latex_walker': var latex_walker = __allkwargs0__ [__attrib0__]; break;
-/* 000392 */ 						case 'token_reader': var token_reader = __allkwargs0__ [__attrib0__]; break;
-/* 000392 */ 						case 'parsing_state': var parsing_state = __allkwargs0__ [__attrib0__]; break;
-/* 000392 */ 					}
-/* 000392 */ 				}
-/* 000392 */ 			}
-/* 000392 */ 		}
-/* 000392 */ 		else {
-/* 000392 */ 		}
-/* 000394 */ 		(function () {
-/* 000394 */ 			var __accu0__ = token_reader;
-/* 000394 */ 			return __call__ (__accu0__.move_past_token, __accu0__, token);
-/* 000394 */ 		}) ();
-/* 000395 */ 		if (__t__ (__eq__ (token.tok, 'brace_close'))) {
-/* 000397 */ 			self.last_delimiter_token = null;
-/* 000398 */ 			self.last_element_pos_end = token.pos;
-/* 000399 */ 			self.parse_more = false;
-/* 000399 */ 		}
-/* 000400 */ 		else {
-/* 000401 */ 			self.last_delimiter_token = token;
-/* 000402 */ 			self.last_element_pos_end = token.pos_end;
-/* 000403 */ 			self.parse_more = true;
-/* 000403 */ 		}
-/* 000403 */ 	});},
-/* 000406 */ 	get __call__ () {return __get__ (this, function (self, latex_walker, token_reader, parsing_state) {
-/* 000406 */ 		if (arguments.length) {
-/* 000406 */ 			var __ilastarg0__ = arguments.length - 1;
-/* 000406 */ 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-/* 000406 */ 				var __allkwargs0__ = arguments [__ilastarg0__--];
-/* 000406 */ 				for (var __attrib0__ in __allkwargs0__) {
-/* 000406 */ 					switch (__attrib0__) {
-/* 000406 */ 						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-/* 000406 */ 						case 'latex_walker': var latex_walker = __allkwargs0__ [__attrib0__]; break;
-/* 000406 */ 						case 'token_reader': var token_reader = __allkwargs0__ [__attrib0__]; break;
-/* 000406 */ 						case 'parsing_state': var parsing_state = __allkwargs0__ [__attrib0__]; break;
-/* 000406 */ 					}
-/* 000406 */ 				}
-/* 000406 */ 			}
-/* 000406 */ 		}
-/* 000406 */ 		else {
-/* 000406 */ 		}
-/* 000408 */ 		// pass;
-/* 000412 */ 		self.parse_more = true;
-/* 000413 */ 		while (__t__ (self.parse_more)) {
-/* 000415 */ 			(function () {
-/* 000415 */ 				var __accu0__ = self;
-/* 000415 */ 				return __call__ (__accu0__._parse_one_commasep_arg, __accu0__, latex_walker, token_reader);
-/* 000415 */ 			}) ();
-/* 000417 */ 			if (__t__ (__t__ (self.parse_more) && self.carryover_info !== null)) {
-/* 000420 */ 				self.current_parsing_state = (function () {
-/* 000420 */ 					var __accu0__ = self.carryover_info;
-/* 000420 */ 					return __call__ (__accu0__.get_updated_parsing_state, __accu0__, self.current_parsing_state);
-/* 000420 */ 				}) ();
-/* 000420 */ 			}
-/* 000420 */ 		}
-/* 000424 */ 		return tuple ([__call__ (LatexNodeList, null, self.comma_sep_arg_list), self.carryover_info]);
-/* 000424 */ 	});},
-/* 000427 */ 	get _parse_one_commasep_arg () {return __get__ (this, function (self, latex_walker, token_reader) {
-/* 000427 */ 		if (arguments.length) {
-/* 000427 */ 			var __ilastarg0__ = arguments.length - 1;
-/* 000427 */ 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-/* 000427 */ 				var __allkwargs0__ = arguments [__ilastarg0__--];
-/* 000427 */ 				for (var __attrib0__ in __allkwargs0__) {
-/* 000427 */ 					switch (__attrib0__) {
-/* 000427 */ 						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-/* 000427 */ 						case 'latex_walker': var latex_walker = __allkwargs0__ [__attrib0__]; break;
-/* 000427 */ 						case 'token_reader': var token_reader = __allkwargs0__ [__attrib0__]; break;
-/* 000427 */ 					}
-/* 000427 */ 				}
+/* 000320 */ 		__call__ (__call__ (__super__, null, LatexCharsCommaSeparatedListParser, '__init__'), null, self, __kwargtrans__ (__mergekwargtrans__ ({delimiters: delimiters, delimited_expression_parser_info_class: LatexCharsCommaSeparatedListParser.CommaSepParserInfo}, kwargs)));
+/* 000327 */ 		self.comma_char = comma_char;
+/* 000328 */ 		self.enable_comments = enable_comments;
+/* 000329 */ 		self.enable_groups = enable_groups;
+/* 000330 */ 		self.keep_empty_parts = keep_empty_parts;
+/* 000332 */ 	});},
+/* 000332 */ 	CommaSepParserInfo: __class__ ('CommaSepParserInfo', [LatexDelimitedGroupParserInfo], {
+/* 000332 */ 		__module__: __name__,
+/* 000333 */ 		get initialize () {return __get__ (this, function (self) {
+/* 000333 */ 			if (arguments.length) {
+/* 000333 */ 				var __ilastarg0__ = arguments.length - 1;
+/* 000333 */ 				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+/* 000333 */ 					var __allkwargs0__ = arguments [__ilastarg0__--];
+/* 000333 */ 					for (var __attrib0__ in __allkwargs0__) {
+/* 000333 */ 						switch (__attrib0__) {
+/* 000333 */ 							case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+/* 000333 */ 						}
+/* 000333 */ 					}
+/* 000333 */ 				}
+/* 000333 */ 			}
+/* 000333 */ 			else {
+/* 000333 */ 			}
+/* 000334 */ 			self.comma_char = self.delimited_expression_parser.comma_char;
+/* 000336 */ 			self.contents_parsing_state = (function () {
+/* 000336 */ 				var __accu0__ = self.group_parsing_state;
+/* 000336 */ 				return __call__ (__accu0__.sub_context, __accu0__, __kwargtrans__ ({enable_macros: false, enable_environments: false, enable_comments: self.delimited_expression_parser.enable_comments, enable_groups: self.delimited_expression_parser.enable_groups, enable_specials: false, enable_math: false}));
+/* 000336 */ 			}) ();
+/* 000344 */ 			self.child_parsing_state = self.parsing_state;
+/* 000346 */ 			self.parsed_delimiters = (function () {
+/* 000346 */ 				var __accu0__ = self;
+/* 000346 */ 				return __call__ (__accu0__.get_parsed_delimiters, __accu0__);
+/* 000346 */ 			}) ();
+/* 000348 */ 			// pass;
+/* 000348 */ 		});},
+/* 000352 */ 		get make_content_parser () {return __get__ (this, function (self, latex_walker, token_reader) {
+/* 000352 */ 			if (arguments.length) {
+/* 000352 */ 				var __ilastarg0__ = arguments.length - 1;
+/* 000352 */ 				if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+/* 000352 */ 					var __allkwargs0__ = arguments [__ilastarg0__--];
+/* 000352 */ 					for (var __attrib0__ in __allkwargs0__) {
+/* 000352 */ 						switch (__attrib0__) {
+/* 000352 */ 							case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+/* 000352 */ 							case 'latex_walker': var latex_walker = __allkwargs0__ [__attrib0__]; break;
+/* 000352 */ 							case 'token_reader': var token_reader = __allkwargs0__ [__attrib0__]; break;
+/* 000352 */ 						}
+/* 000352 */ 					}
+/* 000352 */ 				}
+/* 000352 */ 			}
+/* 000352 */ 			else {
+/* 000352 */ 			}
+/* 000353 */ 			return __call__ (_CommaSepContentCustomParser, null, self);
+/* 000353 */ 		});}
+/* 000353 */ 	})
+/* 000353 */ });
+/* 000356 */ export var _CommaSepContentCustomParser =  __class__ ('_CommaSepContentCustomParser', [LatexParserBase], {
+/* 000356 */ 	__module__: __name__,
+/* 000357 */ 	get __init__ () {return __get__ (this, function (self, contents_parser_info) {
+/* 000357 */ 		if (arguments.length) {
+/* 000357 */ 			var __ilastarg0__ = arguments.length - 1;
+/* 000357 */ 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+/* 000357 */ 				var __allkwargs0__ = arguments [__ilastarg0__--];
+/* 000357 */ 				for (var __attrib0__ in __allkwargs0__) {
+/* 000357 */ 					switch (__attrib0__) {
+/* 000357 */ 						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+/* 000357 */ 						case 'contents_parser_info': var contents_parser_info = __allkwargs0__ [__attrib0__]; break;
+/* 000357 */ 					}
+/* 000357 */ 				}
+/* 000357 */ 			}
+/* 000357 */ 		}
+/* 000357 */ 		else {
+/* 000357 */ 		}
+/* 000358 */ 		__call__ (__call__ (__super__, null, _CommaSepContentCustomParser, '__init__'), null, self);
+/* 000359 */ 		self.contents_parser_info = contents_parser_info;
+/* 000360 */ 		self.main_content_parser = __call__ (LatexGeneralNodesParser, null, __kwargtrans__ ({stop_token_condition: self.stop_token_condition, make_child_parsing_state: contents_parser_info.make_child_parsing_state, require_stop_condition_met: true, handle_stop_condition_token: self.handle_stop_condition_token, stop_condition_message: 'Expected ending of ‘{}’-separated group contents'.format (self.contents_parser_info.comma_char)}));
+/* 000372 */ 		self.current_parsing_state = self.contents_parser_info.contents_parsing_state;
+/* 000373 */ 		self.comma_sep_arg_list = [];
+/* 000374 */ 		self.carryover_info = null;
+/* 000375 */ 		self.parse_more = true;
+/* 000376 */ 		self.pos_start = null;
+/* 000377 */ 		self.is_very_first_element = true;
+/* 000378 */ 		self.last_element_pos_start = null;
+/* 000379 */ 		self.last_delimiter_token = null;
+/* 000380 */ 		self.last_element_pos_end = null;
+/* 000380 */ 	});},
+/* 000382 */ 	get stop_token_condition () {return __get__ (this, function (self, token) {
+/* 000382 */ 		if (arguments.length) {
+/* 000382 */ 			var __ilastarg0__ = arguments.length - 1;
+/* 000382 */ 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+/* 000382 */ 				var __allkwargs0__ = arguments [__ilastarg0__--];
+/* 000382 */ 				for (var __attrib0__ in __allkwargs0__) {
+/* 000382 */ 					switch (__attrib0__) {
+/* 000382 */ 						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+/* 000382 */ 						case 'token': var token = __allkwargs0__ [__attrib0__]; break;
+/* 000382 */ 					}
+/* 000382 */ 				}
+/* 000382 */ 			}
+/* 000382 */ 		}
+/* 000382 */ 		else {
+/* 000382 */ 		}
+/* 000383 */ 		// pass;
+/* 000386 */ 		if (__t__ (__t__ (__eq__ (token.tok, 'brace_close')) && __eq__ (token.arg, __getitem__ (self.contents_parser_info.parsed_delimiters, 1)))) {
+/* 000388 */ 			return true;
+/* 000388 */ 		}
+/* 000389 */ 		if (__t__ (__eq__ (token.tok, 'char'))) {
+/* 000390 */ 			if (__t__ (__eq__ (token.arg, __getitem__ (self.contents_parser_info.parsed_delimiters, 1)))) {
+/* 000391 */ 				return true;
+/* 000391 */ 			}
+/* 000392 */ 			else if (__t__ (__eq__ (token.arg, self.contents_parser_info.comma_char))) {
+/* 000393 */ 				return true;
+/* 000393 */ 			}
+/* 000394 */ 			return false;
+/* 000394 */ 		}
+/* 000395 */ 		return false;
+/* 000395 */ 	});},
+/* 000397 */ 	get handle_stop_condition_token () {return __get__ (this, function (self, token, latex_walker, token_reader, parsing_state) {
+/* 000397 */ 		if (arguments.length) {
+/* 000397 */ 			var __ilastarg0__ = arguments.length - 1;
+/* 000397 */ 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+/* 000397 */ 				var __allkwargs0__ = arguments [__ilastarg0__--];
+/* 000397 */ 				for (var __attrib0__ in __allkwargs0__) {
+/* 000397 */ 					switch (__attrib0__) {
+/* 000397 */ 						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+/* 000397 */ 						case 'token': var token = __allkwargs0__ [__attrib0__]; break;
+/* 000397 */ 						case 'latex_walker': var latex_walker = __allkwargs0__ [__attrib0__]; break;
+/* 000397 */ 						case 'token_reader': var token_reader = __allkwargs0__ [__attrib0__]; break;
+/* 000397 */ 						case 'parsing_state': var parsing_state = __allkwargs0__ [__attrib0__]; break;
+/* 000397 */ 					}
+/* 000397 */ 				}
+/* 000397 */ 			}
+/* 000397 */ 		}
+/* 000397 */ 		else {
+/* 000397 */ 		}
+/* 000399 */ 		(function () {
+/* 000399 */ 			var __accu0__ = token_reader;
+/* 000399 */ 			return __call__ (__accu0__.move_past_token, __accu0__, token);
+/* 000399 */ 		}) ();
+/* 000400 */ 		if (__t__ (__eq__ (token.tok, 'brace_close'))) {
+/* 000402 */ 			self.last_delimiter_token = null;
+/* 000403 */ 			self.last_element_pos_end = token.pos;
+/* 000404 */ 			self.parse_more = false;
+/* 000404 */ 		}
+/* 000405 */ 		else {
+/* 000406 */ 			self.last_delimiter_token = token;
+/* 000407 */ 			self.last_element_pos_end = token.pos_end;
+/* 000408 */ 			self.parse_more = true;
+/* 000408 */ 		}
+/* 000408 */ 	});},
+/* 000411 */ 	get __call__ () {return __get__ (this, function (self, latex_walker, token_reader, parsing_state) {
+/* 000411 */ 		if (arguments.length) {
+/* 000411 */ 			var __ilastarg0__ = arguments.length - 1;
+/* 000411 */ 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+/* 000411 */ 				var __allkwargs0__ = arguments [__ilastarg0__--];
+/* 000411 */ 				for (var __attrib0__ in __allkwargs0__) {
+/* 000411 */ 					switch (__attrib0__) {
+/* 000411 */ 						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+/* 000411 */ 						case 'latex_walker': var latex_walker = __allkwargs0__ [__attrib0__]; break;
+/* 000411 */ 						case 'token_reader': var token_reader = __allkwargs0__ [__attrib0__]; break;
+/* 000411 */ 						case 'parsing_state': var parsing_state = __allkwargs0__ [__attrib0__]; break;
+/* 000411 */ 					}
+/* 000411 */ 				}
+/* 000411 */ 			}
+/* 000411 */ 		}
+/* 000411 */ 		else {
+/* 000411 */ 		}
+/* 000413 */ 		// pass;
+/* 000417 */ 		self.pos_start = (function () {
+/* 000417 */ 			var __accu0__ = token_reader;
+/* 000417 */ 			return __call__ (__accu0__.cur_pos, __accu0__);
+/* 000417 */ 		}) ();
+/* 000419 */ 		self.parse_more = true;
+/* 000420 */ 		while (__t__ (self.parse_more)) {
+/* 000422 */ 			(function () {
+/* 000422 */ 				var __accu0__ = self;
+/* 000422 */ 				return __call__ (__accu0__._parse_one_commasep_arg, __accu0__, latex_walker, token_reader);
+/* 000422 */ 			}) ();
+/* 000424 */ 			if (__t__ (__t__ (self.parse_more) && self.carryover_info !== null)) {
+/* 000427 */ 				self.current_parsing_state = (function () {
+/* 000427 */ 					var __accu0__ = self.carryover_info;
+/* 000427 */ 					return __call__ (__accu0__.get_updated_parsing_state, __accu0__, self.current_parsing_state);
+/* 000427 */ 				}) ();
 /* 000427 */ 			}
 /* 000427 */ 		}
-/* 000427 */ 		else {
-/* 000427 */ 		}
-/* 000429 */ 		// pass;
-/* 000433 */ 		self.last_element_pos_end = null;
-/* 000434 */ 		self.last_delimiter_token = null;
-/* 000436 */ 		var __left0__ = (function () {
-/* 000436 */ 			var __accu0__ = latex_walker;
-/* 000441 */ 			return __call__ (__accu0__.parse_content, __accu0__, self.main_content_parser, __kwargtrans__ ({token_reader: token_reader, parsing_state: self.current_parsing_state, open_context: tuple ([(function () {
-/* 000441 */ 				var __accu1__ = 'Element {} of list separated by ‘{}’';
-/* 000442 */ 				return __call__ (__accu1__.format, __accu1__, __call__ (len, null, self.comma_sep_arg_list), self.contents_parser_info.comma_char);
-/* 000442 */ 			}) (), self.contents_parser_info.first_token])}));
-/* 000442 */ 		}) ();
-/* 000442 */ 		var nodelist = __left0__ [0];
-/* 000442 */ 		var carryover_info = __left0__ [1];
-/* 000449 */ 		// pass;
-/* 000454 */ 		var pos_end = self.last_element_pos_end;
-/* 000455 */ 		if (__t__ (pos_end === null)) {
-/* 000456 */ 			// pass;
-/* 000460 */ 			var pos_end = (function () {
-/* 000460 */ 				var __accu0__ = token_reader;
-/* 000460 */ 				return __call__ (__accu0__.final_pos, __accu0__);
-/* 000460 */ 			}) ();
-/* 000461 */ 			self.parse_more = false;
-/* 000461 */ 		}
-/* 000463 */ 		if (__t__ (self.last_delimiter_token === null)) {
-/* 000464 */ 			var this_close_delim = '';
-/* 000464 */ 		}
-/* 000465 */ 		else {
-/* 000466 */ 			var this_close_delim = self.last_delimiter_token.arg;
-/* 000466 */ 		}
-/* 000468 */ 		var this_group_node = (function () {
-/* 000468 */ 			var __accu0__ = latex_walker;
-/* 000468 */ 			return __call__ (__accu0__.make_node, __accu0__, LatexGroupNode, __kwargtrans__ ({nodelist: nodelist, parsing_state: self.current_parsing_state, delimiters: tuple (['', this_close_delim]), pos: nodelist.pos, pos_end: pos_end}));
-/* 000468 */ 		}) ();
-/* 000477 */ 		(function () {
-/* 000477 */ 			var __accu0__ = self.comma_sep_arg_list;
-/* 000477 */ 			return __call__ (__accu0__.append, __accu0__, this_group_node);
-/* 000477 */ 		}) ();
-/* 000479 */ 		self.carryover_info = carryover_info;
-/* 000481 */ 		// pass;
-/* 000481 */ 	});}
-/* 000481 */ });
+/* 000431 */ 		var final_node_list = __call__ (LatexNodeList, null, self.comma_sep_arg_list, __kwargtrans__ ({pos: self.pos_start, pos_end: self.last_element_pos_end}));
+/* 000437 */ 		return tuple ([final_node_list, self.carryover_info]);
+/* 000437 */ 	});},
+/* 000440 */ 	get _parse_one_commasep_arg () {return __get__ (this, function (self, latex_walker, token_reader) {
+/* 000440 */ 		if (arguments.length) {
+/* 000440 */ 			var __ilastarg0__ = arguments.length - 1;
+/* 000440 */ 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+/* 000440 */ 				var __allkwargs0__ = arguments [__ilastarg0__--];
+/* 000440 */ 				for (var __attrib0__ in __allkwargs0__) {
+/* 000440 */ 					switch (__attrib0__) {
+/* 000440 */ 						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+/* 000440 */ 						case 'latex_walker': var latex_walker = __allkwargs0__ [__attrib0__]; break;
+/* 000440 */ 						case 'token_reader': var token_reader = __allkwargs0__ [__attrib0__]; break;
+/* 000440 */ 					}
+/* 000440 */ 				}
+/* 000440 */ 			}
+/* 000440 */ 		}
+/* 000440 */ 		else {
+/* 000440 */ 		}
+/* 000442 */ 		// pass;
+/* 000446 */ 		self.last_element_pos_start = (function () {
+/* 000446 */ 			var __accu0__ = token_reader;
+/* 000446 */ 			return __call__ (__accu0__.cur_pos, __accu0__);
+/* 000446 */ 		}) ();
+/* 000448 */ 		self.last_element_pos_end = null;
+/* 000449 */ 		self.last_delimiter_token = null;
+/* 000451 */ 		var __left0__ = (function () {
+/* 000451 */ 			var __accu0__ = latex_walker;
+/* 000456 */ 			return __call__ (__accu0__.parse_content, __accu0__, self.main_content_parser, __kwargtrans__ ({token_reader: token_reader, parsing_state: self.current_parsing_state, open_context: tuple ([(function () {
+/* 000456 */ 				var __accu1__ = 'Element {} of list separated by ‘{}’';
+/* 000457 */ 				return __call__ (__accu1__.format, __accu1__, __call__ (len, null, self.comma_sep_arg_list), self.contents_parser_info.comma_char);
+/* 000457 */ 			}) (), self.contents_parser_info.first_token])}));
+/* 000457 */ 		}) ();
+/* 000457 */ 		var nodelist = __left0__ [0];
+/* 000457 */ 		var carryover_info = __left0__ [1];
+/* 000464 */ 		// pass;
+/* 000469 */ 		var pos_end = self.last_element_pos_end;
+/* 000470 */ 		if (__t__ (pos_end === null)) {
+/* 000471 */ 			// pass;
+/* 000474 */ 			var pos_end = (function () {
+/* 000474 */ 				var __accu0__ = token_reader;
+/* 000474 */ 				return __call__ (__accu0__.final_pos, __accu0__);
+/* 000474 */ 			}) ();
+/* 000475 */ 			self.parse_more = false;
+/* 000475 */ 		}
+/* 000477 */ 		if (__t__ (self.last_delimiter_token === null)) {
+/* 000478 */ 			var this_close_delim = '';
+/* 000478 */ 		}
+/* 000479 */ 		else {
+/* 000480 */ 			var this_close_delim = self.last_delimiter_token.arg;
+/* 000480 */ 		}
+/* 000482 */ 		var this_group_node = (function () {
+/* 000482 */ 			var __accu0__ = latex_walker;
+/* 000482 */ 			return __call__ (__accu0__.make_node, __accu0__, LatexGroupNode, __kwargtrans__ ({nodelist: nodelist, parsing_state: self.current_parsing_state, delimiters: tuple (['', this_close_delim]), pos: self.last_element_pos_start, pos_end: pos_end}));
+/* 000482 */ 		}) ();
+/* 000491 */ 		var add_group_node = true;
+/* 000492 */ 		if (__t__ (!__t__ ((__call__ (len, null, nodelist))))) {
+/* 000493 */ 			if (__t__ (__t__ (self.is_very_first_element) && self.last_delimiter_token === null)) {
+/* 000499 */ 				var add_group_node = false;
+/* 000499 */ 			}
+/* 000500 */ 			else if (__t__ (self.keep_empty_parts)) {
+/* 000501 */ 				var add_group_node = true;
+/* 000501 */ 			}
+/* 000502 */ 			else {
+/* 000503 */ 				var add_group_node = false;
+/* 000503 */ 			}
+/* 000503 */ 		}
+/* 000505 */ 		if (__t__ (add_group_node)) {
+/* 000506 */ 			(function () {
+/* 000506 */ 				var __accu0__ = self.comma_sep_arg_list;
+/* 000506 */ 				return __call__ (__accu0__.append, __accu0__, this_group_node);
+/* 000506 */ 			}) ();
+/* 000506 */ 		}
+/* 000508 */ 		self.carryover_info = carryover_info;
+/* 000510 */ 		self.is_very_first_element = false;
+/* 000512 */ 		// pass;
+/* 000512 */ 	});}
+/* 000512 */ });
 /* 000038 */ 
 //# sourceMappingURL=pylatexenc.latexnodes.parsers._stdarg.map

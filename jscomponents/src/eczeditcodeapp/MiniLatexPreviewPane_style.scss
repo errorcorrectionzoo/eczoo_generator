@@ -1,3 +1,5 @@
+@import '../scsscommon/variables.scss';
+
 
 .minilatex-html-preview {
     background-color: #ece8df;
@@ -5,11 +7,63 @@
     margin-top: 0.33rem;
     padding: 1.5rem;
 
-    &::before {
+    .minilatex-html-preview-header {
         display: block;
         color: #8c846e;
-        content: 'PREVIEW';
         font-size: 0.65rem;
+        margin-top: -0.1rem;
+        margin-bottom: 0.33rem;
+        
+        span {
+            display: inline-block;
+            margin: 0px 10px 0px 0px;
+            padding: 2px;
+        }
+        a {
+            cursor: pointer;
+        }
+
+        // based on https://loading.io/css/ , thanks for CC0
+        .updating-animation {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+        }
+        .updating-animation:after {
+            content: " ";
+            display: block;
+            width: 16px;
+            height: 16px;
+            margin: 0px;
+            border-radius: 50%;
+            border: 3px solid #000;
+            border-color: #000 transparent #000 transparent;
+            animation: lds-dual-ring 1.2s linear infinite;
+        }
+        @keyframes lds-dual-ring {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+
+    }
+
+    // make "span" links blue as well
+    .ref {
+        color: $page-link-color;
+
+        &:hover {
+            color: $page-link-highlight-color;
+        }
     }
 }
 
+.minilatex-html-preview-error {
+    color: red;
+    font-weight: bold;
+    white-space: pre-wrap;
+}

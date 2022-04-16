@@ -81,7 +81,7 @@ class MiniHtmlSpecialsSpec(macrospec.SpecialsSpec):
 def html_wrap_in_tag(tagname, htmlcontent, *, attrs=None, class_=None):
     s = f'<{tagname}'
     if attrs:
-        for aname, aval in attrs.items():
+        for aname, aval in dict(attrs).items():
             s += f' {aname}="{htmlescape(aval)}"'
     if class_:
         s += f' class="{htmlescape(class_)}"'
@@ -201,6 +201,12 @@ class ItemToHtmlRef(ItemToHtmlWrapTag):
         if display_html is None:
             display_html = target_html
         logger.debug(f"Ref: ‘{reftarget}’ → ‘{display_html}’")
+        if target_href is None:
+            return html_wrap_in_tag(
+                'span',
+                display_html,
+                class_='ref',
+            )
         return html_wrap_in_tag(
             'a',
             display_html,
@@ -311,14 +317,24 @@ class ItemToHtmlCite(ItemToHtmlWrapTag):
                 doccontext.add_citation(citation_key_prefix, citation_key,
                                         optional_cite_extra_html)
 
-            s_items.append( html_wrap_in_tag(
-                'a',
-                citelabel_html,
-                attrs={
-                    'href': htmlescape(citehref),
-                },
-                class_='cite',
-            ) )
+            if citehref is None:
+                item_cite_html = html_wrap_in_tag(
+                    'span',
+                    citelabel_html,
+                    class_='cite',
+                )
+            else:
+                item_cite_html = html_wrap_in_tag(
+                    'a',
+                    citelabel_html,
+                    attrs={
+                        'href': htmlescape(citehref),
+                    },
+                    class_='cite',
+                )
+
+
+            s_items.append( item_cite_html )
 
         s = "".join(s_items)
 
@@ -356,6 +372,13 @@ class ItemToHtmlFootnote(ItemToHtmlWrapTag):
             return '&lt;footnote&gt;'
 
         fnlabel_html, fnhref = doccontext.add_footnote(fntext_html)
+
+        if fnhref is None:
+            return html_wrap_in_tag(
+                'span',
+                fnlabel_html,
+                class_='footnote',
+            )
 
         return html_wrap_in_tag(
             'a',
@@ -753,7 +776,7 @@ class HtmlRefContext:
         # return (target_html, targethref)
         raise RuntimeError("Subclass must reimplement get_ref()")
 
-    def add_footnote(self, footnotetext):
+    def add_footnote(self, footnotetext): # note footnotetext is in fact HTML code
         # return (footnotelabel_html, footnotehref)
         raise RuntimeError("Subclass must reimplement add_footnote()")
 

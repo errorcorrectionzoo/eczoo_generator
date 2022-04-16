@@ -109,8 +109,10 @@
 .EczEditSchemaField {
     margin: 1rem 0px 1rem 0px;
 
-    .EczEditSchemaField_fieldname {
-        font-weight: bold;
+    .EczEditSchemaField_field_name {
+        //font-weight: bold;
+        font-size: 1.2rem;
+        line-height: 1.3em;
     }
 
     .EczEditSchemaField_field_description {
@@ -171,6 +173,8 @@
                 margin-top: 3rem;
                 border-bottom: solid 1px rgba(0,0,0,0.25);
                 margin-bottom: 1rem;
+                font-size: 1.5rem;
+                line-height: 1.3em;
             }
             > .EczEditSchemaField_field_description {
                 margin-bottom: 1rem;
