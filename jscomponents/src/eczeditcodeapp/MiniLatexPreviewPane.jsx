@@ -15,8 +15,8 @@ let preview_timeout_ms = 750;
 
 function format_minilatex_error_string(err)
 {
-    if ('dispstr' in err) {
-        return minilatextohtml.htmlescape( err.dispstr() );
+    if ('display_string' in err) {
+        return minilatextohtml.htmlescape( err.display_string() );
     } else if ('__class__' in err && '__args__' in err) {
         return minilatextohtml.htmlescape(err.__class__.__name__ + ": "
                                           + err.__args__.join('\n'));
