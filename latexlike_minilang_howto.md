@@ -23,7 +23,7 @@ features:
     following macros: `\textbackslash` (backslash character), `\ `
     (force a space), `\{` (open brace), `\}` (closing brace), `\%`
     (percent character), `\&` (ampersand), `\$` (dollar sign), `\#`
-    (number sign).
+    (number sign), and `~` (non-breaking space).
     
 ## Math
 
