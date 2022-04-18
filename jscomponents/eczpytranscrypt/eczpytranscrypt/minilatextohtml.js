@@ -1,4 +1,4 @@
-/* 000001 */ // Transcrypt'ed from Python, 2022-04-18 16:10:50
+/* 000001 */ // Transcrypt'ed from Python, 2022-04-18 16:55:02
 /* 000005 */ var html = {};
 /* 000005 */ var logging = {};
 /* 000005 */ var re = {};
@@ -15,7 +15,7 @@
 /* 000006 */ __nest__ (html, '', __module_html__);
 /* 000005 */ import * as __module_re__ from './re.js';
 /* 000005 */ __nest__ (re, '', __module_re__);
-/* 000005 */ export {LatexVerbatimEnvironmentContentsParser, latexwalker, nodes, macrospec, LatexCharsCommaSeparatedListParser, LatexDelimitedVerbatimParser, LatexGeneralNodesParser, LatexArgumentSpec, latexnodes, LatexCharsGroupParser};
+/* 000005 */ export {macrospec, LatexDelimitedVerbatimParser, nodes, LatexVerbatimEnvironmentContentsParser, LatexGeneralNodesParser, latexnodes, latexwalker, LatexCharsGroupParser, LatexArgumentSpec, LatexCharsCommaSeparatedListParser};
 /* 000001 */ var __name__ = 'minilatextohtml';
 /* 000008 */ export var htmlescape = function (x) {
 /* 000008 */ 	if (arguments.length) {

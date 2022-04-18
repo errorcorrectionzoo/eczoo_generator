@@ -16,12 +16,11 @@ let preview_timeout_ms = 750;
 function format_minilatex_error_string(err)
 {
     if ('__str__' in err) {
-        return minilatextohtml.htmlescape( err.__str__() );
+        return err.__str__();
     } else if ('__class__' in err && '__args__' in err) {
-        return minilatextohtml.htmlescape(err.__class__.__name__ + ": "
-                                          + err.__args__.join('\n'));
+        return err.__class__.__name__ + ": " + err.__args__.join('\n');
     } else {
-        return minilatextohtml.htmlescape( err.toString() );
+        return err.toString();
     }
 }
 

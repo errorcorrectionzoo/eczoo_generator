@@ -71,7 +71,11 @@ features:
     
   - Insert hyperlinks to other web pages as
     `\href{https://example.com/example/page}{shown link text}` or with
-    `\url{https://example.com/example/page}`.
+    `\url{https://example.com/example/page}`.  Contrary to standard LaTeX
+    behavior, the `\url{...}` command will make some effort to present the URL
+    in a friendlier manner.  For instance, the code
+    `\url{https://errorcorrectionzoo.org/}` will by typeset the URL as
+    “errorcorrectionzoo.org” while linking to the full URL specified.
     
   - Insert references to figures and tables with `\ref{figure:my-figure-label}`
     and `\ref{table:my-table-label}`.  In contrast to LaTeX' usual
