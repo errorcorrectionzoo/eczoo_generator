@@ -1,4 +1,4 @@
-/* 000001 */ // Transcrypt'ed from Python, 2022-04-16 19:37:14
+/* 000001 */ // Transcrypt'ed from Python, 2022-04-18 16:10:53
 /* 000037 */ var logging = {};
 /* 000037 */ var re = {};
 /* 000037 */ var unique_object_id = {};
@@ -10,13 +10,13 @@
 /* 000057 */ import {ParsingState} from './pylatexenc.latexnodes.js';
 /* 000046 */ import * as parsers from './pylatexenc.latexnodes.parsers.js';
 /* 000045 */ import {LatexCharsNode, LatexCommentNode, LatexEnvironmentNode, LatexGroupNode, LatexMacroNode, LatexMathNode, LatexNode, LatexNodeList, LatexSpecialsNode, ParsedMacroArgs, __all__, _unicode_from_str, _update_posposend_from_nodelist} from './pylatexenc.latexnodes.nodes.js';
-/* 000044 */ import {LatexWalkerEndOfStream, LatexWalkerError, LatexWalkerNodesParseError, LatexWalkerParseError, LatexWalkerTokenParseError, _basestring} from './pylatexenc.latexnodes._exctypes.js';
+/* 000044 */ import {LatexWalkerEndOfStream, LatexWalkerError, LatexWalkerNodesParseError, LatexWalkerParseError, LatexWalkerParseErrorFormatter, LatexWalkerTokenParseError, _basestring} from './pylatexenc.latexnodes._exctypes.js';
 /* 000042 */ import * as macrospec from './pylatexenc.macrospec.js';
 /* 000041 */ import * as latexnodes from './pylatexenc.latexnodes.js';
 /* 000039 */ import * as _util from './pylatexenc._util.js';
 /* 000037 */ import * as __module_re__ from './re.js';
 /* 000037 */ __nest__ (re, '', __module_re__);
-/* 000037 */ export {_util, LatexGroupNode, macrospec, LatexCommentNode, LatexWalkerError, LatexNodeList, LatexMathNode, LatexWalkerParseError, LatexMacroNode, parsers, _unicode_from_str, LatexWalkerTokenParseError, LatexWalkerEndOfStream, LatexCharsNode, LatexSpecialsNode, LatexNode, LatexWalkerNodesParseError, _basestring, ParsingState, __all__, LatexEnvironmentNode, ParsedMacroArgs, _update_posposend_from_nodelist, latexnodes};
+/* 000037 */ export {LatexMacroNode, LatexSpecialsNode, LatexWalkerTokenParseError, LatexCharsNode, LatexWalkerEndOfStream, LatexGroupNode, LatexWalkerParseErrorFormatter, LatexNodeList, macrospec, LatexWalkerParseError, _update_posposend_from_nodelist, parsers, LatexWalkerNodesParseError, LatexMathNode, ParsingState, latexnodes, LatexNode, _util, _unicode_from_str, LatexEnvironmentNode, LatexCommentNode, LatexWalkerError, _basestring, __all__, ParsedMacroArgs};
 /* 000001 */ var __name__ = 'pylatexenc.latexwalker._walker';
 /* 000050 */ export var get_default_latex_context_db = macrospec.LatexContextDb;
 /* 000061 */ export var logger = (function () {

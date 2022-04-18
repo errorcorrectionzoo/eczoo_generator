@@ -60,6 +60,22 @@
             color: $page-link-highlight-color;
         }
     }
+
+    .float-preview {
+        display: block;
+        padding: 20px;
+        background-color: #dfd8c9;
+        text-align: center;
+
+        .float-preview-contents-noimpl {
+            font-style: italic;
+            color: #8c846e;
+            padding: 20px 0px;
+        }
+        .float-preview-caption {
+            font-style: italic;
+        }
+    }
 }
 
 .minilatex-html-preview-error {

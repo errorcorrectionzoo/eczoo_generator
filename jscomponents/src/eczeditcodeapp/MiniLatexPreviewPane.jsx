@@ -15,8 +15,8 @@ let preview_timeout_ms = 750;
 
 function format_minilatex_error_string(err)
 {
-    if ('display_string' in err) {
-        return minilatextohtml.htmlescape( err.display_string() );
+    if ('__str__' in err) {
+        return minilatextohtml.htmlescape( err.__str__() );
     } else if ('__class__' in err && '__args__' in err) {
         return minilatextohtml.htmlescape(err.__class__.__name__ + ": "
                                           + err.__args__.join('\n'));
@@ -134,7 +134,26 @@ class PreviewMiniLatexDocContext //extends minilatextohtml.HtmlRefContext
         ];
     }
 
-    
+    add_float(float_obj)
+    {
+        // return float_html
+
+        const float_contents_part_html =
+              '<div class="float-preview-contents-noimpl">(Preview not available for '
+              + float_obj.float_type + ')</div>' ;
+        let float_caption_part_html = '';
+        if (float_obj.caption) {
+            float_caption_part_html =
+                '<div class="float-preview-caption">'
+                + float_obj.float_caption_name + ':&#x2002;'
+                + float_obj.caption + '</div>' ;
+        }
+
+        return '<div class="float-preview">'
+            + float_contents_part_html
+            + float_caption_part_html
+            + '</div>';
+    }
 };
 
 

@@ -1,11 +1,11 @@
-/* 000001 */ // Transcrypt'ed from Python, 2022-04-16 19:37:11
+/* 000001 */ // Transcrypt'ed from Python, 2022-04-18 16:10:50
 /* 000036 */ var logging = {};
 /* 000036 */ import {AssertionError, AttributeError, BaseException, DeprecationWarning, Exception, IndexError, IterableError, KeyError, NotImplementedError, RuntimeWarning, StopIteration, UserWarning, ValueError, Warning, __JsIterator__, __PyIterator__, __Terminal__, __add__, __and__, __call__, __class__, __envir__, __eq__, __floordiv__, __ge__, __get__, __getcm__, __getitem__, __getslice__, __getsm__, __gt__, __i__, __iadd__, __iand__, __idiv__, __ijsmod__, __ilshift__, __imatmul__, __imod__, __imul__, __in__, __init__, __ior__, __ipow__, __irshift__, __isub__, __ixor__, __jsUsePyNext__, __jsmod__, __k__, __kwargtrans__, __le__, __lshift__, __lt__, __matmul__, __mergefields__, __mergekwargtrans__, __mod__, __mul__, __ne__, __neg__, __nest__, __or__, __pow__, __pragma__, __pyUseJsNext__, __rshift__, __setitem__, __setproperty__, __setslice__, __sort__, __specialattrib__, __sub__, __super__, __t__, __terminal__, __truediv__, __withblock__, __xor__, abs, all, any, assert, bool, bytearray, bytes, callable, chr, copy, deepcopy, delattr, dict, dir, divmod, enumerate, filter, float, format, getattr, hasattr, input, int, isinstance, issubclass, len, list, map, max, min, object, ord, pow, print, property, py_TypeError, py_iter, py_metatype, py_next, py_reversed, py_typeof, range, repr, round, set, setattr, sorted, str, sum, tuple, zip} from './org.transcrypt.__runtime__.js';
 /* 000041 */ import {LatexGeneralNodesParser, LatexParserBase} from './pylatexenc.latexnodes.parsers.js';
 /* 000040 */ import {LatexEnvironmentNode, LatexMacroNode, LatexSpecialsNode} from './pylatexenc.latexnodes.nodes.js';
 /* 000036 */ import * as __module_logging__ from './logging.js';
 /* 000036 */ __nest__ (logging, '', __module_logging__);
-/* 000036 */ export {LatexSpecialsNode, LatexEnvironmentNode, LatexGeneralNodesParser, LatexMacroNode, LatexParserBase};
+/* 000036 */ export {LatexMacroNode, LatexEnvironmentNode, LatexSpecialsNode, LatexGeneralNodesParser, LatexParserBase};
 /* 000001 */ var __name__ = 'pylatexenc.macrospec._macrocallparser';
 /* 000038 */ export var logger = (function () {
 /* 000038 */ 	var __accu0__ = logging;
@@ -201,7 +201,7 @@
 /* 000153 */ 			var __accu0__ = latex_walker;
 /* 000153 */ 			return __call__ (__accu0__.make_node, __accu0__, self.node_class, __kwargtrans__ (__mergekwargtrans__ ({parsing_state: parsing_state, spec: self.spec_object, nodeargd: nodeargd, pos: pos_start, pos_end: pos_end}, node_kwargs)));
 /* 000153 */ 		}) ();
-/* 000167 */ 		(function () {
+/* 000167 */ 		var node = (function () {
 /* 000167 */ 			var __accu0__ = self.spec_object;
 /* 000167 */ 			return __call__ (__accu0__.finalize_node, __accu0__, node);
 /* 000167 */ 		}) ();
@@ -261,8 +261,8 @@
 /* 000200 */ 		}
 /* 000201 */ 		var environmentname = token_call.arg;
 /* 000205 */ 		__call__ (__call__ (__super__, null, LatexEnvironmentCallParser, '__init__'), null, self, __kwargtrans__ ({token_call: token_call, spec_object: environmentspec, what: (function () {
-/* 000205 */ 			var __accu0__ = 'environment {{{}}}';
-/* 000205 */ 			return __call__ (__accu0__.format, __accu0__, environmentname);
+/* 000205 */ 			var __accu0__ = 'environment {}{}{}';
+/* 000205 */ 			return __call__ (__accu0__.format, __accu0__, '{', environmentname, '}');
 /* 000208 */ 		}) (), parse_body: true, node_class: LatexEnvironmentNode, node_extra_kwargs: __call__ (dict, null, __kwargtrans__ ({environmentname: environmentname}))}));
 /* 000210 */ 		self.environmentname = environmentname;
 /* 000210 */ 	});},
@@ -293,118 +293,121 @@
 /* 000221 */ 			var parser = self.spec_object.body_parser;
 /* 000221 */ 		}
 /* 000222 */ 		else {
-/* 000225 */ 			var parser = __call__ (LatexGeneralNodesParser, null, __kwargtrans__ ({stop_token_condition: self._parse_body_token_stop_condition, handle_stop_condition_token: self._handle_stop_condition_token}));
-/* 000225 */ 		}
-/* 000231 */ 		var body_parsing_state = (function () {
-/* 000231 */ 			var __accu0__ = self;
-/* 000231 */ 			return __call__ (__accu0__.make_body_parsing_state, __accu0__, nodeargd, arg_carryover_info, parsing_state);
-/* 000231 */ 		}) ();
-/* 000233 */ 		return tuple ([parser, body_parsing_state]);
-/* 000233 */ 	});},
-/* 000235 */ 	get make_body_parsing_state () {return __get__ (this, function (self, nodeargd, arg_carryover_info, parsing_state) {
-/* 000235 */ 		if (arguments.length) {
-/* 000235 */ 			var __ilastarg0__ = arguments.length - 1;
-/* 000235 */ 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-/* 000235 */ 				var __allkwargs0__ = arguments [__ilastarg0__--];
-/* 000235 */ 				for (var __attrib0__ in __allkwargs0__) {
-/* 000235 */ 					switch (__attrib0__) {
-/* 000235 */ 						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-/* 000235 */ 						case 'nodeargd': var nodeargd = __allkwargs0__ [__attrib0__]; break;
-/* 000235 */ 						case 'arg_carryover_info': var arg_carryover_info = __allkwargs0__ [__attrib0__]; break;
-/* 000235 */ 						case 'parsing_state': var parsing_state = __allkwargs0__ [__attrib0__]; break;
-/* 000235 */ 					}
-/* 000235 */ 				}
-/* 000235 */ 			}
-/* 000235 */ 		}
-/* 000235 */ 		else {
-/* 000235 */ 		}
-/* 000237 */ 		if (__t__ (__t__ (arg_carryover_info !== null) && arg_carryover_info.inner_parsing_state !== null)) {
-/* 000240 */ 			var parsing_state = arg_carryover_info.inner_parsing_state;
-/* 000240 */ 		}
-/* 000242 */ 		var kw = dict ({});
-/* 000243 */ 		if (__t__ (self.spec_object.is_math_mode !== null)) {
-/* 000244 */ 			(function () {
-/* 000244 */ 				var __accu0__ = kw;
-/* 000244 */ 				return __call__ (__accu0__.py_update, __accu0__, __kwargtrans__ ({in_math_mode: self.spec_object.is_math_mode}));
-/* 000244 */ 			}) ();
+/* 000229 */ 			var parser = __call__ (LatexGeneralNodesParser, null, __kwargtrans__ ({stop_token_condition: self._parse_body_token_stop_condition, handle_stop_condition_token: self._handle_stop_condition_token, stop_condition_message: (function () {
+/* 000229 */ 				var __accu0__ = 'Expected \\end{}{}{} after \\begin{}{}{}';
+/* 000229 */ 				return __call__ (__accu0__.format, __accu0__, '{', self.environmentname, '}', '{', self.environmentname, '}');
+/* 000229 */ 			}) ()}));
+/* 000229 */ 		}
+/* 000235 */ 		var body_parsing_state = (function () {
+/* 000235 */ 			var __accu0__ = self;
+/* 000235 */ 			return __call__ (__accu0__.make_body_parsing_state, __accu0__, nodeargd, arg_carryover_info, parsing_state);
+/* 000235 */ 		}) ();
+/* 000237 */ 		return tuple ([parser, body_parsing_state]);
+/* 000237 */ 	});},
+/* 000239 */ 	get make_body_parsing_state () {return __get__ (this, function (self, nodeargd, arg_carryover_info, parsing_state) {
+/* 000239 */ 		if (arguments.length) {
+/* 000239 */ 			var __ilastarg0__ = arguments.length - 1;
+/* 000239 */ 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+/* 000239 */ 				var __allkwargs0__ = arguments [__ilastarg0__--];
+/* 000239 */ 				for (var __attrib0__ in __allkwargs0__) {
+/* 000239 */ 					switch (__attrib0__) {
+/* 000239 */ 						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+/* 000239 */ 						case 'nodeargd': var nodeargd = __allkwargs0__ [__attrib0__]; break;
+/* 000239 */ 						case 'arg_carryover_info': var arg_carryover_info = __allkwargs0__ [__attrib0__]; break;
+/* 000239 */ 						case 'parsing_state': var parsing_state = __allkwargs0__ [__attrib0__]; break;
+/* 000239 */ 					}
+/* 000239 */ 				}
+/* 000239 */ 			}
+/* 000239 */ 		}
+/* 000239 */ 		else {
+/* 000239 */ 		}
+/* 000241 */ 		if (__t__ (__t__ (arg_carryover_info !== null) && arg_carryover_info.inner_parsing_state !== null)) {
+/* 000244 */ 			var parsing_state = arg_carryover_info.inner_parsing_state;
 /* 000244 */ 		}
-/* 000246 */ 		if (__t__ (kw)) {
-/* 000247 */ 			return (function () {
-/* 000247 */ 				var __accu0__ = parsing_state;
-/* 000247 */ 				return __call__ (__accu0__.sub_context, __accu0__, __kwargtrans__ (kw));
-/* 000247 */ 			}) ();
-/* 000247 */ 		}
-/* 000248 */ 		return parsing_state;
-/* 000248 */ 	});},
-/* 000250 */ 	get _handle_stop_condition_token () {return __get__ (this, function (self, t, latex_walker, token_reader, parsing_state) {
-/* 000250 */ 		if (arguments.length) {
-/* 000250 */ 			var __ilastarg0__ = arguments.length - 1;
-/* 000250 */ 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-/* 000250 */ 				var __allkwargs0__ = arguments [__ilastarg0__--];
-/* 000250 */ 				for (var __attrib0__ in __allkwargs0__) {
-/* 000250 */ 					switch (__attrib0__) {
-/* 000250 */ 						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-/* 000250 */ 						case 't': var t = __allkwargs0__ [__attrib0__]; break;
-/* 000250 */ 						case 'latex_walker': var latex_walker = __allkwargs0__ [__attrib0__]; break;
-/* 000250 */ 						case 'token_reader': var token_reader = __allkwargs0__ [__attrib0__]; break;
-/* 000250 */ 						case 'parsing_state': var parsing_state = __allkwargs0__ [__attrib0__]; break;
-/* 000250 */ 					}
-/* 000250 */ 				}
-/* 000250 */ 			}
-/* 000250 */ 		}
-/* 000250 */ 		else {
-/* 000250 */ 		}
-/* 000251 */ 		(function () {
-/* 000251 */ 			var __accu0__ = token_reader;
-/* 000251 */ 			return __call__ (__accu0__.move_past_token, __accu0__, t);
-/* 000251 */ 		}) ();
-/* 000251 */ 	});},
-/* 000253 */ 	get _parse_body_token_stop_condition () {return __get__ (this, function (self, t) {
-/* 000253 */ 		if (arguments.length) {
-/* 000253 */ 			var __ilastarg0__ = arguments.length - 1;
-/* 000253 */ 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-/* 000253 */ 				var __allkwargs0__ = arguments [__ilastarg0__--];
-/* 000253 */ 				for (var __attrib0__ in __allkwargs0__) {
-/* 000253 */ 					switch (__attrib0__) {
-/* 000253 */ 						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-/* 000253 */ 						case 't': var t = __allkwargs0__ [__attrib0__]; break;
-/* 000253 */ 					}
-/* 000253 */ 				}
-/* 000253 */ 			}
-/* 000253 */ 		}
-/* 000253 */ 		else {
-/* 000253 */ 		}
-/* 000254 */ 		if (__t__ (__t__ (__eq__ (t.tok, 'end_environment')) && __eq__ (t.arg, self.environmentname))) {
-/* 000255 */ 			return true;
-/* 000255 */ 		}
-/* 000256 */ 		return false;
-/* 000256 */ 	});}
-/* 000256 */ });
-/* 000260 */ export var LatexSpecialsCallParser =  __class__ ('LatexSpecialsCallParser', [_LatexCallableParserBase], {
-/* 000260 */ 	__module__: __name__,
-/* 000262 */ 	get __init__ () {return __get__ (this, function (self, token_call, specialsspec) {
-/* 000262 */ 		if (arguments.length) {
-/* 000262 */ 			var __ilastarg0__ = arguments.length - 1;
-/* 000262 */ 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
-/* 000262 */ 				var __allkwargs0__ = arguments [__ilastarg0__--];
-/* 000262 */ 				for (var __attrib0__ in __allkwargs0__) {
-/* 000262 */ 					switch (__attrib0__) {
-/* 000262 */ 						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
-/* 000262 */ 						case 'token_call': var token_call = __allkwargs0__ [__attrib0__]; break;
-/* 000262 */ 						case 'specialsspec': var specialsspec = __allkwargs0__ [__attrib0__]; break;
-/* 000262 */ 					}
-/* 000262 */ 				}
-/* 000262 */ 			}
-/* 000262 */ 		}
-/* 000262 */ 		else {
-/* 000262 */ 		}
-/* 000263 */ 		var specials_chars = specialsspec.specials_chars;
-/* 000267 */ 		__call__ (__call__ (__super__, null, LatexSpecialsCallParser, '__init__'), null, self, __kwargtrans__ ({token_call: token_call, spec_object: specialsspec, what: (function () {
-/* 000267 */ 			var __accu0__ = 'specials ‘{}’';
-/* 000267 */ 			return __call__ (__accu0__.format, __accu0__, specials_chars);
-/* 000269 */ 		}) (), node_class: LatexSpecialsNode, node_extra_kwargs: __call__ (dict, null, __kwargtrans__ ({specials_chars: specials_chars}))}));
-/* 000271 */ 		self.specials_chars = specials_chars;
-/* 000271 */ 	});}
-/* 000271 */ });
+/* 000246 */ 		var kw = dict ({});
+/* 000247 */ 		if (__t__ (self.spec_object.is_math_mode !== null)) {
+/* 000248 */ 			(function () {
+/* 000248 */ 				var __accu0__ = kw;
+/* 000248 */ 				return __call__ (__accu0__.py_update, __accu0__, __kwargtrans__ ({in_math_mode: self.spec_object.is_math_mode}));
+/* 000248 */ 			}) ();
+/* 000248 */ 		}
+/* 000250 */ 		if (__t__ (kw)) {
+/* 000251 */ 			return (function () {
+/* 000251 */ 				var __accu0__ = parsing_state;
+/* 000251 */ 				return __call__ (__accu0__.sub_context, __accu0__, __kwargtrans__ (kw));
+/* 000251 */ 			}) ();
+/* 000251 */ 		}
+/* 000252 */ 		return parsing_state;
+/* 000252 */ 	});},
+/* 000254 */ 	get _handle_stop_condition_token () {return __get__ (this, function (self, t, latex_walker, token_reader, parsing_state) {
+/* 000254 */ 		if (arguments.length) {
+/* 000254 */ 			var __ilastarg0__ = arguments.length - 1;
+/* 000254 */ 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+/* 000254 */ 				var __allkwargs0__ = arguments [__ilastarg0__--];
+/* 000254 */ 				for (var __attrib0__ in __allkwargs0__) {
+/* 000254 */ 					switch (__attrib0__) {
+/* 000254 */ 						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+/* 000254 */ 						case 't': var t = __allkwargs0__ [__attrib0__]; break;
+/* 000254 */ 						case 'latex_walker': var latex_walker = __allkwargs0__ [__attrib0__]; break;
+/* 000254 */ 						case 'token_reader': var token_reader = __allkwargs0__ [__attrib0__]; break;
+/* 000254 */ 						case 'parsing_state': var parsing_state = __allkwargs0__ [__attrib0__]; break;
+/* 000254 */ 					}
+/* 000254 */ 				}
+/* 000254 */ 			}
+/* 000254 */ 		}
+/* 000254 */ 		else {
+/* 000254 */ 		}
+/* 000255 */ 		(function () {
+/* 000255 */ 			var __accu0__ = token_reader;
+/* 000255 */ 			return __call__ (__accu0__.move_past_token, __accu0__, t);
+/* 000255 */ 		}) ();
+/* 000255 */ 	});},
+/* 000257 */ 	get _parse_body_token_stop_condition () {return __get__ (this, function (self, t) {
+/* 000257 */ 		if (arguments.length) {
+/* 000257 */ 			var __ilastarg0__ = arguments.length - 1;
+/* 000257 */ 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+/* 000257 */ 				var __allkwargs0__ = arguments [__ilastarg0__--];
+/* 000257 */ 				for (var __attrib0__ in __allkwargs0__) {
+/* 000257 */ 					switch (__attrib0__) {
+/* 000257 */ 						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+/* 000257 */ 						case 't': var t = __allkwargs0__ [__attrib0__]; break;
+/* 000257 */ 					}
+/* 000257 */ 				}
+/* 000257 */ 			}
+/* 000257 */ 		}
+/* 000257 */ 		else {
+/* 000257 */ 		}
+/* 000258 */ 		if (__t__ (__t__ (__eq__ (t.tok, 'end_environment')) && __eq__ (t.arg, self.environmentname))) {
+/* 000259 */ 			return true;
+/* 000259 */ 		}
+/* 000260 */ 		return false;
+/* 000260 */ 	});}
+/* 000260 */ });
+/* 000264 */ export var LatexSpecialsCallParser =  __class__ ('LatexSpecialsCallParser', [_LatexCallableParserBase], {
+/* 000264 */ 	__module__: __name__,
+/* 000266 */ 	get __init__ () {return __get__ (this, function (self, token_call, specialsspec) {
+/* 000266 */ 		if (arguments.length) {
+/* 000266 */ 			var __ilastarg0__ = arguments.length - 1;
+/* 000266 */ 			if (arguments [__ilastarg0__] && arguments [__ilastarg0__].hasOwnProperty ("__kwargtrans__")) {
+/* 000266 */ 				var __allkwargs0__ = arguments [__ilastarg0__--];
+/* 000266 */ 				for (var __attrib0__ in __allkwargs0__) {
+/* 000266 */ 					switch (__attrib0__) {
+/* 000266 */ 						case 'self': var self = __allkwargs0__ [__attrib0__]; break;
+/* 000266 */ 						case 'token_call': var token_call = __allkwargs0__ [__attrib0__]; break;
+/* 000266 */ 						case 'specialsspec': var specialsspec = __allkwargs0__ [__attrib0__]; break;
+/* 000266 */ 					}
+/* 000266 */ 				}
+/* 000266 */ 			}
+/* 000266 */ 		}
+/* 000266 */ 		else {
+/* 000266 */ 		}
+/* 000267 */ 		var specials_chars = specialsspec.specials_chars;
+/* 000271 */ 		__call__ (__call__ (__super__, null, LatexSpecialsCallParser, '__init__'), null, self, __kwargtrans__ ({token_call: token_call, spec_object: specialsspec, what: (function () {
+/* 000271 */ 			var __accu0__ = 'specials ‘{}’';
+/* 000271 */ 			return __call__ (__accu0__.format, __accu0__, specials_chars);
+/* 000273 */ 		}) (), node_class: LatexSpecialsNode, node_extra_kwargs: __call__ (dict, null, __kwargtrans__ ({specials_chars: specials_chars}))}));
+/* 000275 */ 		self.specials_chars = specials_chars;
+/* 000275 */ 	});}
+/* 000275 */ });
 /* 000036 */ 
 //# sourceMappingURL=pylatexenc.macrospec._macrocallparser.map
