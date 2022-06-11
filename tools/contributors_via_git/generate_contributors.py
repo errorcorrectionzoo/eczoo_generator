@@ -53,7 +53,7 @@ eczoo_data_repo = github.get_repo("errorcorrectionzoo/eczoo_data")
 
 repo = Repo(ECZOO_DATA_FOLDER)
 # chronological order
-commits = list(repo.iter_commits("main", paths="codes", reverse=True, max_count=1000))
+commits = list(repo.iter_commits("main", paths="codes", reverse=True))
 for c in commits:
 
     author_information = {
