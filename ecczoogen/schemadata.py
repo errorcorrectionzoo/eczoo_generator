@@ -17,8 +17,17 @@ class UseSelfMinilatexResourceParent:
 
 class SchemaData:
 
-    def __init__(self, source_data, full_schema, *, what='<?>',
-                 minilatex_resource_parent=None, _validate=True):
+    def __init__(
+            self,
+            source_data,
+            full_schema,
+            *,
+            what='<?>',
+            llm_environment,
+            llm_resource_parent=None, # e.g., to look up figures etc.
+            #minilatex_resource_parent=None,
+            _validate=True
+    ):
         self.source_data = source_data
         self.full_schema = full_schema
 

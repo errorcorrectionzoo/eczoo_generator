@@ -3,7 +3,6 @@ logger = logging.getLogger(__name__)
 
 
 from .schemadata import SchemaData
-from minilatextohtml import MiniLatex
 
 
 
