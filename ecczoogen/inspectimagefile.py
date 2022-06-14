@@ -31,7 +31,7 @@ def get_image_file_info_pil(filename):
     except PIL.UnidentifiedImageError:
         logger.critical(
             f"PIL Failed to identify the image {filename}.  If you created this image "
-            f"using the GIMP, you can try ‘Image’ → ‘Color Management’ → Diable to work "
+            f"using the GIMP, you can try ‘Image’ → ‘Color Management’ → Disable to work "
             f"around a bug in GIMP's image exporter"
         )
         raise
