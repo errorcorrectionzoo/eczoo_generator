@@ -52,6 +52,11 @@ properties:
               type: string
             cousin_of:
               type: string
+            manual_code_list:
+              type: array
+              items:
+                type: string
+
 
   sort:
     type: object
