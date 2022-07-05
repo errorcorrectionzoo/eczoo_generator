@@ -53,321 +53,321 @@ class HtmlPage:
 # ------------------------------------------------------------------------------
 
 
-class HtmlFootnote:
-    def __init__(self, *, no=None, footnote_text_html=None):
-        self.no = no
-        self.footnote_text_html = footnote_text_html
+# class HtmlFootnote:
+#     def __init__(self, *, no=None, footnote_text_html=None):
+#         self.no = no
+#         self.footnote_text_html = footnote_text_html
 
-    def full_footnote_text_html(self):
-        return markupsafe.Markup( self.footnote_text_html )
+#     def full_footnote_text_html(self):
+#         return markupsafe.Markup( self.footnote_text_html )
 
-class HtmlCitation:
-    def __init__(self, *, no=None, citation_obj):
-        self.no = no
-        self.citation_obj = citation_obj
+# class HtmlCitation:
+#     def __init__(self, *, no=None, citation_obj):
+#         self.no = no
+#         self.citation_obj = citation_obj
 
-    def full_citation_text_html(self):
-        minilatex = self.citation_obj.full_citation_text_minilatex
-        if minilatex is None:
-            raise ValueError(f"Unresolved citation {self.citation_obj}!  "
-                             f"Is it a valid reference?")
-        return markupsafe.Markup( minilatex.to_html() )
+#     def full_citation_text_html(self):
+#         minilatex = self.citation_obj.full_citation_text_minilatex
+#         if minilatex is None:
+#             raise ValueError(f"Unresolved citation {self.citation_obj}!  "
+#                              f"Is it a valid reference?")
+#         return markupsafe.Markup( minilatex.to_html() )
 
-class HtmlFloat:
-    def __init__(self, *, no=None, float_obj, html_page_notes=None):
-        self.no = no
-        self.float_obj = float_obj
-        self.html_page_notes = html_page_notes
-        self.htmlpagecollection = html_page_notes.htmlpagecollection
+# class HtmlFloat:
+#     def __init__(self, *, no=None, float_obj, html_page_notes=None):
+#         self.no = no
+#         self.float_obj = float_obj
+#         self.html_page_notes = html_page_notes
+#         self.htmlpagecollection = html_page_notes.htmlpagecollection
 
-    def numbered(self):
-        return self.float_obj.label is not None
+#     def numbered(self):
+#         return self.float_obj.label is not None
 
-    def full_float_html(self):
-        if self.float_obj.contentstype == 'image_filename':
-            floatinfo = self.htmlpagecollection.get_image_filename_path_info(
-                self.float_obj.contents_image_filename,
-                resource_parent=self.float_obj.resource_parent
-            )
-            imgpath = floatinfo['prefixed_path']
-            image_info = floatinfo['image_info']
-            #
-            # ### Hmmm, let's NOT embed SVG data inline. We might have issues of
-            # ### clashing node ID's, etc.
-            #
-            # if 'svg_source' in image_info:
-            #     # there is source SVG that we can include directly
-            #     float_inner_contents_html = (
-            #         f"<!-- SVG {imgpath} -->"
-            #         + image_info['svg_source']
-            #         f"<!-- END SVG -->"
-            #     )
-            # else:
-            if True:
-                if image_info['type'] == 'vector':
-                    width_dimunit, height_dimunit = image_info['physical_dimensions']
-                    width_dim, width_unit = width_dimunit
-                    height_dim, height_unit = height_dimunit
-                else:
-                    # specify dimensions in pixels; I'm not sure that makes a huge
-                    # difference...
-                    width_dim, height_dim = image_info['pixel_dimensions']
-                    dpi = image_info['dpi']
-                    pxfactor = dpi/96
-                    width_dim = width_dim / pxfactor
-                    height_dim = height_dim / pxfactor
-                    width_unit, height_unit = 'px', 'px'
-                style = (
-                    f"width: {width_dim:.6f}{width_unit}; "
-                    f"height: {height_dim:.6f}{height_unit}"
-                )
-                float_inner_contents_html = \
-                    f"""<img src="{imgpath}" style="{style}" alt="(float)">"""
-        else:
-            raise ValueError("I don't know how to display the float {!r}"
-                             .format(self.float_obj))
+#     def full_float_html(self):
+#         if self.float_obj.contentstype == 'image_filename':
+#             floatinfo = self.htmlpagecollection.get_image_filename_path_info(
+#                 self.float_obj.contents_image_filename,
+#                 resource_parent=self.float_obj.resource_parent
+#             )
+#             imgpath = floatinfo['prefixed_path']
+#             image_info = floatinfo['image_info']
+#             #
+#             # ### Hmmm, let's NOT embed SVG data inline. We might have issues of
+#             # ### clashing node ID's, etc.
+#             #
+#             # if 'svg_source' in image_info:
+#             #     # there is source SVG that we can include directly
+#             #     float_inner_contents_html = (
+#             #         f"<!-- SVG {imgpath} -->"
+#             #         + image_info['svg_source']
+#             #         f"<!-- END SVG -->"
+#             #     )
+#             # else:
+#             if True:
+#                 if image_info['type'] == 'vector':
+#                     width_dimunit, height_dimunit = image_info['physical_dimensions']
+#                     width_dim, width_unit = width_dimunit
+#                     height_dim, height_unit = height_dimunit
+#                 else:
+#                     # specify dimensions in pixels; I'm not sure that makes a huge
+#                     # difference...
+#                     width_dim, height_dim = image_info['pixel_dimensions']
+#                     dpi = image_info['dpi']
+#                     pxfactor = dpi/96
+#                     width_dim = width_dim / pxfactor
+#                     height_dim = height_dim / pxfactor
+#                     width_unit, height_unit = 'px', 'px'
+#                 style = (
+#                     f"width: {width_dim:.6f}{width_unit}; "
+#                     f"height: {height_dim:.6f}{height_unit}"
+#                 )
+#                 float_inner_contents_html = \
+#                     f"""<img src="{imgpath}" style="{style}" alt="(float)">"""
+#         else:
+#             raise ValueError("I don't know how to display the float {!r}"
+#                              .format(self.float_obj))
 
-        float_contents_html = \
-            f"""<div class="float-contents">{float_inner_contents_html}</div>"""
+#         float_contents_html = \
+#             f"""<div class="float-contents">{float_inner_contents_html}</div>"""
 
-        float_type = self.float_obj.float_type
+#         float_type = self.float_obj.float_type
 
-        figuretag_attrs = {}
-        figuretag_classes = []
+#         figuretag_attrs = {}
+#         figuretag_classes = []
 
-        captionhtml = ''
-        if self.numbered():
-            figuretag_attrs['id'] = f"{float_type}-{self.no}"
+#         captionhtml = ''
+#         if self.numbered():
+#             figuretag_attrs['id'] = f"{float_type}-{self.no}"
 
-            # we have a figure caption
-            _, fltnostr, flthref = self.html_page_notes.get_float_ref(
-                self.float_obj.float_type,
-                self.float_obj.label
-            )
-            fltnohtml = f"""<span class="float-number">{fltnostr}</span>"""
-            if self.float_obj.caption:
-                captiontexthtml = \
-                    f"""<span class="caption-text">{self.float_obj.caption}</span>"""
-                captionhtml = \
-                    f"""{fltnohtml}: {captiontexthtml}"""
-            else:
-                captionhtml = fltnohtml
+#             # we have a figure caption
+#             _, fltnostr, flthref = self.html_page_notes.get_float_ref(
+#                 self.float_obj.float_type,
+#                 self.float_obj.label
+#             )
+#             fltnohtml = f"""<span class="float-number">{fltnostr}</span>"""
+#             if self.float_obj.caption:
+#                 captiontexthtml = \
+#                     f"""<span class="caption-text">{self.float_obj.caption}</span>"""
+#                 captionhtml = \
+#                     f"""{fltnohtml}: {captiontexthtml}"""
+#             else:
+#                 captionhtml = fltnohtml
 
-        captionhtml = (
-            f"""<figcaption><span class="center-if-single-line">"""
-            + captionhtml
-            + f"""</span></figcaption>"""
-        )
+#         captionhtml = (
+#             f"""<figcaption><span class="center-if-single-line">"""
+#             + captionhtml
+#             + f"""</span></figcaption>"""
+#         )
 
-        figuretag_classes += ['float', f'float-{float_type}']
+#         figuretag_classes += ['float', f'float-{float_type}']
 
-        figuretag_attrs['class'] = " ".join(figuretag_classes)
-        attrsstr = " ".join([ f'{k}="{markupsafe.escape(v)}"'
-                              for k, v in figuretag_attrs.items() ])
+#         figuretag_attrs['class'] = " ".join(figuretag_classes)
+#         attrsstr = " ".join([ f'{k}="{markupsafe.escape(v)}"'
+#                               for k, v in figuretag_attrs.items() ])
 
-        return f"""<figure {attrsstr}>{float_contents_html}{captionhtml}</figure>"""
+#         return f"""<figure {attrsstr}>{float_contents_html}{captionhtml}</figure>"""
 
-
-
-# ------------------------------------------------------------------------------
-
-class RefContextForHtmlConverter(minilatextohtml.HtmlRefContext):
-    def __init__(self, htmlpagecollection, html_page_notes):
-        super().__init__()
-        self.htmlpagecollection = htmlpagecollection
-        self.html_page_notes = html_page_notes
-
-        self.state = None
-
-    def _get_ref_code(self, code_id):
-        code = self.htmlpagecollection.zoo.get_code(code_id)
-        code_href = self.htmlpagecollection.get_code_href(code_id)
-        code_name_html = code.name.to_html()
-        return (code_name_html, code_href)
-        
-    def get_ref(self, ref_key_prefix, ref_key):
-
-        if self.state != 'generation':
-            return ('','')
-
-        if ref_key_prefix == 'eq':
-            raise ValueError(
-                f"Equation references should use \\eqref{{eq:XXX}}, not \\ref{{eq:XXX}}: "
-                f"‘{ref_key}’"
-            )
-
-        if ref_key_prefix in ('figure', 'table'):
-            (htmlfloat, floatnostr, floathref) = \
-                self.html_page_notes.get_float_ref(ref_key_prefix, ref_key)
-            return (floatnostr, floathref)
-
-        if ref_key_prefix == 'code':
-            return self._get_ref_code(ref_key)
-
-        raise ValueError(
-            f"Invalid ref: ‘{ref_key}’.  Such references must be "
-            f"to a code; use a ref label of the form ‘code:<code-id>’.  "
-            f"For equation references, use \\eqref{{eq:XXX}} instead of \\ref."
-        )
-
-        
-
-    def _check_html_page_notes_context(self):
-        if self.html_page_notes is None:
-            raise ValueError(
-                f"You cannot use ‘\\footnote’ here, because the text is being rendered "
-                f"outside of the main page content.  (You cannot use citations or "
-                f"footnotes in code names or domain/kingdom names, for instance, since "
-                f"they might be rendered as links in the side navigation links.)"
-            )
-
-    def add_footnote(self, footnote_text_html):
-        # return (footnotelabel_html, footnotehref)
-
-        if self.state != 'generation':
-            return ('','')
-
-        self._check_html_page_notes_context()
-
-        footnote = HtmlFootnote(footnote_text_html=footnote_text_html)
-        foot_no = self.html_page_notes.add_footnote(footnote)
-        foot_label_html = self.htmlpagecollection.format_footnote_label_html(foot_no)
-        return (foot_label_html, f'#fn-{foot_no}')
-
-    def _get_citation_obj(self, citation_key_prefix, citation_key):
-
-        if not citation_key_prefix:
-            raise ValueError(f"Invalid {citation_key_prefix=}; {citation_key=}")
-
-        citation_obj = self.htmlpagecollection.citation_manager.get_citation(
-            **{citation_key_prefix: citation_key}
-        )
-
-        citation = HtmlCitation(citation_obj=citation_obj)
-        return citation
-
-    def add_citation(self, citation_key_prefix, citation_key,
-                     optional_cite_extra_html=None):
-        # return (citelabel_html, citehref)
-
-        if self.state != 'generation':
-            return ('','')
-
-        self._check_html_page_notes_context()
-
-        citation = self._get_citation_obj(citation_key_prefix, citation_key)
-        cite_no = self.html_page_notes.add_citation(citation)
-        cite_label_html = \
-            self.htmlpagecollection.format_citation_label_html(cite_no,
-                                                               optional_cite_extra_html)
-        return (cite_label_html, f'#cite-{cite_no}')
-
-    def add_float(self, float_obj):
-        # return float_html
-        
-        self._check_html_page_notes_context()
-
-        if self.state == 'pre-pass':
-
-            if float_obj.label is not None: # numbered float --> register it!!
-                htmlfloat = \
-                    HtmlFloat(float_obj=float_obj, html_page_notes=self.html_page_notes)
-
-                float_no = self.html_page_notes.add_float(htmlfloat)
-                htmlfloat.no = float_no
-
-            return ''
-
-        if self.state == 'generation':
-
-            if float_obj.label is None: # not a numbered float
-                htmlfloat = HtmlFloat(float_obj=float_obj,
-                                      html_page_notes=self.html_page_notes)
-            else:
-                htmlfloat, _, _ = self.html_page_notes.get_float_ref(
-                    float_obj.float_type, float_obj.label
-                )
-
-            return htmlfloat.full_float_html()
-
-        return ''
-        
 
 
 # ------------------------------------------------------------------------------
 
-class HtmlPageNotes:
-    def __init__(self, htmlpagecollection):
-        self.foot_no = -1 # last attributed footnote number
-        self.footnotes = []
-        self.cite_no = -1 # last attributed citation number
-        self.citations = []
+# class RefContextForHtmlConverter(minilatextohtml.HtmlRefContext):
+#     def __init__(self, htmlpagecollection, html_page_notes):
+#         super().__init__()
+#         self.htmlpagecollection = htmlpagecollection
+#         self.html_page_notes = html_page_notes
 
-        self.floats = {
-            'figure': [],
-            'table': [],
-        }
+#         self.state = None
 
-        self.htmlpagecollection = htmlpagecollection
+#     def _get_ref_code(self, code_id):
+#         code = self.htmlpagecollection.zoo.get_code(code_id)
+#         code_href = self.htmlpagecollection.get_code_href(code_id)
+#         code_name_html = code.name.to_html()
+#         return (code_name_html, code_href)
+        
+#     def get_ref(self, ref_key_prefix, ref_key):
 
-    def add_footnote(self, footnote):
-        self.foot_no += 1
+#         if self.state != 'generation':
+#             return ('','')
 
-        foot_no = self.foot_no
-        #foot_label_html = self.htmlpagecollection.format_footnote_label_html(self.foot_no)
+#         if ref_key_prefix == 'eq':
+#             raise ValueError(
+#                 f"Equation references should use \\eqref{{eq:XXX}}, not \\ref{{eq:XXX}}: "
+#                 f"‘{ref_key}’"
+#             )
 
-        footnote.no = foot_no
-        #footnote.label_html = foot_label_html
+#         if ref_key_prefix in ('figure', 'table'):
+#             (htmlfloat, floatnostr, floathref) = \
+#                 self.html_page_notes.get_float_ref(ref_key_prefix, ref_key)
+#             return (floatnostr, floathref)
 
-        self.footnotes.append( footnote )
-        return foot_no #, foot_label_html)
+#         if ref_key_prefix == 'code':
+#             return self._get_ref_code(ref_key)
 
-    def add_citation(self, citation):
+#         raise ValueError(
+#             f"Invalid ref: ‘{ref_key}’.  Such references must be "
+#             f"to a code; use a ref label of the form ‘code:<code-id>’.  "
+#             f"For equation references, use \\eqref{{eq:XXX}} instead of \\ref."
+#         )
 
-        # see if citation is already there
-        for c in self.citations:
-            if c.citation_obj.equals(citation.citation_obj):
-                return c.no #(c.no, c.label_html)
+        
 
-        # add it if not there already
+#     def _check_html_page_notes_context(self):
+#         if self.html_page_notes is None:
+#             raise ValueError(
+#                 f"You cannot use ‘\\footnote’ here, because the text is being rendered "
+#                 f"outside of the main page content.  (You cannot use citations or "
+#                 f"footnotes in code names or domain/kingdom names, for instance, since "
+#                 f"they might be rendered as links in the side navigation links.)"
+#             )
 
-        self.cite_no += 1
+#     def add_footnote(self, footnote_text_html):
+#         # return (footnotelabel_html, footnotehref)
 
-        cite_no = self.cite_no
-        #cite_label_html = self.htmlpagecollection.format_citation_label_html(cite_no)
+#         if self.state != 'generation':
+#             return ('','')
 
-        citation.no = cite_no
-        #citation.label_html = cite_label_html
+#         self._check_html_page_notes_context()
 
-        self.citations.append( citation )
-        return cite_no #(cite_no, cite_label_html)
+#         footnote = HtmlFootnote(footnote_text_html=footnote_text_html)
+#         foot_no = self.html_page_notes.add_footnote(footnote)
+#         foot_label_html = self.htmlpagecollection.format_footnote_label_html(foot_no)
+#         return (foot_label_html, f'#fn-{foot_no}')
 
-    def add_float(self, htmlfloat):
+#     def _get_citation_obj(self, citation_key_prefix, citation_key):
 
-        float_type = htmlfloat.float_obj.float_type
+#         if not citation_key_prefix:
+#             raise ValueError(f"Invalid {citation_key_prefix=}; {citation_key=}")
 
-        float_no = len(self.floats[float_type])
-        self.floats[float_type].append(htmlfloat)
+#         citation_obj = self.htmlpagecollection.citation_manager.get_citation(
+#             **{citation_key_prefix: citation_key}
+#         )
 
-        return float_no
+#         citation = HtmlCitation(citation_obj=citation_obj)
+#         return citation
 
-    def get_float_ref(self, ref_key_prefix, ref_key):
+#     def add_citation(self, citation_key_prefix, citation_key,
+#                      optional_cite_extra_html=None):
+#         # return (citelabel_html, citehref)
 
-        float_type = ref_key_prefix
-        for htmlfloat in self.floats[float_type]:
-            if htmlfloat.float_obj.label == ref_key:
-                # found float!
-                floatnostr = (
-                    htmlfloat.float_obj.float_caption_name + '&nbsp;'
-                    + self.htmlpagecollection.format_float_no_html(
-                        float_type=float_type,
-                        no=htmlfloat.no,
-                    )
-                )
-                floatnohref = f'#{float_type}-{htmlfloat.no}'
-                return (htmlfloat, floatnostr, floatnohref)
+#         if self.state != 'generation':
+#             return ('','')
 
-        raise ValueError(f"Float reference ‘{ref_key_prefix}:{ref_key}’ not resolved!")
+#         self._check_html_page_notes_context()
+
+#         citation = self._get_citation_obj(citation_key_prefix, citation_key)
+#         cite_no = self.html_page_notes.add_citation(citation)
+#         cite_label_html = \
+#             self.htmlpagecollection.format_citation_label_html(cite_no,
+#                                                                optional_cite_extra_html)
+#         return (cite_label_html, f'#cite-{cite_no}')
+
+#     def add_float(self, float_obj):
+#         # return float_html
+        
+#         self._check_html_page_notes_context()
+
+#         if self.state == 'pre-pass':
+
+#             if float_obj.label is not None: # numbered float --> register it!!
+#                 htmlfloat = \
+#                     HtmlFloat(float_obj=float_obj, html_page_notes=self.html_page_notes)
+
+#                 float_no = self.html_page_notes.add_float(htmlfloat)
+#                 htmlfloat.no = float_no
+
+#             return ''
+
+#         if self.state == 'generation':
+
+#             if float_obj.label is None: # not a numbered float
+#                 htmlfloat = HtmlFloat(float_obj=float_obj,
+#                                       html_page_notes=self.html_page_notes)
+#             else:
+#                 htmlfloat, _, _ = self.html_page_notes.get_float_ref(
+#                     float_obj.float_type, float_obj.label
+#                 )
+
+#             return htmlfloat.full_float_html()
+
+#         return ''
+        
+
+
+# ------------------------------------------------------------------------------
+
+# class HtmlPageNotes:
+#     def __init__(self, htmlpagecollection):
+#         self.foot_no = -1 # last attributed footnote number
+#         self.footnotes = []
+#         self.cite_no = -1 # last attributed citation number
+#         self.citations = []
+
+#         self.floats = {
+#             'figure': [],
+#             'table': [],
+#         }
+
+#         self.htmlpagecollection = htmlpagecollection
+
+#     def add_footnote(self, footnote):
+#         self.foot_no += 1
+
+#         foot_no = self.foot_no
+#         #foot_label_html = self.htmlpagecollection.format_footnote_label_html(self.foot_no)
+
+#         footnote.no = foot_no
+#         #footnote.label_html = foot_label_html
+
+#         self.footnotes.append( footnote )
+#         return foot_no #, foot_label_html)
+
+#     def add_citation(self, citation):
+
+#         # see if citation is already there
+#         for c in self.citations:
+#             if c.citation_obj.equals(citation.citation_obj):
+#                 return c.no #(c.no, c.label_html)
+
+#         # add it if not there already
+
+#         self.cite_no += 1
+
+#         cite_no = self.cite_no
+#         #cite_label_html = self.htmlpagecollection.format_citation_label_html(cite_no)
+
+#         citation.no = cite_no
+#         #citation.label_html = cite_label_html
+
+#         self.citations.append( citation )
+#         return cite_no #(cite_no, cite_label_html)
+
+#     def add_float(self, htmlfloat):
+
+#         float_type = htmlfloat.float_obj.float_type
+
+#         float_no = len(self.floats[float_type])
+#         self.floats[float_type].append(htmlfloat)
+
+#         return float_no
+
+#     def get_float_ref(self, ref_key_prefix, ref_key):
+
+#         float_type = ref_key_prefix
+#         for htmlfloat in self.floats[float_type]:
+#             if htmlfloat.float_obj.label == ref_key:
+#                 # found float!
+#                 floatnostr = (
+#                     htmlfloat.float_obj.float_caption_name + '&nbsp;'
+#                     + self.htmlpagecollection.format_float_no_html(
+#                         float_type=float_type,
+#                         no=htmlfloat.no,
+#                     )
+#                 )
+#                 floatnohref = f'#{float_type}-{htmlfloat.no}'
+#                 return (htmlfloat, floatnostr, floatnohref)
+
+#         raise ValueError(f"Float reference ‘{ref_key_prefix}:{ref_key}’ not resolved!")
                     
 
         
@@ -375,41 +375,41 @@ class HtmlPageNotes:
 # ------------------------------------------------------------------------------
 
 
-_alpha = 'abcdefghijklmnopqrstuvwxyz'
+# _alpha = 'abcdefghijklmnopqrstuvwxyz'
 
-def alphacounter(n, lower=True):
-    # a, b, c, d, ..., y, z, aa, bb, cc, ..., zz, aaa, ...
-    w = 1 + (n // 26)
-    m = n % 26
-    s = _alpha[m] * w
-    if lower:
-        return s
-    return s.upper()
+# def alphacounter(n, lower=True):
+#     # a, b, c, d, ..., y, z, aa, bb, cc, ..., zz, aaa, ...
+#     w = 1 + (n // 26)
+#     m = n % 26
+#     s = _alpha[m] * w
+#     if lower:
+#         return s
+#     return s.upper()
     
-_romancounterchars = (
-    (1000, "M"),
-    (900, "CM"),
-    (500, "D"),
-    (400, "CD"),
-    (100, "C"),
-    (90, "XC"),
-    (50, "L"),
-    (40, "XL"),
-    (10, "X"),
-    (9, "IX"),
-    (5, "V"),
-    (4, "IV"),
-    (1, "I"),
-)
+# _romancounterchars = (
+#     (1000, "M"),
+#     (900, "CM"),
+#     (500, "D"),
+#     (400, "CD"),
+#     (100, "C"),
+#     (90, "XC"),
+#     (50, "L"),
+#     (40, "XL"),
+#     (10, "X"),
+#     (9, "IX"),
+#     (5, "V"),
+#     (4, "IV"),
+#     (1, "I"),
+# )
 
-def romancounter(n, lower=True):
-    s = ''
-    for romancharvalue, romanchar in _romancounterchars:
-        s += romanchar * (n // romancharvalue)
-        n = n % romancharvalue
-    if lower:
-        return s.lower()
-    return s
+# def romancounter(n, lower=True):
+#     s = ''
+#     for romancharvalue, romanchar in _romancounterchars:
+#         s += romanchar * (n // romancharvalue)
+#         n = n % romancharvalue
+#     if lower:
+#         return s.lower()
+#     return s
 
 
 
@@ -420,10 +420,8 @@ def romancounter(n, lower=True):
 
 class HtmlPageCollection:
     def __init__(self,
-                 zoo,
                  site_generation_environment):
         super().__init__()
-        self.zoo = zoo
         self.site_generation_environment = site_generation_environment
 
         self.citation_manager = None
@@ -492,10 +490,10 @@ class HtmlPageCollection:
                 self.page_for_code_ids[code_id] = htmlpage.name
     
 
-    def finished(self):
+    def finished(self, zoo):
         # check if there are any codes that aren't included in any page, and
         # emit a warning.
-        for code_id in self.zoo.all_codes():
+        for code_id in zoo.all_codes():
             if code_id not in self.page_for_code_ids:
                 logger.warning(f"Code ‘{code_id}’ is not included in any page")
                 
@@ -515,9 +513,10 @@ class HtmlPageCollection:
         # url suffices
         return full_page_path
 
-    def get_image_filename_path_info(self, image_filename, resource_parent):
-        if hasattr(resource_parent, 'code_id'):
-            code_id = resource_parent.code_id
+    def get_image_filename_path_info(self, image_filename, resource_info):
+
+        if resource_info.resource_type == 'code'):
+            code_id = resource_info.resource_id
             try:
                 info = dict( self.figsdb[(code_id, image_filename)] )
                 info['prefixed_path'] = \
@@ -587,7 +586,7 @@ class HtmlPageCollection:
     #     tohtmlconverter = minilatextohtml.ToHtmlConverter(tohtml_refcontext)
     #     return markupsafe.Markup( tohtmlconverter.to_html(s, what=what) )
 
-    def generate(self, *, output_dir, additional_context={}):
+    def generate(self, *, zoo, output_dir, additional_context={}):
 
         # generate all the family pages
         for page_name, htmlpage in self.pages.items():
@@ -597,12 +596,12 @@ class HtmlPageCollection:
 
             page_footnotes = HtmlPageNotes(self)
 
-            tohtml_refcontext = RefContextForHtmlConverter(self, page_footnotes)
+            #tohtml_refcontext = RefContextForHtmlConverter(self, page_footnotes)
             #tohtmlconverter = minilatextohtml.ToHtmlConverter(tohtml_refcontext)
 
             context = dict(
                 code_list=[
-                    self.zoo.get_code(code_id)
+                    zoo.get_code(code_id)
                     for code_id in htmlpage.code_id_list
                 ],
                 page_footnotes=page_footnotes,
@@ -635,8 +634,3 @@ class HtmlPageCollection:
                 fn_output=output_page_fname,
                 context=context,
             )
-
-            # template = self.jinja2env.get_template(htmlpage.template_name)
-            # with open(os.path.join(self.dirs.output_dir, output_page_fname), 'w', encoding='utf-8') as f:
-            #     f.write(template.render(context))
-

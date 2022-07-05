@@ -31,13 +31,13 @@ _accessory_ignore_exts = (
 
 
 class Zoo:
-    def __init__(self, *, dirs, schema_loader, fig_exts):
+    def __init__(self, *, dirs, schema_loader, eczllm_environment):
         super().__init__()
 
         codes_dir = dirs.codes_dir
 
         # make into a tuple; remove empty suffix if present
-        fig_exts = tuple([e for e in fig_exts if e])
+        fig_exts = eczllm_environment.get_figure_filename_extensions()
 
         self._collection = code_collection.CodeCollection()
 
@@ -72,6 +72,8 @@ class Zoo:
 
                 if fullfname.endswith('.yml'):
 
+                    source_info_filename = os.path.relpath(fullfname, start=codes_dir)
+
                     logger.debug(f"Loading code file ‘{filename}’ ...")
                     with open(os.path.join(codes_dir, fullfname), 'r', encoding='utf-8') as f:
                         try:
@@ -81,14 +83,17 @@ class Zoo:
                             raise
 
                     try:
-                        codeobj = code.Code( code_info , full_schema=code_full_schema )
+                        codeobj = code.Code(
+                            code_info,
+                            full_schema=code_full_schema,
+                            source_info_filename=source_info_filename,
+                            eczllm_environment=eczllm_environment,
+                        )
                     except Exception as e:
                         logger.error(
                             f"Error constructing code from YAML file ‘{filename}’:\n{e}\n\n"
                         )
                         raise
-
-                    codeobj.source_info_filename = os.path.relpath(fullfname, start=codes_dir)
 
                     self._collection.add_code( codeobj )
                     

@@ -20,6 +20,7 @@ from ecczoogen import (
     zoo,
     htmlpagecollectiongen,
     sitegenerationenvironment,
+    eczllm,
     server,
     minilatexscanner,
     citationmanager,
@@ -150,16 +151,6 @@ minilatex_scanner = minilatexscanner.MiniLatexScanner()
 
 ################################################################################
 
-#
-# Build the Code Collection --> create a `ecczoogen.zoo` object
-#
-
-zoo = zoo.Zoo(dirs=Dirs, schema_loader=schema_loader,
-              fig_exts=eczoo_site_setup['image_filename_extensions'])
-
-
-################################################################################
-
 logger.info("Setting up the jinja2 template environment ...")
 
 #
@@ -178,6 +169,56 @@ site_gen_env = sitegenerationenvironment.SiteGenerationEnvironment(
     dirs=Dirs,
     base_url='/',
 )
+
+
+################################################################################
+
+#
+# Our HtmlPageCollection that will handle generating the pages for codes
+#
+
+htmlpgcoll = htmlpagecollectiongen.HtmlPageCollection(
+    site_gen_env,
+)
+
+
+search_index_generator = searchindexgen.SearchIndexGenerator()
+
+
+################################################################################
+
+#
+# The citations manager.
+#
+
+with open(os.path.join(Dirs.citation_extras, 'citations_hints.yml'), encoding='utf-8') as f:
+    citation_hints = yaml.safe_load(f)
+
+citation_manager = citationmanager.CitationTextManager(citation_hints)
+
+
+
+################################################################################
+
+#
+# The Latex-Like Markup (LLM) environment
+#
+
+eczllm_environment = eczllm.EczLLMEnvironment(
+    htmlpgcollection=htmlpgcoll,
+    citationsmanager=citation_manager,
+    figure_filename_extensions=eczoo_site_setup['image_filename_extensions'],
+)
+
+
+################################################################################
+
+#
+# Build the Code Collection --> create a `ecczoogen.zoo` object
+#
+
+zoo = zoo.Zoo(dirs=Dirs, schema_loader=schema_loader,
+              fig_exts=eczoo_site_setup['image_filename_extensions'])
 
 
 
@@ -204,21 +245,6 @@ site_gen_env.copy_tree(
     target_dir='', # root of output directory
     only_exts=('.png', '.svg', '.ico', '.xml', '.webmanifest',)
 )
-
-
-################################################################################
-
-#
-# Our HtmlPageCollection that will handle generating the pages for codes
-#
-
-htmlpgcoll = htmlpagecollectiongen.HtmlPageCollection(
-    zoo,
-    site_gen_env,
-)
-
-
-search_index_generator = searchindexgen.SearchIndexGenerator()
 
 
 ################################################################################
@@ -259,7 +285,7 @@ logger.info("Setting up domain/kingdom pages ...")
 #
 
 # The list of domains and associated kingdoms.  This data tree will use the YAML
-# data, and it will add some more information to the bare YML data tree
+# data, and it will add some more information to the bare YAML data tree
 # (e.g. pointers to code objects)
 
 domainshierarchy_full_schema = schema_loader.get_full_schema('domainshierarchy')
@@ -271,9 +297,13 @@ eczoo_domainshierarchy = schemadata.SchemaData(
     domainshierarchy_source_data,
     domainshierarchy_full_schema,
     what="<eczoo_domainshierarchy>",
-    minilatex_resource_parent=schemadata.UseSelfMinilatexResourceParent,
+    resource_info=eczllm_environment.make_resource_info(
+        resource_type='domainshierarchy',
+        resource_id='0',
+        ymlfile='domainshierarchy.yml'
+    )
 )
-eczoo_domainshierarchy.resource_parent_id = lambda: ('domainshierarchy', '0')
+eczoo_domainshierarchy.resource_parent_id = lambda: 
 
 minilatex_scanner.scan_schemadatalike_obj(eczoo_domainshierarchy)
 
@@ -766,10 +796,6 @@ htmlpgcoll.set_image_filename_database( figsdb )
 
 logger.info("Generating citation database ...")
 
-with open(os.path.join(Dirs.citation_extras, 'citations_hints.yml'), encoding='utf-8') as f:
-    citation_hints = yaml.safe_load(f)
-
-citation_manager = citationmanager.CitationTextManager(citation_hints)
 for c in minilatex_scanner.get_encountered_citations():
     try:
         citation_manager.add_encountered_citation(c)
