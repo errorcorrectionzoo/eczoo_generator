@@ -15,11 +15,11 @@ properties:
 
   title:
     type: string
-    _minilatex: 'simple'
+    _llm: standalone
 
   intro:
     type: string
-    _minilatex: 'simple'
+    _llm: standalone
 
   display:
     type: object

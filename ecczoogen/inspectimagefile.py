@@ -134,7 +134,7 @@ def get_image_file_info_svg(filename):
     }
 
     # ### Don't paste in the source SVG into the HTML, it's a bad idea (risk of
-    # ### ideas / resources clashing, etc.)
+    # ### ids / resources clashing, etc.)
     #
     #if os.path.getsize(filename) < _source_size_threshold:
     #    # for small enough files, get the SVG source for direct inclusion.

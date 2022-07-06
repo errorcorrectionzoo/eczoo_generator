@@ -17,51 +17,51 @@ properties:
 
   rate:
     type: string
-    _minilatex: 'full'
+    _llm: full
 
   magic_scaling_exponent:
     type: string
-    _minilatex: 'full'
+    _llm: full
 
   encoders:
     type: array
     items:
       type: string
-      _minilatex: 'full'
+      _llm: full
 
   general_gates:
     type: array
     items:
       type: string
-      _minilatex: 'full'
+      _llm: full
 
   decoders: 
     type: array
     items:
       type: string
-      _minilatex: 'full'
+      _llm: full
 
   transversal_gates:
     type: string
-    _minilatex: 'full'
+    _llm: full
 
   fault_tolerance:
     type: array
     items:
       type: string
-      _minilatex: 'full'
+      _llm: full
 
   threshold: 
     type: array
     items:
       type: string
-      _minilatex: 'full'
+      _llm: full
 
   code_capacity_threshold: 
     type: array
     items:
       type: string
-      _minilatex: 'full'
+      _llm: full
 
 
   # We can decide to add new standard feature fields here.

@@ -1,15 +1,29 @@
+import os.path
+import logging
+logger = logging.getLogger(__name__)
+
+from pylatexenc.latexnodes.nodes import LatexNodesVisitor
+
 from llm import llmstd
-from llm.feature.refs import RefInstance
+from llm.feature import Feature
+from llm.feature.headings import FeatureHeadings
+from llm.feature.endnotes import FeatureEndnotes, EndnoteCategory
+from llm.feature.refs import FeatureRefs, RefInstance
+from llm.feature.cite import FeatureExternalPrefixedCitations
+from llm.feature.floats import FeatureFloatsIncludeGraphicsOnly, FloatType
+from llm.feature.defterm import FeatureDefTerm
 from llm.feature.graphics import GraphicsResource
+
+from llm.fragmentrenderer.html import HtmlFragmentRenderer
 
 
 class CitationsProvider:
     def __init__(self, citationsmanager):
         self.citationsmanager = citationsmanager
 
-    def get_citation_full_text_llm(self, cite_prefix, cite_key):
-        citeobj = self.citationsmanager.get_citation(cite_prefix, cite_key)
-        return citeobj.full_citation_text_minilatex
+    def get_citation_full_text_llm(self, cite_prefix, cite_key, *, resource_info=None):
+        citeobj = self.citationsmanager.get_citation(**dict([(cite_prefix, cite_key)]))
+        return citeobj.full_citation_text_llm.llm_text
 
 
 class ExternalRefResolver:
@@ -50,56 +64,131 @@ class FeatureEczGraphicsResourceProvider(Feature):
 
     feature_name = 'graphics_resource_provider'
 
-    def __init__(self, htmlpgcollection):
+    def __init__(self):
+        super().__init__()
+        self.htmlpgcollection = None
+
+    def set_htmlpgcollection(self, htmlpgcollection):
         self.htmlpgcollection = htmlpgcollection
 
 
     class RenderManager(Feature.RenderManager):
 
         def get_graphics_resource(self, graphics_path, resource_info):
-
-            ymlpath = resource_info['ymlpath']
             
-            self.htmlpgcollection.get_graphics_resource ........
+            # TODO: do something smarter, please...
 
-            return GraphicsResource(....)
+            info = self.feature.htmlpgcollection.get_image_filename_path_info(
+                graphics_path,
+                resource_info
+            )
+            image_info = info['image_info']
+
+            phys_dim = image_info.get('physical_dimensions', ((None,'pt'), (None, 'pt')))
+
+            assert phys_dim[0][1] == 'pt' and phys_dim[1][1] == 'pt'
+
+            return GraphicsResource(
+                src_url=info['path'],
+                graphics_type=image_info['type'],
+                dpi=image_info.get('dpi', None),
+                pixel_dimensions=image_info.get('pixel_dimensions', (None, None)),
+                physical_dimensions=(phys_dim[0][0], phys_dim[1][0]),
+            )
 
 
 
 
 class EczLLMResourceInfo:
-    def __init__(self, resource_type, resource_id, ymlfile):
+    def __init__(self, resource_type, resource_id):
         super().__init__()
         self.resource_type = resource_type
         self.resource_id = resource_id
-        self.ymlfile = ymlfile
 
+
+
+heading_section_commands_by_level = {
+    # only 'paragraph' available.
+    4: FeatureHeadings.SectionCommandSpec(r"paragraph", inline=True),
+}
+
+footnote_counter_formatter = 'alph'
+
+endnote_categories = [
+    EndnoteCategory('footnote', footnote_counter_formatter, 'footnote'),
+]
+
+citation_counter_formatter = 'arabic'
+citation_delimiters = ('[', ']')
+
+
+float_types = [
+    FloatType('figure', 'Figure', 'Roman'),
+    FloatType('table', 'Table', 'Roman'),
+]
 
 
 
 class EczLLMEnvironment(llmstd.LLMStandardEnvironment):
-    def __init__(self, *, htmlpgcollection, citationsmanager, figure_filename_extensions):
+    def __init__(self, *, figure_filename_extensions):
 
+        self.htmlpgcollection = None
+        self.citationsmanager = None
+
+        self.figure_filename_extensions = \
+            tuple([e for e in figure_filename_extensions if e])
+
+        self.external_citations_provider = None
+        self.external_ref_resolver = None
+
+        self.feature_headings = FeatureHeadings(
+            section_commands_by_level=heading_section_commands_by_level,
+        )
+        self.feature_refs = FeatureRefs(
+            external_ref_resolver=None,
+        )
+
+        self.feature_endnotes = FeatureEndnotes(categories=endnote_categories)
+        
+        self.feature_citations = FeatureExternalPrefixedCitations(
+            external_citations_provider=None,
+            counter_formatter=citation_counter_formatter,
+            citation_delimiters=citation_delimiters,
+        )
+
+        self.feature_floats = FeatureFloatsIncludeGraphicsOnly(float_types=float_types)
+
+        self.feature_defterm = FeatureDefTerm()
+
+        self.graphics_resource_provider = FeatureEczGraphicsResourceProvider()
+
+        # SUPERCLASS constructor call here --
+        super().__init__(
+            features=[
+                self.feature_headings,
+                self.feature_refs,
+                self.feature_endnotes,
+                self.feature_citations,
+                self.feature_floats,
+                self.feature_defterm,
+                self.graphics_resource_provider,
+            ]
+        )
+
+    def set_htmlpgcollection(self, htmlpgcollection):
         self.htmlpgcollection = htmlpgcollection
+
+        self.external_ref_resolver = ExternalRefResolver(htmlpgcollection)
+        self.feature_refs.set_external_ref_resolver(self.external_ref_resolver)
+        self.graphics_resource_provider.set_htmlpgcollection(htmlpgcollection)
+
+    def set_citationsmanager(self, citationsmanager):
         self.citationsmanager = citationsmanager
 
-        self.figure_filename_extensions = tuple([e for e in figure_filename_extensions if e])
-
         self.external_citations_provider = CitationsProvider(citationsmanager)
-        self.external_ref_resolver = ExternalRefResolver(htmlpgcollection)
-        self.graphics_resource_provider = \
-            FeatureEczGraphicsResourceProvider(htmlpgcollection=htmlpgcollection)
-
-        features = llmstd.standard_features(
-            external_citations_provider=self.external_citations_provider,
-            external_ref_resolver=self.external_ref_resolver,
-            use_simple_path_graphics_resource_provider=False,
+        self.feature_citations.set_external_citations_provider(
+            self.external_citations_provider
         )
-        features.append(
-            self.graphics_resource_provider
-        )
-
-        super().__init__( features=features )
 
     def make_resource_info(self, *args, **kwargs):
         return EczLLMResourceInfo(*args, **kwargs)
@@ -108,6 +197,25 @@ class EczLLMEnvironment(llmstd.LLMStandardEnvironment):
         return self.figure_filename_extensions
 
 
+    def make_html_fragment_renderer(self):
+        return EczHtmlFragmentRenderer()
+
+# ----------------------------
+
+
+def _is_local_url(urlstring):
+    return urlstring.startswith('#') or (
+        urlstring.startswith('/')
+        and not urlstring.startswith('//')
+    )
+
+
+class EczHtmlFragmentRenderer(HtmlFragmentRenderer):
+    
+    @classmethod
+    def use_link_target_blank(cls, urlstring):
+        return not _is_local_url(urlstring)
+
 
 
 # ----------------------------
@@ -115,43 +223,82 @@ class EczLLMEnvironment(llmstd.LLMStandardEnvironment):
 
 
 
-EncounteredCitation = collections.namedtuple('EncounteredCitation',
-                                             ['citation_key_prefix',
-                                              'citation_key',
-                                              'encountered_resource_info',
-                                              'encountered_where'])
+class EncounteredCitation:
+    def __init__(self, citation_key_prefix, citation_key,
+                 encountered_resource_info, encountered_where):
+        super().__init__()
+        self.citation_key_prefix = citation_key_prefix
+        self.citation_key = citation_key
+        self.encountered_resource_info = encountered_resource_info
+        self.encountered_where = encountered_where
 
-EncounteredImageFilename = collections.namedtuple('EncounteredFloat',
-                                                  ['image_filename',
-                                                   'encountered_resource_info',
-                                                   'encountered_where'])
+    def __repr__(self):
+        return (
+            f"{self.__class__.__name__}("
+            f"citation_key_prefix={self.citation_key_prefix!r}, "
+            f"citation_key={self.citation_key!r}, "
+            f"encountered_resource_info={self.encountered_resource_info!r}, "
+            f"encountered_where={self.encountered_where!r})"
+        )
 
+class EncounteredImageFilename:
+    def __init__(self, image_filename, encountered_resource_info, encountered_where):
+        super().__init__()
+        self.image_filename = image_filename
+        self.encountered_resource_info = encountered_resource_info
+        self.encountered_where = encountered_where
+
+    def __repr__(self):
+        return (
+            f"{self.__class__.__name__}("
+            f"image_filename={self.image_filename!r}, "
+            f"encountered_resource_info={self.encountered_resource_info!r}, "
+            f"encountered_where={self.encountered_where!r})"
+        )
 
 
 class NodeScanner(LatexNodesVisitor):
-    def __init__(self, *, htmlpgcollection, citationsmanager):
-        self.htmlpgcollection = htmlpgcollection
-        self.citationsmanager = citationsmanager
+    def __init__(self):
+        super().__init__()
+        self.encountered_citations = []
+        self.encountered_image_filenames = []
 
-        ....... directly add to htmlpgcollection/citationsmanager or store
-        separately for later additions????...........
+    def get_encountered_citations(self):
+        return self.encountered_citations
+
+    def get_encountered_image_filenames(self):
+        return self.encountered_image_filenames
 
     def visit_macro_node(self, node):
+        logger.debug("scanner -- visiting node %r", node)
+
         if hasattr(node, 'llmarg_graphics_path'):
             # it's a graphics node, e.g., \includegraphics
-            ymlfile = node.latex_walker.resource_info['ymlfile']
-            self.htmlpgcollection.register_graphics(
-                graphics_path=node.llmarg_graphics_path,
-                relative_to_yml_file=ymlfile
+            graphics_options_value = node.llmarg_graphics_options_value
+            graphics_path = node.llmarg_graphics_path
+
+            self.encountered_image_filenames.append(
+                EncounteredImageFilename(
+                    image_filename=graphics_path,
+                    encountered_resource_info=node.latex_walker.resource_info,
+                    encountered_where=node.latex_walker.what,
+                )
             )
 
         if hasattr(node, 'llmarg_cite_items'):
             # it's a citation node with citations to track
-            self.citationsmanager.add_citation(.........)
-
+            for cite_item in node.llmarg_cite_items:
+                citation_key_prefix, citation_key = cite_item
+                self.encountered_citations.append(
+                    EncounteredCitation(
+                        citation_key_prefix=citation_key_prefix,
+                        citation_key=citation_key,
+                        encountered_resource_info=node.latex_walker.resource_info,
+                        encountered_where=node.latex_walker.what,
+                    )
+                )
 
         super().visit_macro_node(node)
-
 
 
 
@@ -160,7 +307,7 @@ class NodeScanner(LatexNodesVisitor):
         for (fldinfo, value) in obj.iter_fields_recursive(
                 arrays_at_once=False
         ):
-            #logger.debug(f"Scanning LLM in {obj} - iter {fldinfo=} / {value=}")
+            logger.debug(f"Scanning for LLM in {obj} - iter {fldinfo=} / {value=}")
             if value is not None and fldinfo is not None \
                and fldinfo['schema'] is not None \
                and fldinfo['schema'].get('_llm', False):
@@ -169,8 +316,7 @@ class NodeScanner(LatexNodesVisitor):
                     this_what = what
                 else:
                     this_what = obj.what
-                self.visit_nodelist(
-                    value.nodes,
-                    where=f"{this_what}{fldinfo['fieldname']}",
-                    resource_info=value.resource_info
-                )
+
+                logger.debug(f"Scanning LLM “{value.what}”")
+
+                value.nodes.accept_node_visitor( self )

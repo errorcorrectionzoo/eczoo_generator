@@ -22,7 +22,7 @@ properties:
   # every code must have a name.
   name:
     type: string
-    _minilatex: 'simple'
+    _llm: standalone
     _single_line_string: True
     _description: >-
       The name of the code.  It is listed in multiple places, so don't make it
@@ -32,7 +32,7 @@ properties:
   # where space is precious (e.g. navigation links in the header bar)
   short_name:
     type: string
-    _minilatex: 'simple'
+    _llm: standalone
     _single_line_string: true
     _description: >-
       (Optional.) A short name in case the 'name' field is long.  The short name
@@ -43,7 +43,7 @@ properties:
   # every code must have a description.
   description:
     type: string
-    _minilatex: 'full'
+    _llm: full
     _description: >-
       Describe code subspace as best as you can here.  Anything applicable to a
       larger parent set of codes (see below) should go in that entry instead of
@@ -53,7 +53,7 @@ properties:
   introduced:
     type: string
     _single_line_string: True
-    _minilatex: 'full'
+    _llm: full
     _description: >-
       First reference with the code (optional).  This field should be a single
       ‘\cite{}’ command with the appropriate reference(s).  Recall that you can
@@ -67,7 +67,7 @@ properties:
     $ref: '/schemas/ecc_space'
 
   protection:
-    _minilatex: 'full'
+    _llm: full
     type: string
 
 
@@ -78,13 +78,13 @@ properties:
   realizations:
     type: array
     items:
-      _minilatex: 'full'
+      _llm: full
       type: string
 
   notes:
     type: array
     items:
-      _minilatex: 'full'
+      _llm: full
       type: string
 
   #

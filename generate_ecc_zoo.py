@@ -22,7 +22,6 @@ from ecczoogen import (
     sitegenerationenvironment,
     eczllm,
     server,
-    minilatexscanner,
     citationmanager,
     searchindexgen,
     schemaloader,
@@ -31,6 +30,8 @@ from ecczoogen import (
 )
 
 logger = logging.getLogger()
+
+from llm.fragmentrenderer.text import TextFragmentRenderer
 
 
 #
@@ -146,8 +147,6 @@ if args.run_server:
 
 schema_loader = schemaloader.SchemaLoader(schemas_dir=Dirs.schemas_dir)
 
-minilatex_scanner = minilatexscanner.MiniLatexScanner()
-
 
 ################################################################################
 
@@ -171,32 +170,6 @@ site_gen_env = sitegenerationenvironment.SiteGenerationEnvironment(
 )
 
 
-################################################################################
-
-#
-# Our HtmlPageCollection that will handle generating the pages for codes
-#
-
-htmlpgcoll = htmlpagecollectiongen.HtmlPageCollection(
-    site_gen_env,
-)
-
-
-search_index_generator = searchindexgen.SearchIndexGenerator()
-
-
-################################################################################
-
-#
-# The citations manager.
-#
-
-with open(os.path.join(Dirs.citation_extras, 'citations_hints.yml'), encoding='utf-8') as f:
-    citation_hints = yaml.safe_load(f)
-
-citation_manager = citationmanager.CitationTextManager(citation_hints)
-
-
 
 ################################################################################
 
@@ -205,10 +178,12 @@ citation_manager = citationmanager.CitationTextManager(citation_hints)
 #
 
 eczllm_environment = eczllm.EczLLMEnvironment(
-    htmlpgcollection=htmlpgcoll,
-    citationsmanager=citation_manager,
     figure_filename_extensions=eczoo_site_setup['image_filename_extensions'],
 )
+
+
+eczllm_scanner = eczllm.NodeScanner()
+
 
 
 ################################################################################
@@ -218,7 +193,8 @@ eczllm_environment = eczllm.EczLLMEnvironment(
 #
 
 zoo = zoo.Zoo(dirs=Dirs, schema_loader=schema_loader,
-              fig_exts=eczoo_site_setup['image_filename_extensions'])
+              eczllm_environment=eczllm_environment)
+
 
 
 
@@ -247,6 +223,49 @@ site_gen_env.copy_tree(
 )
 
 
+
+################################################################################
+
+#
+# Our HtmlPageCollection that will handle generating the pages for codes
+#
+
+htmlpgcoll = htmlpagecollectiongen.HtmlPageCollection(
+    site_generation_environment=site_gen_env,
+    eczllm_environment=eczllm_environment
+)
+
+
+eczllm_environment.set_htmlpgcollection(htmlpgcoll)
+
+
+################################################################################
+
+#
+# Search index scanner and generator
+#
+
+search_index_generator = searchindexgen.SearchIndexGenerator()
+
+
+################################################################################
+
+#
+# The citations manager.
+#
+
+with open(os.path.join(Dirs.citation_extras, 'citations_hints.yml'), encoding='utf-8') as f:
+    citation_hints = yaml.safe_load(f)
+
+citation_manager = citationmanager.CitationTextManager(
+    citation_hints,
+    eczllm_environment=eczllm_environment,
+)
+
+
+eczllm_environment.set_citationsmanager(citation_manager)
+
+
 ################################################################################
 
 logger.info("Setting up code pages ...")
@@ -263,7 +282,7 @@ for code_id, code in zoo.all_codes().items():
         name=f'c/{code_id}',
         info={
             'page_title': code.name,
-            'page_title_text': code.name.text,
+            'page_title_text': code.name.render_standalone(TextFragmentRenderer()),
         },
         code_id_list=[ code_id ],
         context={
@@ -297,15 +316,14 @@ eczoo_domainshierarchy = schemadata.SchemaData(
     domainshierarchy_source_data,
     domainshierarchy_full_schema,
     what="<eczoo_domainshierarchy>",
-    resource_info=eczllm_environment.make_resource_info(
+    llm_environment=eczllm_environment,
+    llm_resource_info=eczllm_environment.make_resource_info(
         resource_type='domainshierarchy',
         resource_id='0',
-        ymlfile='domainshierarchy.yml'
     )
 )
-eczoo_domainshierarchy.resource_parent_id = lambda: 
 
-minilatex_scanner.scan_schemadatalike_obj(eczoo_domainshierarchy)
+eczllm_scanner.scan_schemadatalike_obj(eczoo_domainshierarchy)
 
 
 for domain in eczoo_domainshierarchy['domains']:
@@ -339,7 +357,7 @@ for domain in eczoo_domainshierarchy['domains']:
             name=f'kingdom/{kingdom_code_id}',
             info={
                 'page_title': kingdom['name'],
-                'page_title_text': kingdom['name'].text,
+                'page_title_text': kingdom['name'].render_standalone(TextFragmentRenderer()),
             },
             code_id_list=sorted_code_id_list,
             context={
@@ -364,7 +382,7 @@ for domain in eczoo_domainshierarchy['domains']:
         },
         code_id_list=[ ],
         context={
-            'domain': domain, #htmlpgcoll.wrap_object_with_minilatex_properties(domain),
+            'domain': domain,
         },
         template_name='dyn_pages/domain_page.html',
     )
@@ -388,6 +406,7 @@ os.makedirs(os.path.join(Dirs.output_dir, 'list'), exist_ok=True)
 
 
 codelistpage_list = []
+codelistpages_by_list_id = {}
 
 for (dirpath, dirnames, filenames) in os.walk(codelistpages_dir, followlinks=True):
     show_dirpath = os.path.relpath(dirpath)
@@ -415,12 +434,13 @@ for (dirpath, dirnames, filenames) in os.walk(codelistpages_dir, followlinks=Tru
             ydata,
             codelistpage_full_schema,
             what=f'codelistpage ‘{filename}’',
-            minilatex_resource_parent=schemadata.UseSelfMinilatexResourceParent,
+            llm_resource_info=eczllm_environment.make_resource_info(
+                resource_type='codelistpage',
+                resource_id=ydata['list_id'],
+            )
         )
-        codelistpage_sd.resource_parent_id = \
-            lambda: ('codelistpage', relfname)
 
-        minilatex_scanner.scan_schemadatalike_obj(codelistpage_sd)
+        eczllm_scanner.scan_schemadatalike_obj(codelistpage_sd)
 
         domains_by_domainid = {
             domain['domain_id']: domain
@@ -489,7 +509,7 @@ for (dirpath, dirnames, filenames) in os.walk(codelistpages_dir, followlinks=Tru
             name=listpageid,
             info={
                 'page_title': codelistpage_sd['title'],
-                'page_title_text': codelistpage_sd['title'].text,
+                'page_title_text': codelistpage_sd['title'].render_standalone(TextFragmentRenderer()),
                 'codelistpage_data': codelistpage_sd,
                 'display_options': codelistpage_sd.subobject('display.options'),
             },
@@ -501,12 +521,16 @@ for (dirpath, dirnames, filenames) in os.walk(codelistpages_dir, followlinks=Tru
         )
         htmlpgcoll.create_page( htmlpage )
 
-        codelistpage_list.append({
-            'list_id': codelistpage_sd['list_id'],
+        list_id = codelistpage_sd['list_id']
+        codelistpage_info = {
+            'list_id': list_id,
             'path': htmlpage.path(),
             'title': codelistpage_sd['title'],
             'codelistpage_data': codelistpage_sd,
-        })
+            'source_info_filename': relfname,
+        }
+        codelistpage_list.append(codelistpage_info)
+        codelistpages_by_list_id[ list_id ] = codelistpage_info
 
 
 codelistpage_list.sort(
@@ -659,33 +683,6 @@ for fn in os.listdir(Dirs.pages_dir):
             context=global_context
         )
 
-################################################################################
-
-logger.info("Compiling special pages ...")
-
-#
-# Compile special pages (like the pretty code graph)
-#
-
-from special_pages_gen.pretty_code_graph import PagePrettyCodeGraph
-
-special_pages = [ PagePrettyCodeGraph, ]
-
-for SpecialPageClass in special_pages:
-
-    logger.info(f"Compiling special page ‘{SpecialPageClass.__name__}’")
-
-    pg = SpecialPageClass(
-        dirs=Dirs,
-        site_gen_env=site_gen_env,
-        zoo=zoo,
-        eczoo_domains=eczoo_domainshierarchy['domains'],
-        htmlpagescollection=htmlpgcoll,
-        global_context=global_context,
-    )
-
-    pg.generate()
-
 
 ################################################################################
 
@@ -693,11 +690,11 @@ for SpecialPageClass in special_pages:
 # Scan codes' information for citations, and build the bibliography.
 #
 
-logger.info("Scanning code minilatex for external resources ...")
+logger.info("Scanning LLM code for external resources ...")
 
 for code_id, code in zoo.all_codes().items():
     
-    minilatex_scanner.scan_schemadatalike_obj(code, what=f"<code {code.code_id}>")
+    eczllm_scanner.scan_schemadatalike_obj(code, what=f"<code {code.code_id}>")
 
 
 ################################################################################
@@ -715,74 +712,81 @@ figsdb = {}
 output_fig_prefix = 'fig'
 os.makedirs(os.path.join(Dirs.output_dir, output_fig_prefix), exist_ok=True)
 
-for encountered_image_filename in minilatex_scanner.get_encountered_image_filenames():
-    if encountered_image_filename.encountered_resource_parent_id is not None:
-        resource_parent_id = encountered_image_filename.encountered_resource_parent_id
-        image_filename = encountered_image_filename.image_filename
+for encountered_image_filename in eczllm_scanner.get_encountered_image_filenames():
 
-        if (resource_parent_id, image_filename) in figsdb:
-            # already got this figure (how is this possible ?)
-            continue
+    resource_info = encountered_image_filename.encountered_resource_info
+    image_filename = encountered_image_filename.image_filename
 
-        resource_parent_type, resource_parent_id_part = resource_parent_id
+    if (resource_info, image_filename) in figsdb:
+        # already got this figure (how is this possible ?)
+        continue
 
-        if resource_parent_type == 'code':
-            code_id = resource_parent_id_part
-            code = zoo.get_code(code_id)
-            full_path = os.path.join(Dirs.codes_dir,
-                                     os.path.dirname(code.source_info_filename),
-                                     image_filename)
-        elif resource_parent_type == 'domainshierarchy':
-            full_path = os.path.join(Dirs.code_tree_info, image_filename)
-        elif resource_parent_type == 'codelistpage':
-            full_path = os.path.join(Dirs.code_tree_info, 'codelistpages',
-                                     resource_parent_id_part, image_filename)
-        else:
-            raise ValueError(
-                f"Unknown resource_parent_type for finding minilatex figures:"
-                f"{resource_parent_type} in {resource_parent_id}"
-            )
+    if resource_info is None:
+        logger.warning(f"Can't handle {encountered_image_filename=}, resource_info is None")
+        raise ValueError("I don't know what to do with a resource present "
+                         "in this LLM string, because resource_info is None!")
 
-        ext = ''
-        for ext in fig_exts:
-            full_path_wext = full_path + ext
-            if os.path.exists(full_path_wext):
-                break
-        else:
-            raise ValueError(
-                f"Cannot find image file {full_path}, tried extentions {fig_exts}")
-
-        with open(full_path_wext, 'rb') as fb:
-            hx = hashlib.sha256()
-            while True:
-                data = fb.read(2048)
-                if not data:
-                    break
-                hx.update(data)
-            image_file_hexdigest = hx.hexdigest()
-
-        ofigname = image_file_hexdigest[:32]
-
-        # pick up the extension again, in case it was already in full_path
-        _, ext = os.path.splitext(full_path_wext)
-        ofigname = ofigname + ext
-
-        site_gen_env.copy_file(
-            source_dir=None,
-            fn_source=full_path_wext,
-            fn_target=os.path.join(output_fig_prefix, ofigname)
+    if resource_info.resource_type == 'code':
+        code_id = resource_info.resource_id
+        code = zoo.get_code(code_id)
+        full_path = os.path.join(
+            Dirs.codes_dir,
+            os.path.dirname(code.source_info_filename),
+            image_filename
+        )
+    elif resource_info.resource_type == 'domainshierarchy':
+        full_path = os.path.join(Dirs.code_tree_info, image_filename)
+    elif resource_info.resource_type == 'codelistpage':
+        list_id = resource_info.resource_id
+        full_path = os.path.join(
+            Dirs.code_tree_info,
+            'codelistpages',
+            os.path.dirname(codelistpages_by_id[list_id]['source_info_filename']),
+            image_filename
+        )
+    else:
+        raise ValueError(
+            f"Unknown resource_parent_type for finding figures:"
+            f"{resource_parent_type} in {resource_parent_id}"
         )
 
-        image_info = dict(inspectimagefile.get_image_file_info(full_path_wext))
-
-        figsdb[(code_id, image_filename)] = {
-            'path': output_fig_prefix + '/' + ofigname,
-            'image_info': image_info,
-        }
-
+    ext = ''
+    for ext in fig_exts:
+        full_path_wext = full_path + ext
+        if os.path.exists(full_path_wext):
+            break
     else:
-        # TODO! will we need figures outside code pages?
-        raise RuntimeError("please implement me")
+        raise ValueError(
+            f"Cannot find image file {full_path}, tried extentions {fig_exts}")
+
+    with open(full_path_wext, 'rb') as fb:
+        hx = hashlib.sha256()
+        while True:
+            data = fb.read(2048)
+            if not data:
+                break
+            hx.update(data)
+        image_file_hexdigest = hx.hexdigest()
+
+    ofigname = image_file_hexdigest[:32]
+
+    # pick up the extension again, in case it was already in full_path
+    _, ext = os.path.splitext(full_path_wext)
+    ofigname = ofigname + ext
+
+    site_gen_env.copy_file(
+        source_dir=None,
+        fn_source=full_path_wext,
+        fn_target=os.path.join(output_fig_prefix, ofigname)
+    )
+
+    image_info = dict(inspectimagefile.get_image_file_info(full_path_wext))
+
+    figsdb[(resource_info, image_filename)] = {
+        'path': output_fig_prefix + '/' + ofigname,
+        'image_info': image_info,
+    }
+
 
 
 htmlpgcoll.set_image_filename_database( figsdb )
@@ -796,7 +800,9 @@ htmlpgcoll.set_image_filename_database( figsdb )
 
 logger.info("Generating citation database ...")
 
-for c in minilatex_scanner.get_encountered_citations():
+encountered_citations = eczllm_scanner.get_encountered_citations()
+logger.debug("Encountered citations = %r", encountered_citations)
+for c in encountered_citations:
     try:
         citation_manager.add_encountered_citation(c)
     except Exception as e:
@@ -849,7 +855,6 @@ with open(output_citation_cache_fetched_data_filename, 'w') as fw:
 
 citation_manager.build_full_citation_text_database()
 
-htmlpgcoll.set_citation_manager(citation_manager)
 
 ################################################################################
 
@@ -860,9 +865,37 @@ htmlpgcoll.set_citation_manager(citation_manager)
 logger.info("Generating code pages ...")
 
 htmlpgcoll.generate(
+    zoo=zoo,
     output_dir=Dirs.output_dir,
     additional_context=global_context,
 )
+
+################################################################################
+
+logger.info("Compiling special pages ...")
+
+#
+# Compile special pages (like the pretty code graph)
+#
+
+from special_pages_gen.pretty_code_graph import PagePrettyCodeGraph
+
+special_pages = [ PagePrettyCodeGraph, ]
+
+for SpecialPageClass in special_pages:
+
+    logger.info(f"Compiling special page ‘{SpecialPageClass.__name__}’")
+
+    pg = SpecialPageClass(
+        dirs=Dirs,
+        site_gen_env=site_gen_env,
+        zoo=zoo,
+        eczoo_domains=eczoo_domainshierarchy['domains'],
+        htmlpagescollection=htmlpgcoll,
+        global_context=global_context,
+    )
+
+    pg.generate()
 
 
 
@@ -883,8 +916,8 @@ def _get_schemadata_properties_as_json_tree(obj):
     if isinstance(obj.data, dict):
         return { k: _get_schemadata_properties_as_json_tree(o)
                  for k, o in obj._data_sd.items() }
-    if hasattr(obj.data, 'text'):
-        return obj.data.text
+    if hasattr(obj.data, 'llm_text'):
+        return obj.data.llm_text
     return obj.data
 
 all_codes_info = { code_id: _get_schemadata_properties_as_json_tree(codeobj.schemadata)
@@ -893,9 +926,12 @@ with open(os.path.join(Dirs.output_dir, 'dat', 'all_codes_info_dump.json'), 'w',
           encoding='utf-8') as fw:
     json.dump(all_codes_info, fw)
 
+search_index_data = search_index_generator.generate_search_index(
+    eczllm_environment=eczllm_environment
+)
 with open(os.path.join(Dirs.output_dir, 'dat', 'search_index_store.json'), 'w',
           encoding='utf-8') as fw:
-    json.dump(search_index_generator.get_store_dump(), fw)
+    json.dump(search_index_data, fw)
 
 
 ################################################################################

@@ -25,7 +25,9 @@
 {% block contents %}
 
 
-{% set popular_code_id_list = [
+{% set popular_code_id_list = [] %}
+
+{# {% set popular_code_id_list = [
   'binary_linear',
   'reed_solomon',
   'ldpc',
@@ -39,7 +41,31 @@
   'qldpc',
 
   'gkp',
-] %}
+] %} #}
+
+
+{% set zoo_stats = zoo.generate_stats( domains, [] ) %}
+
+{# {% set zoo_stats = zoo.generate_stats( domains, [
+    ['total_num_codes', ['code entries']],
+    ['total_num_kingdoms', ['kingdoms']],
+    ['total_num_domains', ['domains']],
+    ['domain_ids_and_codetypes', [
+        ['classical_domain', 'classical codes'],
+        ['quantum_domain', 'quantum codes'],
+        [ None, 'abstract property codes'],
+    ]],
+    ['code_familyhead_ids_and_codetypes', [
+        ['topological', 'topological codes'],
+        ['css', 'CSS codes'],
+        ['qldpc','quantum LDPC codes'],
+        ['oscillators', 'bosonic codes'],
+    ]],
+] ) %} #}
+
+
+
+
 
 <nav class="page-index-box">
   {#- <h1><a href="{{domain.htmlpage.path() | prebaseurl}}">{{domain.name}}</a></h1> -#}
@@ -142,23 +168,6 @@
   <span style="font-style:italic">(Random code loading …)</span>
 </nav>
 
-
-{% set zoo_stats = zoo.generate_stats( domains, [
-    ['total_num_codes', ['code entries']],
-    ['total_num_kingdoms', ['kingdoms']],
-    ['total_num_domains', ['domains']],
-    ['domain_ids_and_codetypes', [
-        ['classical_domain', 'classical codes'],
-        ['quantum_domain', 'quantum codes'],
-        [ None, 'abstract property codes'],
-    ]],
-    ['code_familyhead_ids_and_codetypes', [
-        ['topological', 'topological codes'],
-        ['css', 'CSS codes'],
-        ['qldpc','quantum LDPC codes'],
-        ['oscillators', 'bosonic codes'],
-    ]],
-] ) %}
 
 <nav class="page-index-box" id="quick-stats-box">
   Stats at a glance:

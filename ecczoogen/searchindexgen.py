@@ -4,41 +4,21 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-import minilatextohtml
 
-
-
-class DummyRefContext:
-    def get_ref(self, ref_key_prefix, ref_key):
-        return ('', '')
-
-    def add_footnote(self, footnotetext):
-        return ('', '')
-
-    def add_citation(self, citation_key_prefix, citation_key,
-                     optional_cite_extra_html=None):
-        return ('', '')
-
-
-
-# class MiniLatexToTextConverter(minilatextohtml.ToHtmlConverter):
-#     def __init__(self):
-#         super().__init__( DummyRefContext() )
-
-#     def to_text(self, x, *, what='(unknown)'):
-#         htmlval = self.to_html(x, what=what)
-#         return html.unescape(htmlval)
-
-#     def html_wrap_in_tag(self, tagname, htmlcontent, **kwargs):
-#         return htmlcontent
+from llm.fragmentrenderer.text import TextFragmentRenderer
 
 
 
 class SearchIndexGenerator:
     def __init__(self):
-        self.documents = []
+        self.documents = None
+        self._code_pages = []
 
     def add_code_page(self, code, href):
+        self._code_pages.append( (code, href) )
+
+
+    def _index_code_page(self, code, href):
         d = {}
         for fldinfo, value in code.iter_fields_recursive():
 
@@ -67,11 +47,30 @@ class SearchIndexGenerator:
     def _get_value_string(self, value, schema):
         if value is None:
             return ''
-        if schema.get('_minilatex', False):
-            return value.text
+        if schema.get('_llm', False):
+            doc = self.eczllm_environment.make_document(
+                value.render,
+                feature_document_options=dict(
+                    citations=dict(
+                        use_endnotes=False,
+                    ),
+                ),
+            )
+            rendered_text, _ = doc.render( self.eczllm_text_fragment_renderer )
+            return rendered_text
         return value
 
-    def get_store_dump(self):
+    def generate_search_index(self, eczllm_environment):
+
+        # do all the indexing
+        self.eczllm_environment = eczllm_environment
+        self.eczllm_text_fragment_renderer = TextFragmentRenderer()
+
+        self.documents = []
+
+        for code, href in self._code_pages:
+            self._index_code_page
+
         return {
             x['_page_id']: x
             for x in self.documents

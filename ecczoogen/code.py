@@ -55,7 +55,6 @@ class Code:
         self.llm_resource_info = self.eczllm_environment.make_resource_info(
             resource_type='code',
             resource_id=code_id,
-            ymlfile=self.source_info_filename,
         )
 
         self.schemadata = SchemaData(
@@ -88,7 +87,7 @@ class Code:
         name = self.name
         if name.llm_text.endswith(" code"):
             return self.eczllm_environment.make_fragment(
-                llm_text=name.minilatex[:-len(" code")],
+                llm_text=name.llm_text[:-len(" code")],
                 what=f"{name.what} (short)",
                 resource_info=self.llm_resource_info,
                 standalone_mode=True,
@@ -119,7 +118,7 @@ class Code:
                         yield (fldinfo, rel[rel_field])
 
     def __str__(self):
-        return self.name.minilatex
+        return self.name.llm_text
 
     def __repr__(self):
         return (

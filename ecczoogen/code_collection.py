@@ -4,7 +4,6 @@ logger = logging.getLogger(__name__)
 
 from . import code
 
-from minilatextohtml import MiniLatex
 
 
 class InvalidCodeReference(Exception):
@@ -32,7 +31,7 @@ class CodeCollection:
 
     # ------------------
 
-    def finish(self):
+    def finish(self, eczllm_environment):
         r"""
         Call this method when you finished constructing the code collection and you
         want to establish all relations.  This will also compute additional
@@ -94,9 +93,11 @@ class CodeCollection:
                         raise
 
                     if 'detail' in relinfo:
-                        detail = MiniLatex(
-                            relinfo['detail'],
-                            what=f'Code({code_id=}).relations.{rel_type}s[{j}]'
+                        detail = eczllm_environment.make_fragment(
+                            llm_text=relinfo['detail'],
+                            what=f'Code({code_id=}).relations.{rel_type}s[{j}]',
+                            standalone_mode=False,
+                            resource_info=codeobj.llm_resource_info,
                         )
                     else:
                         detail = None
@@ -118,7 +119,7 @@ class CodeCollection:
             for rel_type in ('parent', 'cousin',):
                 setattr(codeobj.relations, rel_type+'_of',
                         sorted(getattr(codeobj.relations, rel_type+'_of'),
-                               key=lambda relobj: relobj.code.name.text))
+                               key=lambda relobj: relobj.code.name.llm_text))
 
         #
         # Compute the generation of codes.

@@ -80,14 +80,14 @@ notes:
   - |
       Test citation to book \cite{doi:10.1017/CBO9780511976667}.  Test citation
       to arXiv entry with incomplete DOI (issue \#43) \cite{arXiv:1604.04062}.
-      Test citing a preset: \cite{preset:PreskillLectureNotesQuComputation}.
+      Test citing a preset: \cite{preset:PreskillNotes}.
       Test citing a preset with citation note:
-      \cite[Chap.~6]{preset:PreskillLectureNotesQuComputation}.
+      \cite[Chap.~6]{preset:PreskillNotes}.
 
   - |
-      By the way, you can |\begin{verbatiminput}\input %verbatim$ text&*~like
-      this.\end{booh} using the \begin{vertatiminput} ... \end {verbatiminput}
-      environment\end{verbatiminput}|!
+      By the way, you can |\begin{verbatimtext}\input %verbatim$ text&*~like
+      this.\end{booh} using the \begin{vertatimtext} ... \end {verbatimtext}
+      environment\end{verbatimtext}|!
 
       A bug can occur if a paper on the arXiv has a ‘\%’ sign in its
       title:\cite{arXiv:1907.02554}
@@ -96,7 +96,7 @@ notes:
       A second note goes here.  This one contains a display equation:
       \begin{align}
         S_1 &= I\,Z\,X\,X\,Z\ ;  \nonumber\\
-        S_2, \ldots, S_4 &= \text{cyclical permutations of \(S_1\)}\ .
+        S_2, \ldots, S_4 &= \text{cyclical permutations of S_1}\ .
         \label{eq:stabilizers}
       \end{align}
       Note that the last cyclical permutation of \(S_1\) is not included, as it is

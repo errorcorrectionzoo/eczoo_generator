@@ -110,7 +110,7 @@ class Zoo:
 
         logger.info(f"Finalizing code collection ...")
 
-        self._collection.finish()
+        self._collection.finish(eczllm_environment)
 
     #
     # Only expose a subset of the CodeCollection's API.  E.g., prevent the user
