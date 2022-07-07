@@ -45,6 +45,18 @@
   {#- <h1><a href="{{domain.htmlpage.path() | prebaseurl}}">{{domain.name}}</a></h1> -#}
   <ul class="page-index-box-links">
 
+{# LIST SOME FAVORITES #}
+    <li><span class="page-index-box-links-head">Jump to&nbsp;▸&nbsp;</span></li>
+      {% for popular_code_id in popular_code_id_list -%}
+        <li>{{- showcodelink(popular_code_id) -}}</li>
+        {%- if not loop.last -%}
+          , {# space after comma #}
+        {%- endif -%}
+      {%- endfor %}
+    </li>
+
+    <li class="page-index-box-links-thin-separator"></li>
+
 {# LIST DOMAINS/KINGDOMS #}
     {% for domain in domains %}
     <li><a href="{{domain.htmlpage.path() | prebaseurl}}"
@@ -77,16 +89,6 @@
     {% endfor %}
     {% endfor %}
 
-{# LIST SOME FAVORITES #}
-    <li class="page-index-box-links-thin-separator"></li>
-    <li><span class="page-index-box-links-head-not-too-prominent"><h1>Jump to:</h1></span></li>
-      {% for popular_code_id in popular_code_id_list -%}
-        <li>{{- showcodelink(popular_code_id) -}}</li>
-        {%- if not loop.last -%}
-          , {# space after comma #}
-        {%- endif -%}
-      {%- endfor %}
-    </li>
   </ul>
 </nav>
 
