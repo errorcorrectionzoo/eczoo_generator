@@ -7,6 +7,8 @@ import random
 import logging
 logger = logging.getLogger(__name__)
 
+import ecczoogen.eczllm as eczllm
+
 
 def is_abstract_code(code):
     if not code['physical']: # or not code.logical: # e.g. 'bosonic code' kingdom
@@ -43,6 +45,7 @@ class PagePrettyCodeGraph:
                  global_context,
                  htmlpagescollection,
                  eczoo_domains,
+                 eczllm_environment,
                  **kwargs):
         super().__init__()
 
@@ -51,6 +54,7 @@ class PagePrettyCodeGraph:
         self.global_context = global_context
         self.htmlpagescollection = htmlpagescollection
         self.eczoo_domains = eczoo_domains
+        self.eczllm_environment = eczllm_environment
 
         self.dirs = self.site_gen_env.dirs
 
@@ -170,8 +174,9 @@ class PagePrettyCodeGraph:
             n = {
                 'data': {
                     'id': f"domain_{domain['domain_id']}",
-                    'label': domain['name'].text,
-                    '_description': domain['description'].text,
+                    'label': eczllm.render_as_text(domain['name'], self.eczllm_environment),
+                    '_description': eczllm.render_as_text(domain['description'],
+                                                          self.eczllm_environment),
                     
                     '_is_domain': 1,
                     '_page_href':
@@ -206,7 +211,8 @@ class PagePrettyCodeGraph:
 
         for code_id, code in all_codes_dict.items():
 
-            short_description = code['description'].text
+            short_description = eczllm.render_as_text(code['description'],
+                                                      self.eczllm_environment)
             if short_description and len(short_description) > 200:
                 short_description = short_description[:200-3]+'...',
 
@@ -269,9 +275,9 @@ class PagePrettyCodeGraph:
             n = {
                 'data': {
                     'id': node_id_code(code_id),
-                    'label': code.short_name().text,
+                    'label': eczllm.render_as_text(code.short_name(), self.eczllm_environment),
 
-                    '_code_name': code.name.text,
+                    '_code_name': eczllm.render_as_text(code.name, self.eczllm_environment),
                     '_is_code': 1,
                     '_is_plain_concrete_code': (0 if code_is_abstract or is_kingdom else 1),
                     '_is_abstract_code': \
@@ -285,7 +291,8 @@ class PagePrettyCodeGraph:
             if is_kingdom:
                 n['data'].update({
                     '_is_kingdom': 1,
-                    '_kingdom_name': kingdom['name'].text,
+                    '_kingdom_name': eczllm.render_as_text(kingdom['name'],
+                                                           self.eczllm_environment),
                     '_kingdom_href': self.site_gen_env.prefix_base_url(
                         kingdom['htmlpage'].path()),
                 })

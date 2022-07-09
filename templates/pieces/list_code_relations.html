@@ -21,7 +21,7 @@ Expected context variables:
   {%- if rel.detail -%}
     <span class="code-{{use_relation_type}}-1-detail">
       <!-- whitespace, em dash, no-break space -->
-      &#x2014;&nbsp;{{rel.detail | to_html_with_notes(rc)}}</span>
+      &#x2014;&nbsp;{{rel.detail | llmrender(rc)}}</span>
   {%- endif -%}
   </li>
 {% endfor %}

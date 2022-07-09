@@ -15,6 +15,7 @@ from llm.feature.defterm import FeatureDefTerm
 from llm.feature.graphics import GraphicsResource
 
 from llm.fragmentrenderer.html import HtmlFragmentRenderer
+from llm.fragmentrenderer.text import TextFragmentRenderer
 
 
 class CitationsProvider:
@@ -27,10 +28,11 @@ class CitationsProvider:
 
 
 class ExternalRefResolver:
-    def __init__(self, htmlpgcollection):
-        self.htmlpgcollection = None
+    def __init__(self, htmlpgcollection, zoo):
+        self.htmlpgcollection = htmlpgcollection
+        self.zoo = zoo
     
-    def get_ref(ref_prefix, ref_target):
+    def get_ref(self, ref_prefix, ref_target, *, resource_info=None):
         if ref_prefix == 'code':
             # refers to another code, find it & return link to it
             code = self.zoo.get_code(ref_target) # okay to raise exception
@@ -134,6 +136,7 @@ class EczLLMEnvironment(llmstd.LLMStandardEnvironment):
 
         self.htmlpgcollection = None
         self.citationsmanager = None
+        self.zoo = None
 
         self.figure_filename_extensions = \
             tuple([e for e in figure_filename_extensions if e])
@@ -175,12 +178,14 @@ class EczLLMEnvironment(llmstd.LLMStandardEnvironment):
             ]
         )
 
-    def set_htmlpgcollection(self, htmlpgcollection):
+    def set_htmlpgcollection_zoo(self, htmlpgcollection, zoo):
         self.htmlpgcollection = htmlpgcollection
+        self.zoo = zoo
 
-        self.external_ref_resolver = ExternalRefResolver(htmlpgcollection)
-        self.feature_refs.set_external_ref_resolver(self.external_ref_resolver)
         self.graphics_resource_provider.set_htmlpgcollection(htmlpgcollection)
+
+        self.external_ref_resolver = ExternalRefResolver(self.htmlpgcollection, self.zoo)
+        self.feature_refs.set_external_ref_resolver(self.external_ref_resolver)
 
     def set_citationsmanager(self, citationsmanager):
         self.citationsmanager = citationsmanager
@@ -215,6 +220,23 @@ class EczHtmlFragmentRenderer(HtmlFragmentRenderer):
     @classmethod
     def use_link_target_blank(cls, urlstring):
         return not _is_local_url(urlstring)
+
+
+
+
+def render_as_text(value, eczllm_environment):
+    doc = eczllm_environment.make_document(
+        value.render,
+        feature_document_options=dict(
+            citations=dict(
+                use_endnotes=False,
+            ),
+        ),
+    )
+    rendered_text, _ = doc.render( TextFragmentRenderer() )
+
+    return rendered_text
+
 
 
 

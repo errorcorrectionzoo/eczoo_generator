@@ -190,7 +190,7 @@ pylatexenc = {git = "https://github.com/phfaist/pylatexenc.git", branch = "devel
 type = "git"
 url = "https://github.com/phfaist/llm.git"
 reference = "main"
-resolved_reference = "f5a8c5a75cb96d63ad91bb0f7541fa101f27865c"
+resolved_reference = "37e723e3247c568aae55f3b0870efba7c3bbac47"
 
 [[package]]
 name = "lxml"
@@ -224,18 +224,21 @@ python-versions = ">=3.7"
 
 [[package]]
 name = "pylatexenc"
-version = "3.0a3"
+version = "3.0alpha000004"
 description = "Simple LaTeX parser providing latex-to-unicode and unicode-to-latex conversion"
 category = "main"
 optional = false
-python-versions = "*"
+python-versions = "^3.6" # argh...
 develop = false
+
+[package.extras]
+buildjslib = ["Transcrypt (>=3.9.0,<4.0.0)", "PyYAML (>=6.0,<7.0)"]
 
 [package.source]
 type = "git"
 url = "https://github.com/phfaist/pylatexenc.git"
 reference = "devel"
-resolved_reference = "4c6cfcc2bc6dd8443bef32282811030eabf6cd22"
+resolved_reference = "ddee0f285fa088750c137b01b7b5161089a0f6cf"
 
 [[package]]
 name = "pyrsistent"

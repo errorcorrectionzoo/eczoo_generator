@@ -197,7 +197,6 @@ zoo = zoo.Zoo(dirs=Dirs, schema_loader=schema_loader,
 
 
 
-
 ################################################################################
 
 #
@@ -236,7 +235,7 @@ htmlpgcoll = htmlpagecollectiongen.HtmlPageCollection(
 )
 
 
-eczllm_environment.set_htmlpgcollection(htmlpgcoll)
+eczllm_environment.set_htmlpgcollection_zoo(htmlpgcoll, zoo)
 
 
 ################################################################################
@@ -893,6 +892,7 @@ for SpecialPageClass in special_pages:
         eczoo_domains=eczoo_domainshierarchy['domains'],
         htmlpagescollection=htmlpgcoll,
         global_context=global_context,
+        eczllm_environment=eczllm_environment,
     )
 
     pg.generate()

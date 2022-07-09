@@ -132,4 +132,4 @@ class SiteGenerationEnvironment:
         output_fname = os.path.join(self.dirs.output_dir, fn_output)
 
         with open(output_fname, 'w', encoding='utf-8') as fw:
-            fw.write(rendered_output)
+            fw.write(contents)
