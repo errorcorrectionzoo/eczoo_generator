@@ -42,6 +42,9 @@
                 display: inline-block; // no line break within the 'head' item
                 font-weight: 550;
             }
+            span.page-index-box-links-head {
+                // additional styling for when this "head" is not a link
+            }
 
             > li {
                 display: inline;
