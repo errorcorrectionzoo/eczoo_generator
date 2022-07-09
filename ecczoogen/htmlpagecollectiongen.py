@@ -131,7 +131,7 @@ class HtmlPageCollection:
     #              + f"</span>")
     #             for item in obj
     #         ]) )
-    #     if isinstance(obj, minilatextohtml.MiniLatex):
+    #     if isinstance(obj, mini~~~latextohtml.Mini~~~Latex):
     #         return markupsafe.Markup( obj.to_html(refcontext=refcontext) )
     #     return obj
 
@@ -249,7 +249,7 @@ class HtmlPageCollection:
             logger.info(f"Generating page ‘{output_page_fname}’")
 
             def render_html_page(render_context):
-                logger.debug(f"Rendering page ‘{page_name}’ ...")
+                #logger.debug(f"Rendering page ‘{page_name}’ ...")
 
                 context = dict(
                     code_list=[
@@ -290,7 +290,9 @@ class HtmlPageCollection:
                     endnotes_mgr.render_endnotes(
                         target_id='endnotes',
                         annotations=['sectioncontent'],
-                        include_headings_at_level=2,
+                        #include_headings_at_level=2,
+                        endnotes_heading_title='References',
+                        endnotes_heading_level=2,
                     )
                 )
 

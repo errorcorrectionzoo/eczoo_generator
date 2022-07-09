@@ -295,7 +295,7 @@ class NodeScanner(LatexNodesVisitor):
         return self.encountered_image_filenames
 
     def visit_macro_node(self, node):
-        logger.debug("scanner -- visiting node %r", node)
+        #logger.debug("scanner -- visiting node %r", node)
 
         if hasattr(node, 'llmarg_graphics_path'):
             # it's a graphics node, e.g., \includegraphics
@@ -332,7 +332,7 @@ class NodeScanner(LatexNodesVisitor):
         for (fldinfo, value) in obj.iter_fields_recursive(
                 arrays_at_once=False
         ):
-            logger.debug(f"Scanning for LLM in {obj} - iter {fldinfo=} / {value=}")
+            #logger.debug(f"Scanning for LLM in {obj} - iter {fldinfo=} / {value=}")
             if value is not None and fldinfo is not None \
                and fldinfo['schema'] is not None \
                and fldinfo['schema'].get('_llm', False):
@@ -342,6 +342,6 @@ class NodeScanner(LatexNodesVisitor):
                 else:
                     this_what = obj.what
 
-                logger.debug(f"Scanning LLM “{value.what}”")
+                #logger.debug(f"Scanning LLM “{value.what}”")
 
                 value.start_node_visitor( self )

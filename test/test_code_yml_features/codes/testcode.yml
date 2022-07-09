@@ -63,7 +63,7 @@ notes:
       
       Multiple paragraphs here.\footnote{Do these paragraph breaks work?  Here's
       a \textit{footnote}, by the way.}  Here's also a reference to
-      \ref{figure:test1}.
+      \ref{figure:test1} and \ref{figure:test-n-only}.
 
   - |
       Another thing we should try out is what happens when we have really,

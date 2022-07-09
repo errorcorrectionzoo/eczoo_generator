@@ -1,6 +1,8 @@
 import logging
 logger = logging.getLogger(__name__)
 
+import datetime
+
 
 from .schemadata import SchemaData
 
@@ -45,8 +47,13 @@ class Code:
 
         self.source_info_filename = source_info_filename
 
+        year = datetime.date.today().year
+        if '_meta' in self.source_info:
+            if 'year' in self.source_info['_meta']:
+                year = self.source_info['_meta']['year']
+
         self.citation_info = {
-            'year': 2022 # FIXME: WHAT YEAR SHOULD WE SET?  FIND FILE/GIT MODIFICATION DATE?
+            'year': year,
         }
 
         code_id = info['code_id']

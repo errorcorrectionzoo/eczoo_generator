@@ -63,6 +63,7 @@ args = args_parser.parse_args()
 if args.verbose:
     logger.setLevel(logging.DEBUG)
     logging.getLogger('pylatexenc').setLevel(logging.INFO)
+    logging.getLogger('llm').setLevel(logging.INFO)
 
 
 with open(args.eczoo_site_setup, encoding='utf-8') as f:

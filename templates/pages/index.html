@@ -25,9 +25,9 @@
 {% block contents %}
 
 
-{% set popular_code_id_list = [ 'css' ] %}
+{# {% set popular_code_id_list = [ 'css' ] %} #}
 
-{# {% set popular_code_id_list = [
+{% set popular_code_id_list = [
   'binary_linear',
   'reed_solomon',
   'ldpc',
@@ -41,12 +41,12 @@
   'qldpc',
 
   'gkp',
-] %} #}
+] %}
 
 
-{% set zoo_stats = zoo.generate_stats( domains, [] ) %}
+{# {% set zoo_stats = zoo.generate_stats( domains, [] ) %} #}
 
-{# {% set zoo_stats = zoo.generate_stats( domains, [
+{% set zoo_stats = zoo.generate_stats( domains, [
     ['total_num_codes', ['code entries']],
     ['total_num_kingdoms', ['kingdoms']],
     ['total_num_domains', ['domains']],
@@ -61,7 +61,7 @@
         ['qldpc','quantum LDPC codes'],
         ['oscillators', 'bosonic codes'],
     ]],
-] ) %} #}
+] ) %}
 
 
 
