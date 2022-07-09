@@ -1,0 +1,37 @@
+$schema: "http://json-schema.org/draft-06/schema"
+$id: "https://errorcorrectionzoo.org/schemas/meta"
+
+#
+# The _meta: field of any entry in the zoo.  Includes information about
+# contributors, etc.
+#
+
+_use_schemadata: false
+type: object
+additionalProperties: false
+properties:
+
+  #
+  # List of contributors
+  #
+  contributors:
+    type: array
+    items:
+      #
+      # A single contributor
+      #
+      type: object
+      additionalProperties: false
+      required: ['name']
+      properties:
+        name:
+          type: string
+        githubusername:
+          type: string
+
+  #
+  # Year of latest significant contribution.  Will be used (TODO) for generating
+  # citations, for instance.
+  #
+  year:
+    type: integer

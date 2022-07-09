@@ -100,3 +100,12 @@ properties:
         $ref: '/schemas/ecc_relation_list'
       cousins:
         $ref: '/schemas/ecc_relation_list'
+
+
+  #
+  # Store meta-information about this entry. Authors, etc.
+  #
+  _meta:
+    $ref: '/schemas/meta'
+    
+
