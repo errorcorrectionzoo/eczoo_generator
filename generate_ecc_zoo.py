@@ -232,7 +232,8 @@ site_gen_env.copy_tree(
 
 htmlpgcoll = htmlpagecollectiongen.HtmlPageCollection(
     site_generation_environment=site_gen_env,
-    eczllm_environment=eczllm_environment
+    eczllm_environment=eczllm_environment,
+    zoo=zoo
 )
 
 
@@ -860,6 +861,15 @@ with open(output_citation_cache_fetched_data_filename, 'w') as fw:
     citation_manager.save_db_json(fw)
 
 citation_manager.build_full_citation_text_database()
+
+
+################################################################################
+
+#
+# some final checks
+#
+
+htmlpgcoll.finished()
 
 
 ################################################################################

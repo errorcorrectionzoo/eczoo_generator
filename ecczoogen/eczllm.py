@@ -55,7 +55,7 @@ class ExternalRefResolver:
                 ref_type=ref_prefix,
                 ref_target=ref_target,
                 formatted_ref_llm_text=defterm_term_llm_text,
-                target_href=target_href,
+                target_href=defterm_href,
             )
 
         return None
@@ -282,6 +282,55 @@ class EncounteredImageFilename:
         )
 
 
+class EncounteredDefTerm:
+    def __init__(self, defterm_llm_text, defterm_safe_target_id,
+                 encountered_resource_info, encountered_where):
+        super().__init__()
+        self.defterm_llm_text = defterm_llm_text
+        self.defterm_safe_target_id = defterm_safe_target_id
+        self.encountered_resource_info = encountered_resource_info
+        self.encountered_where = encountered_where
+
+    def __repr__(self):
+        return (
+            f"{self.__class__.__name__}("
+            f"defterm_llm_text={self.defterm_llm_text!r}, "
+            f"defterm_safe_target_id={self.defterm_safe_target_id!r}, "
+            f"encountered_resource_info={self.encountered_resource_info!r}, "
+            f"encountered_where={self.encountered_where!r})"
+        )
+
+
+
+
+class NodeDefTermScanner(LatexNodesVisitor):
+    def __init__(self):
+        super().__init__()
+        self.encountered_defterms = []
+
+    def get_encountered_defterms(self):
+        return self.encountered_defterms
+
+    def visit_environment_node(self, node):
+        if hasattr(node, 'llmarg_term_llm_ref_label_verbatim'):
+            defterm_llm_text = node.llmarg_term_llm_ref_label_verbatim
+            defterm_safe_target_id = node.llmarg_term_safe_target_id
+
+            self.encountered_defterms.append(
+                EncounteredDefTerm(
+                    defterm_llm_text=defterm_llm_text,
+                    defterm_safe_target_id=defterm_safe_target_id,
+                    encountered_resource_info=node.latex_walker.resource_info,
+                    encountered_where=node.latex_walker.what,
+                )
+            )
+        super().visit_environment_node(node)
+
+    def scan_schemadatalike_obj(self, obj, what=None):
+        visitor_scan_schemadatalike_obj(self, obj, what=what)
+
+
+
 class NodeScanner(LatexNodesVisitor):
     def __init__(self):
         super().__init__()
@@ -325,23 +374,25 @@ class NodeScanner(LatexNodesVisitor):
 
         super().visit_macro_node(node)
 
-
-
     def scan_schemadatalike_obj(self, obj, what=None):
+        visitor_scan_schemadatalike_obj(self, obj, what=what)
 
-        for (fldinfo, value) in obj.iter_fields_recursive(
-                arrays_at_once=False
-        ):
-            #logger.debug(f"Scanning for LLM in {obj} - iter {fldinfo=} / {value=}")
-            if value is not None and fldinfo is not None \
-               and fldinfo['schema'] is not None \
-               and fldinfo['schema'].get('_llm', False):
-                #
-                if what is not None:
-                    this_what = what
-                else:
-                    this_what = obj.what
 
-                #logger.debug(f"Scanning LLM “{value.what}”")
 
-                value.start_node_visitor( self )
+def visitor_scan_schemadatalike_obj(visitor, obj, what=None):
+    for (fldinfo, value) in obj.iter_fields_recursive(
+            arrays_at_once=False
+    ):
+        #logger.debug(f"Scanning for LLM in {obj} - iter {fldinfo=} / {value=}")
+        if value is not None and fldinfo is not None \
+           and fldinfo['schema'] is not None \
+           and fldinfo['schema'].get('_llm', False):
+            #
+            if what is not None:
+                this_what = what
+            else:
+                this_what = obj.what
+
+            #logger.debug(f"Scanning LLM “{value.what}”")
+
+            value.start_node_visitor( visitor )

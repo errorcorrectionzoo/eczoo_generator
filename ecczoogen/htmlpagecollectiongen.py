@@ -62,6 +62,7 @@ class HtmlPageCollection:
             self,
             site_generation_environment,
             eczllm_environment,
+            zoo,
     ):
         super().__init__()
         self.site_generation_environment = site_generation_environment
@@ -70,12 +71,17 @@ class HtmlPageCollection:
         self.eczllm_html_fragment_renderer = \
             self.eczllm_environment.make_html_fragment_renderer()
 
+        self.zoo = zoo
+
         self.figsdb = None
 
         self.jinja2env = self.site_generation_environment.jinja2env
 
         self.pages = {}
         self.page_for_code_ids = {}
+
+        # remember on which page we defined terms with \begin{defterm}{XYZ}...\end{defterm}
+        self.refinfo_for_defterms = {}
 
         self.global_context = {}
 
@@ -137,6 +143,9 @@ class HtmlPageCollection:
 
 
     def create_page(self, htmlpage):
+
+        zoo = self.zoo
+
         if htmlpage.name in self.pages:
             raise ValueError(f"A page with name ‘{htmlpage.name}’ already exists!")
 
@@ -150,15 +159,38 @@ class HtmlPageCollection:
                         f"‘{self.page_for_code_ids[code_id]}’ and ‘{htmlpage.name}’"
                     )
                 self.page_for_code_ids[code_id] = htmlpage.name
-    
+        
+            # scan for any defterms in the content of the code, so that we can link
+            # it here.
+            scanner = eczllm.NodeDefTermScanner()
+            for code_id in htmlpage.code_id_list:
+                code = zoo.get_code(code_id)
+                scanner.scan_schemadatalike_obj(
+                    code,
+                    what=repr(code)
+                )
 
-    def finished(self, zoo):
+            for encountered_defterm in scanner.get_encountered_defterms():
+                defterm_llm_text = encountered_defterm.defterm_llm_text
+                defterm_href = self.site_generation_environment.prefix_base_url(
+                    f"{htmlpage.path()}#defterm-{encountered_defterm.defterm_safe_target_id}"
+                )
+                self.refinfo_for_defterms[defterm_llm_text] = \
+                    (defterm_llm_text, defterm_href)
+                logger.debug(f"registered defterm: {self.refinfo_for_defterms = }")
+
+
+    def finished(self):
+
+        zoo = self.zoo
+
         # check if there are any codes that aren't included in any page, and
         # emit a warning.
         for code_id in zoo.all_codes():
             if code_id not in self.page_for_code_ids:
                 logger.warning(f"Code ‘{code_id}’ is not included in any page")
     
+
     def get_code_href(self, code_id):
         try:
             page_name = self.page_for_code_ids[code_id]
@@ -191,24 +223,16 @@ class HtmlPageCollection:
         raise ValueError(f"I don't know where to look for {image_filename!r} with "
                          f"{resource_parent=!r}")
 
-
     def set_image_filename_database(self, figsdb):
         self.figsdb = figsdb
 
-    # def format_footnote_label_html(self, foot_no):
-    #     fn_symb = alphacounter(foot_no)
-    #     return fn_symb
+    def get_defterm_href(self, defterm):
+        try:
+            #logger.debug(f"{self.refinfo_for_defterms = }")
+            return self.refinfo_for_defterms[defterm]
+        except KeyError as e:
+            raise ValueError(f"Unknown defterm reference: ‘{defterm}’")
 
-    # def format_citation_label_html(self, cite_no, optional_cite_extra_html=None):
-
-    #     cite_symb = f'{1+cite_no:d}'
-
-    #     if optional_cite_extra_html is not None:
-    #         return markupsafe.Markup(f'[{cite_symb}; {optional_cite_extra_html}]')
-    #     return markupsafe.Markup(f'[{cite_symb}]')
-
-    # def format_float_no_html(self, float_type, no):
-    #     return romancounter(1 + no, lower=False)
 
     def _jfilter_code_ref(self, code):
         code_href = self.get_code_href( code.code_id )
