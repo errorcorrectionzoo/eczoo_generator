@@ -433,10 +433,11 @@ for (dirpath, dirnames, filenames) in os.walk(codelistpages_dir, followlinks=Tru
             ydata,
             codelistpage_full_schema,
             what=f'codelistpage ‘{filename}’',
+            llm_environment=eczllm_environment,
             llm_resource_info=eczllm_environment.make_resource_info(
                 resource_type='codelistpage',
                 resource_id=ydata['list_id'],
-            )
+            ),
         )
 
         eczllm_scanner.scan_schemadatalike_obj(codelistpage_sd)
@@ -485,8 +486,8 @@ for (dirpath, dirnames, filenames) in os.walk(codelistpages_dir, followlinks=Tru
                     return True
             return False
 
-        def _ml_as_text(s):
-            return getattr(s, 'text', s)
+        def _llm_as_text(s):
+            return eczllm.render_as_text(s, eczllm_environment)
 
         list_of_codes = [
             code
@@ -496,7 +497,7 @@ for (dirpath, dirnames, filenames) in os.walk(codelistpages_dir, followlinks=Tru
         sort_by = codelistpage_sd.getfield('sort.by', 'name')
         reverse = codelistpage_sd.getfield('sort.reverse', False)
         list_of_codes.sort(
-            key=lambda code: _ml_as_text(code.getfield(sort_by)),
+            key=lambda code: _llm_as_text(code.getfield(sort_by)),
             reverse=reverse,
         )
 

@@ -41,7 +41,7 @@ figure.float {
 
         text-align: center;
 
-        .center-if-single-line {
+        > span {
             display: inline-block;
 
             font-style: italic;
@@ -77,7 +77,7 @@ figure.float {
     margin-top: -0.3em;
 }
 
-.cite {
+.citation {
     @include fixbaseline-superscript-text;
 }
 .footnote {

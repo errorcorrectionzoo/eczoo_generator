@@ -41,7 +41,7 @@ Expected context variables:
 <div class="sectioncontent code-name">
   <span class="code-name-cell">
     <h1 class="code-name">
-      {{code.name}}
+      {{code.name|llmrender(rc)}}
       {%- if code.introduced -%}
       <span class="code-introduced">{{code.introduced | llmrender(rc)}}</span>
       {%- endif -%}

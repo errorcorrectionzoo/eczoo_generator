@@ -2,13 +2,13 @@
 
 {% block contents %}
 
-<p>Welcome to the {{domain.name}}.</p>
+<p>Welcome to the {{domain.name | llmrender}}.</p>
 
 <p>Kingdoms:</p>
 
 <ul class="domain-kingdoms-list">
 {% for kingdom in domain.kingdoms %}
-<li><a href="{{ kingdom.htmlpage.path() | prebaseurl}}">{{kingdom.name}}</a></li>
+<li><a href="{{ kingdom.htmlpage.path() | prebaseurl}}">{{kingdom.name | llmrender}}</a></li>
 {% endfor %}
 </ul>
 

@@ -17,7 +17,7 @@
 
 {% macro showcodelink(code_id) -%}
   {%- set code = zoo.get_code(code_id) -%}
-  <a href="{{ code|code_ref_href }}">{{code.short_name()}}</a>
+  <a href="{{ code|code_ref_href }}">{{code.short_name()|llmrender}}</a>
 {%- endmacro %}
 
 
@@ -25,7 +25,7 @@
 {% block contents %}
 
 
-{% set popular_code_id_list = [] %}
+{% set popular_code_id_list = [ 'css' ] %}
 
 {# {% set popular_code_id_list = [
   'binary_linear',
@@ -70,7 +70,6 @@
 {% set heading_separator_html = '&nbsp;▸&nbsp;&nbsp;' | safe %}
 
 <nav class="page-index-box">
-  {#- <h1><a href="{{domain.htmlpage.path() | prebaseurl}}">{{domain.name}}</a></h1> -#}
   <ul class="page-index-box-links">
 
 {# LIST SOME FAVORITES #}
@@ -89,10 +88,12 @@
 {# LIST DOMAINS/KINGDOMS #}
     {%- for domain in domains -%}
     <li><a href="{{domain.htmlpage.path() | prebaseurl}}"
-           class="page-index-box-links-head">{{domain.name}}{{heading_separator_html}}</a></li>
+           class="page-index-box-links-head">
+           {{- domain.name | llmrender -}}{{- heading_separator_html -}}
+        </a></li>
     {%- for kingdom in domain.kingdoms -%}
       <li>{#- -#}
-        <a href="{{ kingdom.htmlpage.path() | prebaseurl }}">{{kingdom.name}}</a>
+        <a href="{{ kingdom.htmlpage.path() | prebaseurl }}">{{ kingdom.name | llmrender}}</a>
           {%- if not loop.last -%}
             , {# space after comma #}
           {%- endif -%}
@@ -113,7 +114,7 @@
     <li><a href="{{ 'lists' | prebaseurl}}"
            class="page-index-box-links-head">Code lists{{heading_separator_html}}</a>
 {%- for codelistpage in codelistpage_list[:max_display_box_codelistpage] -%}
-      <a href="{{ codelistpage.path | prebaseurl }}">{{ codelistpage.title.to_html().strip()|safe }}</a>
+      <a href="{{ codelistpage.path | prebaseurl }}">{{ codelistpage.title.whitespace_stripped()|llmrender }}</a>
       {%- if not loop.last -%}
         , {# space after comma -#}
       {%- endif -%}

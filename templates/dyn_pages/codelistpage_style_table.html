@@ -46,9 +46,11 @@
       {%- if col.link_to_code %}<a href="{{code|code_ref_href}}">{% endif -%}
       {%- if display_value is not none -%}
         {%- if col.first_paragraph_only -%}
-          {{ display_value.get_first_paragraph() | to_html_with_notes(rc) }}
+          {{ display_value.get_first_paragraph() | llmrender(rc) }}
+        {%- elif col.truncate_to -%}
+          {{ display_value.truncate_to(chars=col.truncate_to) | llmrender(rc) }}
         {%- else -%}
-          {{ display_value | to_html_with_notes(rc) }}
+          {{ display_value | llmrender(rc) }}
         {%- endif -%}
       {%- endif -%}
       {%- if col.link_to_code %}</a>{% endif -%}

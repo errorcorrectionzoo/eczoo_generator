@@ -19,7 +19,7 @@ properties:
 
   intro:
     type: string
-    _llm: standalone
+    _llm: full
 
   display:
     type: object

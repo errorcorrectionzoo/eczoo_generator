@@ -211,10 +211,10 @@ class PagePrettyCodeGraph:
 
         for code_id, code in all_codes_dict.items():
 
-            short_description = eczllm.render_as_text(code['description'],
-                                                      self.eczllm_environment)
-            if short_description and len(short_description) > 200:
-                short_description = short_description[:200-3]+'...',
+            short_description = eczllm.render_as_text(
+                code['description'].truncate_to(chars=200, min_chars=120),
+                self.eczllm_environment
+            )
 
             # position = {}
             # if code.family_root_code is not None:

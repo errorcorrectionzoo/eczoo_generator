@@ -4,7 +4,7 @@
 
 {% block contents %}
 
-<p>Welcome to the {{kingdom.name}}.</p>
+<p>Welcome to the {{kingdom.name | llmrender}}.</p>
 
 {% for code in code_list %}
 

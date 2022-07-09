@@ -91,7 +91,7 @@ class FeatureEczGraphicsResourceProvider(Feature):
             assert phys_dim[0][1] == 'pt' and phys_dim[1][1] == 'pt'
 
             return GraphicsResource(
-                src_url=info['path'],
+                src_url=info['prefixed_path'],
                 graphics_type=image_info['type'],
                 dpi=image_info.get('dpi', None),
                 pixel_dimensions=image_info.get('pixel_dimensions', (None, None)),
@@ -117,7 +117,10 @@ heading_section_commands_by_level = {
 footnote_counter_formatter = 'alph'
 
 endnote_categories = [
-    EndnoteCategory('footnote', footnote_counter_formatter, 'footnote'),
+    EndnoteCategory('footnote',
+                    counter_formatter=footnote_counter_formatter,
+                    heading_title='Footnotes',
+                    endnote_command='footnote'),
 ]
 
 citation_counter_formatter = 'arabic'
@@ -125,8 +128,8 @@ citation_delimiters = ('[', ']')
 
 
 float_types = [
-    FloatType('figure', 'Figure', 'Roman'),
-    FloatType('table', 'Table', 'Roman'),
+    FloatType('figure', 'Figure', counter_formatter='Roman'),
+    FloatType('table', 'Table', counter_formatter='Roman'),
 ]
 
 
@@ -341,4 +344,4 @@ class NodeScanner(LatexNodesVisitor):
 
                 logger.debug(f"Scanning LLM “{value.what}”")
 
-                value.nodes.accept_node_visitor( self )
+                value.start_node_visitor( self )

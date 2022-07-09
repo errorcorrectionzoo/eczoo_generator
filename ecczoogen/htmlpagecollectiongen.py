@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 import markupsafe
 
 from . import code
-
+from . import eczllm
 
 
 
@@ -92,6 +92,7 @@ class HtmlPageCollection:
             lambda cite_no: markupsafe.Markup( self.format_citation_label_html(cite_no) )
 
         self.jinja2env.filters['llmrender'] = self._jfilter_llmrender
+        self.jinja2env.filters['llmrendertext'] = self._jfilter_llmrendertext
 
         self.jinja2env.filters['to_json'] = self._jfilter_to_json
 
@@ -99,12 +100,15 @@ class HtmlPageCollection:
             lambda llm: llm.llm_text
 
 
+    def _jfilter_llmrendertext(self, obj, rendercontext=None):
+        return eczllm.render_as_text(obj, self.eczllm_environment)
+
     def _jfilter_llmrender(self, obj, rendercontext=None):
         if isinstance(obj, list):
             return markupsafe.Markup( "".join([
-                (f"<span class=\"paragraph-in-list\">"
+                (markupsafe.Markup(f"<span class=\"paragraph-in-list\">")
                  + self._jfilter_llmrender(item, rendercontext=rendercontext)
-                 + f"</span>")
+                 + markupsafe.Markup(f"</span>"))
                 for item in obj
             ]) )
 
@@ -209,7 +213,9 @@ class HtmlPageCollection:
     def _jfilter_code_ref(self, code):
         code_href = self.get_code_href( code.code_id )
         page_url_html = markupsafe.escape(code_href)
-        code_name_html = markupsafe.escape(code.name)
+        code_name_html = markupsafe.escape(
+            self._jfilter_llmrender(code.name)
+        )
         return markupsafe.Markup(
             f'''<a href="{page_url_html}">{code_name_html}</a>'''
         )
@@ -220,7 +226,9 @@ class HtmlPageCollection:
     def _jfilter_short_code_ref(self, code):
         code_href = self.get_code_href( code.code_id )
         page_url_html = markupsafe.escape(code_href)
-        code_short_name_html = markupsafe.escape(code.short_name())
+        code_short_name_html = markupsafe.escape(
+            self._jfilter_llmrender(code.short_name())
+        )
         return markupsafe.Markup(
             f'''<a href="{page_url_html}">{code_short_name_html}</a>'''
         )
@@ -279,7 +287,11 @@ class HtmlPageCollection:
                 endnotes_mgr = render_context.feature_render_manager('endnotes')
                 full_rendered_output = full_rendered_output.replace(
                     '<RENDER_ENDNOTES/>',
-                    endnotes_mgr.render_endnotes()
+                    endnotes_mgr.render_endnotes(
+                        target_id='endnotes',
+                        annotations=['sectioncontent'],
+                        include_headings_at_level=2,
+                    )
                 )
 
             self.site_generation_environment.create_file_with_contents(
