@@ -227,6 +227,7 @@ class EczHtmlFragmentRenderer(HtmlFragmentRenderer):
 
     inline_heading_add_space = False
 
+    html_blocks_joiner = ""
     
 
 

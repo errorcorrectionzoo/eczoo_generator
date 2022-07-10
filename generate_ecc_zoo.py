@@ -379,7 +379,7 @@ for domain in eczoo_domainshierarchy['domains']:
         name=f'domain/{domain_id}',
         info={
             'page_title': domain['name'],
-            'page_title_text': domain['name'],
+            'page_title_text': domain['name'].render_standalone(TextFragmentRenderer()),
         },
         code_id_list=[ ],
         context={

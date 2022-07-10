@@ -190,7 +190,7 @@ pylatexenc = {git = "https://github.com/phfaist/pylatexenc.git", branch = "devel
 type = "git"
 url = "https://github.com/phfaist/llm.git"
 reference = "main"
-resolved_reference = "1c2dda9a3684fd21e96c0a14ad35bbf089434a2c"
+resolved_reference = "f65ec5cc17eb08370dc12775a275ed924751a419"
 
 [[package]]
 name = "lxml"
