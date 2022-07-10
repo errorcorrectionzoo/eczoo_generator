@@ -390,13 +390,13 @@ class PagePrettyCodeGraph:
                     'gap': gap
                 })
             # but all abstract codes must appear ABOVE domains
-            else:
-                relative_placement_constraint.append({
-                    'bottom': first_domain_node_id,
-                    'top': n['data']['id'],
-                    'gap': 100
-                })
-            pass
+            # else:
+            #     relative_placement_constraint.append({
+            #         'bottom': first_domain_node_id,
+            #         'top': n['data']['id'],
+            #         'gap': 100
+            #     })
+            # pass
 
         # all parent relations should point upwards (even between abstract code parents)
         for prel in parent_relationships:
@@ -411,9 +411,9 @@ class PagePrettyCodeGraph:
                 continue
 
             relative_placement_constraint.append( {
-                'top': node_id_code(prel['target_code_obj'].code_id),
-                'bottom': node_id_code(prel['source_code_obj'].code_id),
-                'gap': 100,
+               'top': node_id_code(prel['target_code_obj'].code_id),
+               'bottom': node_id_code(prel['source_code_obj'].code_id),
+               'gap': 100,
             } )
 
         data = {
@@ -428,7 +428,7 @@ class PagePrettyCodeGraph:
 
         with open(output_data_js_fname, 'w', encoding='utf-8') as fw:
             fw.write("GENERATED_pretty_code_graph_data = ")
-            json.dump(data, fw) #, indent=4)
+            json.dump(data, fw, indent=4)
             fw.write(";")
 
 

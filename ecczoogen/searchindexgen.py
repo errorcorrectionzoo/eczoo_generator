@@ -71,7 +71,7 @@ class SearchIndexGenerator:
                 ),
             ),
         )
-        d, _ = doc.render( TextFragmentRenderer() )
+        d, _ = doc.render( self.eczllm_text_fragment_renderer )
 
         #logger.debug(f"Search index, added document {d=}")
 
@@ -99,6 +99,9 @@ class SearchIndexGenerator:
 
         # do all the indexing
         self.eczllm_environment = eczllm_environment
+
+        self.eczllm_text_fragment_renderer = TextFragmentRenderer()
+        self.eczllm_text_fragment_renderer.display_href_urls = False
 
         self.documents = []
 

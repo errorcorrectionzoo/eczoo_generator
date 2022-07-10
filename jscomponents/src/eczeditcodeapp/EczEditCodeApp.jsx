@@ -188,6 +188,7 @@ export default class EczEditCodeApp extends React.Component
             </div>,
             <EczEditCodeAppSidebar key={'sidebar'}  />,
             <EczBottomBar
+                key={'bottombar'}
                 onClickClear={() => this.do_clear()}
                 onClickLoadYaml={() => this.do_load_yaml()}
                 onUploadFileSelected={(file) => this.do_upload_file_selected(file)}

@@ -46,6 +46,12 @@ properties:
           type: string
           _single_line_string: true
 
+  stub:
+    _description: >-
+      Set to true if this entry is a stub and is intended to be completed at a
+      later time.
+    type: boolean
+
   year:
     _description: >-
       This is the year of latest significant contribution to this entry.  Will

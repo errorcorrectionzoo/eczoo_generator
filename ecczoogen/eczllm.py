@@ -110,7 +110,8 @@ class EczLLMResourceInfo:
 
 
 heading_section_commands_by_level = {
-    # only 'paragraph' available.
+    # only 'subsection' and 'paragraph' available.
+    3: FeatureHeadings.SectionCommandSpec(r"subsection", inline=False),
     4: FeatureHeadings.SectionCommandSpec(r"paragraph", inline=True),
 }
 
@@ -219,12 +220,14 @@ def _is_local_url(urlstring):
 
 
 class EczHtmlFragmentRenderer(HtmlFragmentRenderer):
-    
+
     @classmethod
     def use_link_target_blank(cls, urlstring):
         return not _is_local_url(urlstring)
 
+    inline_heading_add_space = False
 
+    
 
 
 def render_as_text(value, eczllm_environment):
@@ -236,7 +239,11 @@ def render_as_text(value, eczllm_environment):
             ),
         ),
     )
-    rendered_text, _ = doc.render( TextFragmentRenderer() )
+
+    tfr = TextFragmentRenderer()
+    tfr.display_href_urls = False
+
+    rendered_text, _ = doc.render( tfr )
 
     return rendered_text
 

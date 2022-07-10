@@ -7,6 +7,27 @@
 }
 
 
+.heading-level-3 {
+    // \section{...}
+    font-weight: bold;
+    margin: 1.25em 0 1em;
+    font-size: 1rem;
+}
+
+.heading-level-4 {
+    // \paragraph{...}
+    font-style: italic;
+    display: inline;
+    //margin-right: 1em;
+
+    &::after {
+        display: inline-block;
+        margin: 0px .12em;
+        content: '—';
+    }
+}
+
+
 figure.float {
     /*min-width: 200pt;*/
     width: 100%;
