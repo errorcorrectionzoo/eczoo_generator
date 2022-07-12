@@ -51,52 +51,39 @@
   'cat',
 ] %}
 
+{% set heading_separator_html = '&nbsp;▸&nbsp;&nbsp;' | safe %}
+
 <nav class="page-index-box">
   {#- <h1><a href="{{domain.htmlpage.path() | prebaseurl}}">{{domain.name}}</a></h1> -#}
   <ul class="page-index-box-links">
 
-{# LIST DOMAINS/KINGDOMS #}
-    {% for domain in domains %}
-    <li><a href="{{domain.htmlpage.path() | prebaseurl}}"
-           class="page-index-box-links-head">{{domain.name}}</a>:</li>
-    {% for kingdom in domain.kingdoms %}
-      <li>
-        <a href="{{ kingdom.htmlpage.path() | prebaseurl }}">{{kingdom.name}}</a>
-{#-
-        {% set codes = zoo.get_code_family_tree(kingdom.code_id) | sort(attribute='family_generation_level') %}
-        { # after two kingdoms, only show one code per kingdom in the same domain # }
-        {% set this_max_num_codes = max_num_codes if loop.index0 < 2 else max_num_codes_later %}
-        {% set num_codes = codes | length %}
-        {%- for codeobj in codes[:this_max_num_codes] -%}
-          {%- set code = codeobj -%}
-          <a href="{{ code|code_ref_href }}">{{code.name}}</a>
-          {%- if not loop.last -%}
-            , { # space after comma # }
-          {%- endif -%}
-        {%- endfor -%}
-        {%- if num_codes > this_max_num_codes -%}
-          , <span class="spacer">…</span>
-        {%- else -%}
-          <span class="spacer">.</span>
-        {%- endif -%}
--#}
-          {%- if not loop.last -%}
-            , {# space after comma #}
-          {%- endif -%}
-      </li>
-    {% endfor %}
-    {% endfor %}
-
 {# LIST SOME FAVORITES #}
-    <li class="page-index-box-links-thin-separator"></li>
-    <li><span class="page-index-box-links-head-not-too-prominent"><h1>Jump to:</h1></span></li>
-      {% for popular_code_id in popular_code_id_list -%}
+    <li><span class="page-index-box-links-head">Jump to{{heading_separator_html}}</span></li>
+      {%- for popular_code_id in popular_code_id_list -%}
         <li>{{- showcodelink(popular_code_id) -}}</li>
         {%- if not loop.last -%}
           , {# space after comma #}
         {%- endif -%}
       {%- endfor %}
     </li>
+
+{# SMALL VERTICAL SPACE #}
+    <li class="page-index-box-links-thin-separator"></li>
+
+{# LIST DOMAINS/KINGDOMS #}
+    {%- for domain in domains -%}
+    <li><a href="{{domain.htmlpage.path() | prebaseurl}}"
+           class="page-index-box-links-head">{{domain.name}}{{heading_separator_html}}</a></li>
+    {%- for kingdom in domain.kingdoms -%}
+      <li>{#- -#}
+        <a href="{{ kingdom.htmlpage.path() | prebaseurl }}">{{kingdom.name}}</a>
+          {%- if not loop.last -%}
+            , {# space after comma #}
+          {%- endif -%}
+      </li>
+    {%- endfor -%}
+    {%- endfor -%}
+
   </ul>
 </nav>
 
@@ -108,8 +95,8 @@
 <nav class="page-index-box">
   <ul class="page-index-box-links">
     <li><a href="{{ 'lists' | prebaseurl}}"
-           class="page-index-box-links-head">Code lists</a>:
-{% for codelistpage in codelistpage_list[:max_display_box_codelistpage] -%}
+           class="page-index-box-links-head">Code lists{{heading_separator_html}}</a>
+{%- for codelistpage in codelistpage_list[:max_display_box_codelistpage] -%}
       <a href="{{ codelistpage.path | prebaseurl }}">{{ codelistpage.title.to_html().strip()|safe }}</a>
       {%- if not loop.last -%}
         , {# space after comma -#}
