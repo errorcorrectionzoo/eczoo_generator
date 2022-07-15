@@ -63,7 +63,7 @@ notes:
       
       Multiple paragraphs here.\footnote{Do these paragraph breaks work?  Here's
       a \textit{footnote}, by the way.}  Here's also a reference to
-      \ref{figure:test1}.
+      \ref{figure:test1} and \ref{figure:test-n-only}.
 
   - |
       Another thing we should try out is what happens when we have really,
@@ -80,14 +80,14 @@ notes:
   - |
       Test citation to book \cite{doi:10.1017/CBO9780511976667}.  Test citation
       to arXiv entry with incomplete DOI (issue \#43) \cite{arXiv:1604.04062}.
-      Test citing a preset: \cite{preset:PreskillLectureNotesQuComputation}.
+      Test citing a preset: \cite{preset:PreskillNotes}.
       Test citing a preset with citation note:
-      \cite[Chap.~6]{preset:PreskillLectureNotesQuComputation}.
+      \cite[Chap.~6]{preset:PreskillNotes}.
 
   - |
-      By the way, you can |\begin{verbatiminput}\input %verbatim$ text&*~like
-      this.\end{booh} using the \begin{vertatiminput} ... \end {verbatiminput}
-      environment\end{verbatiminput}|!
+      By the way, you can |\begin{verbatimtext}\input %verbatim$ text&*~like
+      this.\end{booh} using the \begin{vertatimtext} ... \end {verbatimtext}
+      environment\end{verbatimtext}|!
 
       A bug can occur if a paper on the arXiv has a ‘\%’ sign in its
       title:\cite{arXiv:1907.02554}
@@ -134,6 +134,14 @@ notes:
       \begin{figure}
         \includegraphics{testfigure}
         \label{figure:test-n-only}
+      \end{figure}
+
+      Or only a caption on its own:
+
+      \begin{figure}
+        \includegraphics{testfigure}
+        \caption{This figure has no number, and I can't refer to it with
+          a ref command.}
       \end{figure}
 
 

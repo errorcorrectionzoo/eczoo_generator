@@ -12,6 +12,7 @@ PyYAML = "^6.0"
 colorlog = "^6.5.0"
 #pylatexenc = "^2.10"
 pylatexenc = {'git' = "https://github.com/phfaist/pylatexenc.git", branch = "devel" }
+llm = {'git' = "https://github.com/phfaist/llm.git", branch = "main"}
 libsass = "^0.21.0"
 jsonref = "^0.2"
 arxiv = "^1.4.2"

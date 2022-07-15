@@ -24,12 +24,12 @@ properties:
 
         name:
           type: string
-          _minilatex: 'simple'
+          _llm: standalone
           _single_line_string: True
 
         description:
           type: string
-          _minilatex: 'full'
+          _llm: full
           
         kingdoms:
           type: array
@@ -45,4 +45,4 @@ properties:
               name:
                 type: string
                 _single_line_string: True
-                _minilatex: 'simple'
+                _llm: standalone

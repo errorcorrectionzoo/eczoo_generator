@@ -6,6 +6,11 @@ $id: "https://errorcorrectionzoo.org/schemas/meta"
 # contributors, etc.
 #
 
+_description: >-
+  The _meta field contains additional meta-information data about the error
+  correction zoo entry itself.  We store among others the list of people who
+  have contributed to this particular entry.
+
 _use_schemadata: false
 type: object
 additionalProperties: false
@@ -15,7 +20,17 @@ properties:
   # List of contributors
   #
   contributors:
+
+    _description: >-
+      The list of people who have contributed to this entry.  The list should be
+      in chronological order.  Contributors are included if their contribution
+      was substantial; fixing typos and formatting tweaks are not considered
+      substantial contributions.
+
+      Make sure you add your own name here if you're editing this entry!
+
     type: array
+
     items:
       #
       # A single contributor
@@ -26,12 +41,19 @@ properties:
       properties:
         name:
           type: string
+          _single_line_string: true
         githubusername:
           type: string
+          _single_line_string: true
 
-  #
-  # Year of latest significant contribution.  Will be used (TODO) for generating
-  # citations, for instance.
-  #
+  stub:
+    _description: >-
+      Set to true if this entry is a stub and is intended to be completed at a
+      later time.
+    type: boolean
+
   year:
+    _description: >-
+      This is the year of latest significant contribution to this entry.  Will
+      be used for instance for generating citations to the ECC entry.
     type: integer

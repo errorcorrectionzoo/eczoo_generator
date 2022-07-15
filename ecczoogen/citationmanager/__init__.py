@@ -8,7 +8,6 @@ import collections
 import warnings
 import logging
 
-import minilatextohtml
 
 import arxiv
 import requests
@@ -57,7 +56,7 @@ class Citation:
         # identifier
         self.preset = preset 
 
-        # manual citation (can contain minilatex formatting)
+        # manual citation (can contain LLM formatting)
         self.manual = manual
 
         if len([ x
@@ -67,10 +66,10 @@ class Citation:
                              f" (‘{self.doi}’), preset (‘{self.preset}’) or manual "
                              f"(‘{self.manual}’)")
 
-        self.full_citation_text_minilatex = None
+        self.full_citation_text_llm = None
 
     def has_full_citation(self):
-        return self.full_citation_text_minilatex is not None
+        return self.full_citation_text_llm is not None
 
     def equals(self, other):
         if (self.arxiv is None) != (other.arxiv is None) \
@@ -92,7 +91,7 @@ class Citation:
         return (
             f'Citation(arxiv={self.arxiv!r}, doi={self.doi!r}, preset={self.preset!r}'
             f'manual={self.manual!r}, '
-            f'full_citation_text_minilatex={self.full_citation_text_minilatex!r})'
+            f'full_citation_text_llm={self.full_citation_text_llm!r})'
         )
 
 
@@ -115,7 +114,9 @@ CACHE_MAX_AGE_DAYS = 90
 
 
 class CitationTextManager:
-    def __init__(self, citation_hints):
+    def __init__(self, citation_hints, eczllm_environment):
+        super().__init__()
+
         self._citations_db = []
         self._citations_by_field = {
             fld: {}
@@ -137,6 +138,8 @@ class CitationTextManager:
         self._citation_hints = citation_hints
         self._preset_citations = self._citation_hints['presets']
         self._arxiv_to_doi_override = self._citation_hints['arxiv_to_doi_override']
+
+        self.eczllm_environment = eczllm_environment
 
         logger.debug(f"Initialized citation manager.\n\n"
                      f"{self._preset_citations=}\n\n"
@@ -180,7 +183,7 @@ class CitationTextManager:
 
     def add_encountered_citation(self, c):
         r"""
-        Tool to add a citation as it was encountered when scanning minilatex text.
+        Tool to add a citation as it was encountered when scanning LLM text.
         The argument `c` is expected to be a `EncounteredCitation` instance (see
         below).
         """
@@ -371,7 +374,7 @@ class CitationTextManager:
         
             # produce formatted citation text here
             # full_citation_text = \
-            #     _get_full_citation_text_minilatex_for_pure_arxiv_entry(arxividstr, d)
+            #     _get_full_citation_text_llm_for_pure_arxiv_entry(arxividstr, d)
 
             citeprocjsond = {
                 'id': arxividstr,
@@ -383,20 +386,21 @@ class CitationTextManager:
                 'title': d['title'],
 
             }
-            full_citation_text = _generate_citation_minilatex_from_citeprocjsond(
+            full_citation_text = self._generate_citation_llm_from_citeprocjsond(
                 citeprocjsond,
                 bib_style=bib_style,
                 what=f"citation ‘arXiv:{arxividstr}’"
-            ).minilatex
+            ).llm_text
 
             full_citation_text += \
                 fr" \href{{https://arxiv.org/abs/{arxividstr}}}{{{arxividstr}}}"
 
             logger.debug(f"Citation arXiv:{arxividstr} → {full_citation_text}")
 
-            citeobj.full_citation_text_minilatex = minilatextohtml.MiniLatex(
+            citeobj.full_citation_text_llm = self.eczllm_environment.make_fragment(
                 full_citation_text,
                 what=f"Citation ‘arXiv:{arxividstr}’",
+                standalone_mode=True,
             )
 
 
@@ -414,11 +418,11 @@ class CitationTextManager:
 
             #logger.debug(f"{d=}")
 
-            full_citation_text = _generate_citation_minilatex_from_citeprocjsond(
+            full_citation_text = self._generate_citation_llm_from_citeprocjsond(
                 d,
                 bib_style=bib_style,
                 what=f'citation ‘doi:{doi}’'
-            ).minilatex
+            ).llm_text
 
             full_citation_text += \
                 fr" \href{{https://doi.org/{doi}}}{{DOI}}"
@@ -430,9 +434,10 @@ class CitationTextManager:
 
             logger.debug(f"Citation doi:{doi} → {full_citation_text!r}")
 
-            citeobj.full_citation_text_minilatex = minilatextohtml.MiniLatex(
+            citeobj.full_citation_text_llm = self.eczllm_environment.make_fragment(
                 full_citation_text,
                 what=f"Citation ‘doi:{doi}’",
+                standalone_mode=True,
             )
 
        
@@ -442,7 +447,7 @@ class CitationTextManager:
 
         for preset, citeobj in self._citations_by_field['preset'].items():
 
-            # don't use _make_minilatex_citation_text() because we should report
+            # don't use _make_llm_citation_text() because we should report
             # syntax errors in preset citations !
 
             try:
@@ -451,9 +456,10 @@ class CitationTextManager:
                 logger.error(f"Unknown preset citation: ‘{citeobj.preset}’")
                 raise
 
-            citeobj.full_citation_text_minilatex = minilatextohtml.MiniLatex(
+            citeobj.full_citation_text_llm = self.eczllm_environment.make_fragment(
                 full_citation_text,
-                what=f"Citation ‘preset:{citeobj.preset}’"
+                what=f"Citation ‘preset:{citeobj.preset}’",
+                standalone_mode=True
             )
 
 
@@ -463,12 +469,13 @@ class CitationTextManager:
 
         for manual, citeobj in self._citations_by_field['manual'].items():
 
-            # don't use _make_minilatex_citation_text() because we should report
+            # don't use _make_llm_citation_text() because we should report
             # syntax errors in manual citations !
 
-            citeobj.full_citation_text_minilatex = minilatextohtml.MiniLatex(
+            citeobj.full_citation_text_llm = self.eczllm_environment.make_fragment(
                 citeobj.manual,
-                what=f"Manual citation ‘{citeobj.manual}’"
+                what=f"Manual citation ‘{citeobj.manual}’",
+                standalone_mode=True
             )
 
         #
@@ -478,92 +485,100 @@ class CitationTextManager:
         
 
 
-
-def _generate_citation_minilatex_from_citeprocjsond(citeprocjsond, bib_style, what):
-
-    with warnings.catch_warnings():
-        warnings.simplefilter('ignore', citeproc.source.MissingArgumentWarning)
-        warnings.simplefilter('ignore', citeproc.source.UnsupportedArgumentWarning)
-
-        citekey = citeprocjsond['id']
-
-        logger.debug(f"Creating citation for entry ‘{citekey}’")
-
-        # patch JSON for limitations of citeproc-py (?)
-        #
-        # E.g. for authors with 'name': ... instead of 'given': and 'family':
-
-        if 'author' in citeprocjsond:
-            citeprocjsond = copy.copy(citeprocjsond)
-            for author in citeprocjsond['author']:
-                if 'name' in author and 'family' not in author and 'given' not in author:
-                    author['family'] = author['name']
-                    del author['name']
-
-        # explore the citeprocjsond tree and make sure that all strings are
-        # valid minilatex markup
-        def _sanitize(d):
-            if isinstance(d, dict):
-                for k in d.keys():
-                    d[k] = _sanitize(d[k])
-                return d
-            elif isinstance(d, list):
-                for j, val in enumerate(d):
-                    d[j] = _sanitize(val)
-                return d
-            else:
-                try:
-                    # try compiling the given value, suppressing warnings
-                    minilatextohtml.MiniLatex(str(d), _silent=True).text
-                except Exception:
-                    logger.debug(
-                        f"Encountered invalid minilatex string {d!r} when "
-                        f"composing citation."
-                    )
-                    return r'\begin{verbatiminput}' + str(d) + r'\end{verbatiminput}'
-                return d
-
-        #
-        # Sanitizing the entire JSON object (which often includes the abstract,
-        # etc.) is completely overkill.  So we first try to generate the entry
-        # without sanitizing, and if it fails, we sanitize.
-        #
-        #_sanitize(citeprocjsond)
-
-        def _gen_entry(citeprocjsond):
-            bib_source = citeproc.source.json.CiteProcJSON([citeprocjsond])
-            bibliography = citeproc.CitationStylesBibliography(bib_style, bib_source,
-                                                               _cslformatter)
-
-            citation1 = citeproc.Citation([citeproc.CitationItem(citeprocjsond['id'])])
-            bibliography.register(citation1)
-            bibliography_items = [str(item) for item in bibliography.bibliography()]
-            assert len(bibliography_items) == 1
-            return bibliography_items[0]
-
-        try:
-            logger.debug(f"Attempting to generate entry for {citekey}...")
-            return minilatextohtml.MiniLatex(
-                _gen_entry(citeprocjsond),
-                what=what,
-                _silent=True # don't report errors on logger
-            )
-        except Exception:
-            logger.debug(f"Error while forming citation entry for {citekey}, trying "
-                         f"again with minilatex sanitization")
-
-        _sanitize(citeprocjsond)
-        try:
-            return minilatextohtml.MiniLatex(
-                _gen_entry(citeprocjsond),
-                what=what
-            )
-        except Exception as e:
-            logger.critical(f"EXCEPTION!! {e!r}")
-            raise
+    # ---
 
 
-# def _get_full_citation_text_minilatex_for_pure_arxiv_entry(arxividstr, d):
+    def _generate_citation_llm_from_citeprocjsond(self, citeprocjsond, bib_style, what):
+
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore', citeproc.source.MissingArgumentWarning)
+            warnings.simplefilter('ignore', citeproc.source.UnsupportedArgumentWarning)
+
+            citekey = citeprocjsond['id']
+
+            logger.debug(f"Creating citation for entry ‘{citekey}’")
+
+            # patch JSON for limitations of citeproc-py (?)
+            #
+            # E.g. for authors with 'name': ... instead of 'given': and 'family':
+
+            if 'author' in citeprocjsond:
+                citeprocjsond = copy.copy(citeprocjsond)
+                for author in citeprocjsond['author']:
+                    if 'name' in author and 'family' not in author and 'given' not in author:
+                        author['family'] = author['name']
+                        del author['name']
+
+            # explore the citeprocjsond tree and make sure that all strings are
+            # valid LLM markup
+            def _sanitize(d):
+                if isinstance(d, dict):
+                    for k in d.keys():
+                        d[k] = _sanitize(d[k])
+                    return d
+                elif isinstance(d, list):
+                    for j, val in enumerate(d):
+                        d[j] = _sanitize(val)
+                    return d
+                else:
+                    try:
+                        # try compiling the given value, suppressing warnings
+                        self.eczllm_environment.make_fragment(
+                            str(d),
+                            standalone_mode=True,
+                            silent=True
+                        )
+                    except Exception as e:
+                        logger.debug(
+                            f"Encountered invalid LLM string {d!r} when "
+                            f"composing citation: {e}"
+                        )
+                        return r'\begin{verbatimtext}' + str(d) + r'\end{verbatimtext}'
+                    return d
+
+            #
+            # Sanitizing the entire JSON object (which often includes the abstract,
+            # etc.) is completely overkill.  So we first try to generate the entry
+            # without sanitizing, and if it fails, we sanitize.
+            #
+            #_sanitize(citeprocjsond)
+
+            def _gen_entry(citeprocjsond):
+                bib_source = citeproc.source.json.CiteProcJSON([citeprocjsond])
+                bibliography = citeproc.CitationStylesBibliography(bib_style, bib_source,
+                                                                   _cslformatter)
+
+                citation1 = citeproc.Citation([citeproc.CitationItem(citeprocjsond['id'])])
+                bibliography.register(citation1)
+                bibliography_items = [str(item) for item in bibliography.bibliography()]
+                assert len(bibliography_items) == 1
+                return bibliography_items[0]
+
+            try:
+                logger.debug(f"Attempting to generate entry for {citekey}...")
+                return self.eczllm_environment.make_fragment(
+                    _gen_entry(citeprocjsond),
+                    what=what,
+                    standalone_mode=True,
+                    silent=True # don't report errors on logger
+                )
+            except Exception:
+                logger.debug(f"Error while forming citation entry for {citekey}, trying "
+                             f"again with LLM sanitization on")
+
+            _sanitize(citeprocjsond)
+            try:
+                return self.eczllm_environment.make_fragment(
+                    _gen_entry(citeprocjsond),
+                    standalone_mode=True,
+                    what=what
+                )
+            except Exception as e:
+                logger.critical(f"EXCEPTION!! {e!r}")
+                raise
+
+
+# def _get_full_citation_text_llm_for_pure_arxiv_entry(arxividstr, d):
 #     if len(d['authors']) < 8:
 #         authors = list(d['authors'])
 #         if len(authors) > 1:

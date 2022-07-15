@@ -20,7 +20,7 @@ class EczEditSchemaFieldObjectType extends React.Component
         const schema = this.props.schema;
         const value = this.props.value || {};
         if (schema.additionalProperties !== false) {
-            throw Exception("additionalProperties not supported!");
+            throw new Error("additionalProperties not supported!");
         }
         let props_components_list = 
             Object.keys(schema.properties).map( (prop_key) => {
@@ -155,6 +155,58 @@ class EczEditSchemaFieldArrayType extends React.Component
 
 
 
+class EczEditSChemaFieldScalarNonstringType extends React.Component
+{
+    render()
+    {
+        const has_value = (typeof(this.props.value) != 'undefined');
+
+        const hasvalueclassname = 'hasvalue-' + (has_value?'y':'n');
+
+        const schema = this.props.schema;
+
+        let input_elem = null;
+
+        if (schema.type == 'integer') {
+            const numvalue = this.props.value || 0;
+            input_elem = (
+                <input type="number"
+                       value={numvalue}
+                       className={hasvalueclassname}
+                       onChange={(event) => this.props.onChange(event.target.value)} />
+            );
+        } else if (schema.type == 'boolean') {
+            const boolvalue = this.props.value || false;
+            input_elem = (
+                <label className={"checkbox-input "+hasvalueclassname}>
+                    Enable&nbsp;→
+                    <input type="checkbox"
+                           checked={boolvalue}
+                           onChange={(event) => this.props.onChange(event.target.checked)} />
+                </label>
+            );
+        } else {
+            throw new Error("Can't handle input type: ‘" + schema.type + "’");
+        }
+
+        if (has_value) {
+            return (
+                <div className="input">
+                    {input_elem}
+                    <button className="clear-to-undefined"
+                            onClick={(event) => this.props.onChange(undefined)}>clear</button>
+                </div>
+            );
+        }
+        return (
+            <div className="input">
+                {input_elem}
+            </div>
+        );
+    }
+};
+
+
 class EczEditSchemaFieldScalarType extends React.Component
 {
     shouldComponentUpdate(newProps, newState) {
@@ -165,8 +217,17 @@ class EczEditSchemaFieldScalarType extends React.Component
     {
         const schema = this.props.schema;
 
+        if (schema.type == 'integer' || schema.type == 'boolean') {
+            return (
+                <EczEditSChemaFieldScalarNonstringType
+                    value={this.props.value}
+                    schema={schema}
+                    onChange={(newvalue) => this.props.onChange(newvalue)} />
+            )
+        }
+
         if (schema.type != 'string') {
-            throw Exception("Can't handle non-string scalar types yet.");
+            throw new Error("Can't handle scalar type ‘"+schema.type+"’ yet.");
         }
 
         const value = this.props.value || '';
@@ -184,7 +245,7 @@ class EczEditSchemaFieldScalarType extends React.Component
             );
         }
 
-        if ( ! schema._minilatex ) {
+        if ( ! schema._llm ) {
             if (schema._single_line_string) {
                 return (
                     <input type="string"
@@ -200,7 +261,7 @@ class EczEditSchemaFieldScalarType extends React.Component
             }
         }
 
-        // minilatex features enabled -> use CodeMirror editor
+        // LLM features enabled -> use CodeMirror editor
 
         const height = (schema._single_line_string ? '2em': '18em');
 
@@ -238,14 +299,15 @@ class EczEditFieldDescription extends React.Component
         if (schema._single_line_string) {
             expected_items.push('single line text')
         }
-        if (schema._minilatex) {
-            if (schema._minilatex == 'full') {
+        if (schema._llm) {
+            if (schema._llm == 'full') {
                 expected_items.push(
-                    'you can use LaTeX-like commands including citations and references'
+                    'you can use LaTeX-like commands including citations and cross-references'
                 );
-            } else if (schema._minilatex == 'simple') {
+            } else if (schema._llm == 'standalone') {
                 expected_items.push(
-                    'you can use LaTeX-like commands except for citations and references'
+                    'you can use some LaTeX-like commands, but not citations and '
+                    + 'cross-references (standalone mode)'
                 );
             }
         }

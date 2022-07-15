@@ -175,6 +175,24 @@ python-versions = "*"
 six = "*"
 
 [[package]]
+name = "llm"
+version = "0.1.0beta0"
+description = "Latex-Like Markup"
+category = "main"
+optional = false
+python-versions = "^3.8"
+develop = false
+
+[package.dependencies]
+pylatexenc = {git = "https://github.com/phfaist/pylatexenc.git", branch = "devel"}
+
+[package.source]
+type = "git"
+url = "https://github.com/phfaist/llm.git"
+reference = "main"
+resolved_reference = "f65ec5cc17eb08370dc12775a275ed924751a419"
+
+[[package]]
 name = "lxml"
 version = "4.7.1"
 description = "Powerful and Pythonic XML processing library combining libxml2/libxslt with the ElementTree API."
@@ -206,18 +224,21 @@ python-versions = ">=3.7"
 
 [[package]]
 name = "pylatexenc"
-version = "3.0a1"
+version = "3.0alpha000004"
 description = "Simple LaTeX parser providing latex-to-unicode and unicode-to-latex conversion"
 category = "main"
 optional = false
-python-versions = "*"
+python-versions = "^3.6" # argh...
 develop = false
+
+[package.extras]
+buildjslib = ["Transcrypt (>=3.9.0,<4.0.0)", "PyYAML (>=6.0,<7.0)"]
 
 [package.source]
 type = "git"
 url = "https://github.com/phfaist/pylatexenc.git"
 reference = "devel"
-resolved_reference = "af7951956cce74663ee561b974ad0aa8a22b5bfe"
+resolved_reference = "f7b69e71bdde33e74caf8e833a69e857f082e1f4"
 
 [[package]]
 name = "pyrsistent"
@@ -297,7 +318,7 @@ testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytest-
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "0d1133a648aea02c686da668e2e7cf31b657ccc4c46e86e0072c02875d4b2fa9"
+content-hash = "2a191c76f9487981446c3d966f28d470c1a4aadba8267aeafc5937419781682d"
 
 [metadata.files]
 arxiv = [
@@ -364,6 +385,7 @@ libsass = [
     {file = "libsass-0.21.0-cp36-abi3-win_amd64.whl", hash = "sha256:659ae41af8708681fa3ec73f47b9735a6725e71c3b66ff570bfce78952f2314e"},
     {file = "libsass-0.21.0.tar.gz", hash = "sha256:d5ba529d9ce668be9380563279f3ffe988f27bc5b299c5a28453df2e0b0fbaf2"},
 ]
+llm = []
 lxml = [
     {file = "lxml-4.7.1-cp27-cp27m-macosx_10_14_x86_64.whl", hash = "sha256:d546431636edb1d6a608b348dd58cc9841b81f4116745857b6cb9f8dadb2725f"},
     {file = "lxml-4.7.1-cp27-cp27m-manylinux_2_5_i686.manylinux1_i686.whl", hash = "sha256:6308062534323f0d3edb4e702a0e26a76ca9e0e23ff99be5d82750772df32a9e"},

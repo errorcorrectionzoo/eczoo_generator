@@ -1,7 +1,5 @@
 import re
 
-import minilatextohtml
-
 _escape_chars = {
     '\\': r'\textbackslash',
     '%': r'\%',
@@ -30,7 +28,7 @@ def preformat(text):
     return s
 
 
-class MinilatexCommandWrapper(str):
+class LLMCommandWrapper(str):
     cmd = None
 
     @classmethod
@@ -39,10 +37,10 @@ class MinilatexCommandWrapper(str):
         return f'\\{cls.cmd}{{{text}}}'
 
     def __new__(cls, text):
-        return super(MinilatexCommandWrapper, cls).__new__(cls, cls._wrap(text))
+        return super(LLMCommandWrapper, cls).__new__(cls, cls._wrap(text))
 
 
-class Italic(MinilatexCommandWrapper):
+class Italic(LLMCommandWrapper):
     cmd = 'textit'
 
 
@@ -50,25 +48,25 @@ class Oblique(Italic):
     pass
 
 
-class Bold(MinilatexCommandWrapper):
+class Bold(LLMCommandWrapper):
     cmd = 'textbf'
 
 
-class Light(MinilatexCommandWrapper):
+class Light(LLMCommandWrapper):
     cmd = 'textit' # italic instead
 
 
-class Underline(MinilatexCommandWrapper):
+class Underline(LLMCommandWrapper):
     cmd = 'textit' # italic instead
 
 
-class Superscript(MinilatexCommandWrapper):
+class Superscript(LLMCommandWrapper):
     cmd = 'textit' # italic instead
 
 
-class Subscript(MinilatexCommandWrapper):
+class Subscript(LLMCommandWrapper):
     cmd = 'textit' # italic instead
 
 
-class SmallCaps(MinilatexCommandWrapper):
+class SmallCaps(LLMCommandWrapper):
     cmd = 'textit' # italic instead

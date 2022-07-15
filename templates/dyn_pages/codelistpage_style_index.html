@@ -15,17 +15,19 @@
       {{- code|code_ref -}}
       {%- if display_options.show_introduced and code.introduced -%}
         <span class="code-introduced">
-          {{- code.introduced|to_html_with_notes(rc) -}}
+          {{- code.introduced|llmrender(rc) -}}
         </span>
       {%- endif -%}
     </span>
     {%- if display_options.show_description -%}
       {%- if display_options.description_first_paragraph -%}
         {%- set desc = code.description.get_first_paragraph() -%}
+      {%- elif display_options.description_truncate_to -%}
+          {{- display_value.truncate_to(chars=display_options.description_truncate_to) | llmrender(rc) -}}
       {%- else -%}
         {%- set desc = code.description -%}
       {%- endif -%}
-      <span class="code-description">{{desc|to_html_with_notes(rc)}}</span>
+      <span class="code-description">{{desc|llmrender(rc)}}</span>
     {%- endif -%}
   </li>
 {% endfor %}

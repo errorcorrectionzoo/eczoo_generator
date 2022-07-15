@@ -16,7 +16,7 @@ Expected context variables:
   -->
 
 {%- macro code_text_citation(code) -%}
-  “{{code.name|minilatex}}”, The Error Correction Zoo (V. V. Albert & P. Faist, eds.), {{code.citation_info.year}}. https://errorcorrectionzoo.org{{code|code_ref_href}}
+  “{{code.name|llm_text}}”, The Error Correction Zoo (V. V. Albert & P. Faist, eds.), {{code.citation_info.year}}. https://errorcorrectionzoo.org{{code|code_ref_href}}
 {%- endmacro -%}
 
 {%- macro code_edit_github_url(code) -%}
@@ -41,9 +41,9 @@ Expected context variables:
 <div class="sectioncontent code-name">
   <span class="code-name-cell">
     <h1 class="code-name">
-      {{code.name}}
+      {{code.name|llmrender(rc)}}
       {%- if code.introduced -%}
-      <span class="code-introduced">{{code.introduced | to_html_with_notes(rc)}}</span>
+      <span class="code-introduced">{{code.introduced | llmrender(rc)}}</span>
       {%- endif -%}
     </h1>
   </span>
@@ -51,11 +51,11 @@ Expected context variables:
 
 
 <h2 id="description" class="code-description">Description</h2>
-<div class="sectioncontent code-description">{{code.description | to_html_with_notes(rc)}}</div>
+<div class="sectioncontent code-description">{{code.description | llmrender(rc)}}</div>
 
 {% if code.protection %}
 <h2 id="protection" class="code-protection">Protection</h2>
-<div class="sectioncontent code-protection">{{code.protection | to_html_with_notes(rc)}}</div>
+<div class="sectioncontent code-protection">{{code.protection | llmrender(rc)}}</div>
 {% endif %}
 
 
@@ -69,7 +69,7 @@ Expected context variables:
   <h2 id="feature_{{featurename}}"
       class="code-feature code-feature-{{featurename}}">{{label}}</h2>
   <div class="sectioncontent code-feature code-feature-{{featurename}}">
-    {{- code['features'][featurename] | to_html_with_notes(rc) -}}
+    {{- code['features'][featurename] | llmrender(rc) -}}
   </div>
   {% endif %}
 {%- endmacro %}
@@ -97,14 +97,14 @@ Expected context variables:
 {% if code.realizations %}
 <h2 id="realizations" class="code-realizations">Realizations</h2>
 <div class="sectioncontent code-realizations">
-  {{code.realizations | to_html_with_notes(rc)}}
+  {{code.realizations | llmrender(rc)}}
 </div>
 {% endif %}
 
 {% if code.notes %}
 <h2 id="notes" class="code-notes">Notes</h2>
 <div class="sectioncontent code-notes">
-  {{code.notes | to_html_with_notes(rc)}}
+  {{code.notes | llmrender(rc)}}
 </div>
 {% endif %}
 
@@ -192,7 +192,7 @@ Expected context variables:
     <dt>BibTeX:</dt>
     <dd class="bibtex">{#
 #}@incollection{{ '{' }}eczoo_{{code.code_id}},
-title={{'{'}}{{ code.name|minilatex }}{{'}'}},
+title={{'{'}}{{ code.name|llm_text }}{{'}'}},
 booktitle={The Error Correction Zoo},
 year={{'{'}}{{code.citation_info.year}}{{'}'}},
 editor={Albert, Victor V. and Faist, Philippe},
@@ -209,10 +209,7 @@ url={{'{'}}https://errorcorrectionzoo.org{{code|code_ref_href}}{{'}'}}
 
 
 <!-- endnotes -->
-
-{% set divendnotesclass="sectioncontent" %}
-{% include 'pieces/endnotes.html' %}
-
+<RENDER_ENDNOTES/>
 
 
 <!-- "Cite As" citation, for paper printouts -->

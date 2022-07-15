@@ -3,7 +3,6 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-from minilatextohtml import MiniLatex
 
 
 import jsonschema
@@ -11,14 +10,19 @@ import jsonschema
 
 
 
-class UseSelfMinilatexResourceParent:
-    pass
-
 
 class SchemaData:
 
-    def __init__(self, source_data, full_schema, *, what='<?>',
-                 minilatex_resource_parent=None, _validate=True):
+    def __init__(
+            self,
+            source_data,
+            full_schema,
+            *,
+            what='<?>',
+            llm_environment,
+            llm_resource_info=None, # e.g., to look up figures etc.
+            _validate=True
+    ):
         self.source_data = source_data
         self.full_schema = full_schema
 
@@ -39,9 +43,8 @@ class SchemaData:
         self.fields_info = []
         
         self.what = what
-        self.minilatex_resource_parent = minilatex_resource_parent
-        if self.minilatex_resource_parent is UseSelfMinilatexResourceParent:
-            self.minilatex_resource_parent = self
+        self.llm_environment = llm_environment
+        self.llm_resource_info = llm_resource_info
 
         if self.data_type == 'object':
             self.data = {}
@@ -64,7 +67,8 @@ class SchemaData:
                     continue
 
                 sdobj = SchemaData(v, value_schema, what=f"{what}.{k}",
-                                   minilatex_resource_parent=self.minilatex_resource_parent,
+                                   llm_environment=self.llm_environment,
+                                   llm_resource_info=self.llm_resource_info,
                                    _validate=False,)
                 self._data_sd[k] = sdobj
                 if self.source_data is not None and k in self.source_data:
@@ -85,7 +89,8 @@ class SchemaData:
                 for j, v in enumerate(self.source_data):
                     sdobj = SchemaData(
                         v, value_schema, what=f"{what}[{j}]",
-                        minilatex_resource_parent=self.minilatex_resource_parent,
+                        llm_environment=self.llm_environment,
+                        llm_resource_info=self.llm_resource_info,
                         _validate=False,
                     )
                     self._data_sd.append(sdobj)
@@ -103,11 +108,20 @@ class SchemaData:
         value_schema = self.full_schema
         what = self.what
 
-        if value_schema is not None and value_schema.get('_minilatex', None):
+        if value_schema is not None and value_schema.get('_llm', None):
             if source_value is None:
                 source_value = ''
-            return MiniLatex( source_value, what=what,
-                              resource_parent=self.minilatex_resource_parent )
+
+            standalone_mode = False
+            if value_schema['_llm'] == 'standalone':
+                standalone_mode = True
+            
+            return self.llm_environment.make_fragment(
+                source_value,
+                what=what,
+                standalone_mode=standalone_mode,
+                resource_info=self.llm_resource_info,
+            )
 
         return source_value
 
@@ -117,7 +131,8 @@ class SchemaData:
             raise ValueError("Can only call add_extra_field() on object data types")
 
         sdobj = SchemaData(v, value_schema, what=f"{self.what}.{key}",
-                           minilatex_resource_parent=self.minilatex_resource_parent,
+                           llm_environment=self.llm_environment,
+                           llm_resource_info=self.llm_resource_info,
                            _validate=False)
         self._data_sd[key] = sdobj
         self.data[key] = sdobj.data

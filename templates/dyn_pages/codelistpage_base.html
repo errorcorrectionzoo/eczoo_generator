@@ -11,7 +11,7 @@
 {# ** BLOCK INTRO ** #}
 {% block intro %}
 {%- if codelistpage_data.intro -%}
-  {{ codelistpage_data.intro|to_html_with_notes(rc) }}
+  {{ codelistpage_data.intro | llmrender(rc) }}
 {%- endif -%}
 {% endblock %}
 {# **** #}
@@ -25,11 +25,12 @@
 
 {% endfor %}
 
-{% include 'pieces/endnotes.html' %}
-
 {% endblock listcontents %}
 {# **** #}
 
-{% include 'pieces/endnotes.html' %}
+
+<!-- endnotes -->
+<RENDER_ENDNOTES/>
+
 
 {% endblock contents %}

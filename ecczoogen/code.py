@@ -1,9 +1,10 @@
 import logging
 logger = logging.getLogger(__name__)
 
+import datetime
+
 
 from .schemadata import SchemaData
-from minilatextohtml import MiniLatex
 
 
 
@@ -39,23 +40,37 @@ class CodeRelations:
 
 
 class Code:
-    def __init__(self, info, full_schema):
+    def __init__(self, info, full_schema, source_info_filename, eczllm_environment):
         super().__init__()
 
         self.source_info = info
 
-        # source file (the zoo sets this relative to the codes_dir folder)
-        self.source_info_filename = None
+        self.source_info_filename = source_info_filename
+
+        year = datetime.date.today().year
+        if '_meta' in self.source_info:
+            if 'year' in self.source_info['_meta']:
+                year = self.source_info['_meta']['year']
 
         self.citation_info = {
-            'year': 2022 # FIXME: WHAT YEAR SHOULD WE SET?  FIND FILE/GIT MODIFICATION DATE?
+            'year': year,
         }
 
         code_id = info['code_id']
 
-        self.schemadata = SchemaData(self.source_info, full_schema,
-                                     what=f"<code {code_id}>",
-                                     minilatex_resource_parent=self)
+        self.eczllm_environment = eczllm_environment
+        self.llm_resource_info = self.eczllm_environment.make_resource_info(
+            resource_type='code',
+            resource_id=code_id,
+        )
+
+        self.schemadata = SchemaData(
+            self.source_info,
+            full_schema,
+            what=f"<code {code_id}>",
+            llm_environment=self.eczllm_environment,
+            llm_resource_info=self.llm_resource_info,
+        )
 
         # often used properties
         self.code_id = self.schemadata['code_id']
@@ -77,10 +92,13 @@ class Code:
         if 'short_name' in self.schemadata:
             return self.schemadata['short_name']
         name = self.name
-        if name.minilatex.endswith(" code"):
-            return MiniLatex( name.minilatex[:-len(" code")],
-                              what=f"{name.what} (short)",
-                              resource_parent=name.resource_parent )
+        if name.llm_text.endswith(" code"):
+            return self.eczllm_environment.make_fragment(
+                llm_text=name.llm_text[:-len(" code")],
+                what=f"{name.what} (short)",
+                resource_info=self.llm_resource_info,
+                standalone_mode=True,
+            )
         return name
 
     def __getitem__(self, key):
@@ -107,7 +125,7 @@ class Code:
                         yield (fldinfo, rel[rel_field])
 
     def __str__(self):
-        return self.name.minilatex
+        return self.name.llm_text
 
     def __repr__(self):
         return (
@@ -171,8 +189,3 @@ class Code:
         
 
 
-
-    # provides info on where to look for external resources (eg figures) in
-    # minilatex strings
-    def resource_parent_id(self):
-        return ('code', self.code_id)
