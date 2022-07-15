@@ -453,32 +453,32 @@ for (dirpath, dirnames, filenames) in os.walk(codelistpages_dir, followlinks=Tru
         def _code_select_predicate(code, predinfo):
             if 'not' in predinfo:
                 if _code_select_predicate(code, predinfo['not']):
-                    logger.debug(
-                      f"Code {code.code_id} fails to obey (NOT {predinfo['not']})")
+                    # logger.debug(
+                    #   f"Code {code.code_id} fails to obey (NOT {predinfo['not']})")
                     return False
             if 'property_set' in predinfo:
                 if not code.getfield(predinfo['property_set']):
-                    logger.debug(
-                      f"Code {code.code_id} does not have property {predinfo['property_set']}")
+                    # logger.debug(
+                    #   f"Code {code.code_id} does not have property {predinfo['property_set']}")
                     return False
             if 'domain' in predinfo:
                 if not code.is_in_domain(domains_by_domainid[predinfo['domain']]):
-                    logger.debug(f"Code {code.code_id} is not in domain {predinfo['domain']}")
+                    # logger.debug(f"Code {code.code_id} is not in domain {predinfo['domain']}")
                     return False
             if 'descendant_of' in predinfo:
                 if not code.is_descendant_of(predinfo['descendant_of']):
-                    logger.debug(
-                        f"Code {code.code_id} is not descendant of {predinfo['descendant_of']}")
+                    # logger.debug(
+                    #     f"Code {code.code_id} is not descendant of {predinfo['descendant_of']}")
                     return False
             if 'cousin_of' in predinfo:
                 if not code.is_cousin_of(predinfo['cousin_of']):
-                    logger.debug(
-                        f"Code {code.code_id} is not cousin of {predinfo['cousin_of']}")
+                    # logger.debug(
+                    #     f"Code {code.code_id} is not cousin of {predinfo['cousin_of']}")
                     return False
             if 'manual_code_list' in predinfo:
                 if code.code_id not in predinfo['manual_code_list']:
-                    logger.debug(
-                        f"Code {code.code_id} is not one of {predinfo['manual_code_list']}")
+                    # logger.debug(
+                    #     f"Code {code.code_id} is not one of {predinfo['manual_code_list']}")
                     return False
             return True
 
@@ -808,7 +808,7 @@ htmlpgcoll.set_image_filename_database( figsdb )
 logger.info("Generating citation database ...")
 
 encountered_citations = eczllm_scanner.get_encountered_citations()
-logger.debug("Encountered citations = %r", encountered_citations)
+#logger.debug("Encountered citations = %r", encountered_citations)
 for c in encountered_citations:
     try:
         citation_manager.add_encountered_citation(c)

@@ -95,7 +95,7 @@ class SearchIndexGenerator:
 
     def generate_search_index(self, eczllm_environment):
 
-        logging.debug("generating search index - code pages = %r", self._code_pages)
+        #logger.debug("generating search index - code pages = %r", self._code_pages)
 
         # do all the indexing
         self.eczllm_environment = eczllm_environment
