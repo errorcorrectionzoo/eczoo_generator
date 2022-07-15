@@ -131,5 +131,8 @@ class SiteGenerationEnvironment:
 
         output_fname = os.path.join(self.dirs.output_dir, fn_output)
 
+        # create any parent directories, as necessary
+        os.makedirs(os.path.dirname(output_fname), exist_ok=True)
+
         with open(output_fname, 'w', encoding='utf-8') as fw:
             fw.write(contents)
