@@ -92,9 +92,11 @@
 
 {# SMALL VERTICAL SPACE #}
     <li class="page-index-box-links-thin-separator"></li>
+  </ul>
 
 {# LIST DOMAINS/KINGDOMS #}
-    {%- for domain in domains -%}
+  {%- for domain in domains -%}
+  <ul class="page-index-box-links">
     <li><a href="{{domain.htmlpage.path() | prebaseurl}}"
            class="page-index-box-links-head">
            {{- domain.name | llmrender -}}{{- heading_separator_html -}}
@@ -107,9 +109,9 @@
           {%- endif -%}
       </li>
     {%- endfor -%}
-    {%- endfor -%}
-
   </ul>
+  {%- endfor -%}
+
 </nav>
 
 
