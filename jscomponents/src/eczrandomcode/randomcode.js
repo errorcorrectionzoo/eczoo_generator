@@ -34,9 +34,9 @@ export class RandomCodeShower
         let code_ids = Object.keys( raw_data );
 
         // make sure the code isn't a simple empty "stub"
-        let _matches_stub = (c) => (c.replace(/[^a-zA-Z]+/g, "").toLowerCase() == 'stub');
+        const rx_stub = /^[ \t\n.;_-]*stub[ \t\n.;!_-]*$/i;
         code_ids = code_ids.filter(
-            (code_id) => !_matches_stub(raw_data[code_id].description)
+            (code_id) => ! raw_data[code_id].description.match(rx_stub)
         );
 
         const random_code_id = code_ids[ parseInt(code_ids.length * Math.random(), 0) ];
@@ -54,20 +54,33 @@ export class RandomCodeShower
 
         const code_url = window.ecz_baseurl + 'c/' + code_id;
 
-        this.element_container.innerHTML =
-            `<h1>Your Random Code Pick: ${code.name}</h1>
-             <p class="random-code-content">
-               <span class="desc">${desc}</span>
-               <a href="${code_url}" class="random-code-quick-link">go→</a>
-             </p>`;
-        
-        let a_new_random = document.createElement('a');
+        this.element_container.innerHTML = '';
+
+        const h1 = document.createElement('h1');
+        h1.innerHTML = `Your Random Code Pick: ${code.name}`;
+
+        const a_go = document.createElement('a');
+        a_go.setAttribute('href', code_url);
+        a_go.classList.add('random-code-quick-link');
+        a_go.classList.add('random-code-quick-link-go');
+        a_go.innerText = 'go →';
+
+        const a_new_random = document.createElement('a');
         a_new_random.classList.add('random-code-quick-link');
+        a_new_random.classList.add('random-code-quick-link-refresh');
         a_new_random.textContent = 'refresh';
         a_new_random.href = 'javascript:void(0);'
         a_new_random.addEventListener('click', () => this.pick_and_show_random_code());
-        this.element_container.querySelector('.random-code-content').appendChild(a_new_random);
 
+        const p_desc = document.createElement('p');
+        p_desc.classList.add('random-code-content');
+        p_desc.innerHTML = desc;
+
+        this.element_container.appendChild(h1);
+        this.element_container.appendChild(a_go);
+        this.element_container.appendChild(a_new_random);
+        this.element_container.appendChild(p_desc);
+        
         if (typeof MathJax != 'undefined') {
             MathJax.typesetPromise([this.element_container]);
         }
