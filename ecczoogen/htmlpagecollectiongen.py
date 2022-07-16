@@ -22,6 +22,7 @@ class HtmlPage:
             name,
             *,
             template_name,
+            resource_info,
             info={},
             ext='.html',
             code_id_list,
@@ -36,6 +37,7 @@ class HtmlPage:
         self.ext = ext
         self.context = context
         self.link_to_codes_here = link_to_codes_here
+        self.resource_info = resource_info
 
     # where to copy the file in the output files
     def pathext(self):
@@ -62,12 +64,14 @@ class HtmlPageCollection:
             self,
             site_generation_environment,
             eczllm_environment,
+            eczllm_scanner,
             zoo,
     ):
         super().__init__()
         self.site_generation_environment = site_generation_environment
 
         self.eczllm_environment = eczllm_environment
+        self.eczllm_scanner = eczllm_scanner
         self.eczllm_html_fragment_renderer = \
             self.eczllm_environment.make_html_fragment_renderer()
 
@@ -160,24 +164,32 @@ class HtmlPageCollection:
                     )
                 self.page_for_code_ids[code_id] = htmlpage.name
         
-            # scan for any defterms in the content of the code, so that we can link
-            # it here.
-            scanner = eczllm.NodeDefTermScanner()
-            for code_id in htmlpage.code_id_list:
-                code = zoo.get_code(code_id)
-                scanner.scan_schemadatalike_obj(
-                    code,
-                    what=repr(code)
-                )
+            # # scan for any defterms in the content of the code, so that we can link
+            # # it here.
+            # scanner = eczllm.NodeDefTermScanner()
+            # for code_id in htmlpage.code_id_list:
+            #     code = zoo.get_code(code_id)
+            #     scanner.scan_schemadatalike_obj(
+            #         code,
+            #         what=repr(code)
+            #     )
 
-            for encountered_defterm in scanner.get_encountered_defterms():
-                defterm_llm_text = encountered_defterm.defterm_llm_text
-                defterm_href = self.site_generation_environment.prefix_base_url(
-                    f"{htmlpage.path()}#defterm-{encountered_defterm.defterm_safe_target_id}"
-                )
-                self.refinfo_for_defterms[defterm_llm_text] = \
-                    (defterm_llm_text, defterm_href)
-                logger.debug(f"registered defterm: {self.refinfo_for_defterms = }")
+        encountered_defterms = self.eczllm_scanner.get_encountered_defterms(
+            resource_info=htmlpage.resource_info
+        )
+
+        encountered_defterms = list(encountered_defterms)
+        logger.debug(f"defterms for page {htmlpage.resource_info=} "
+                     f"are {encountered_defterms=}")
+
+        for encountered_defterm in encountered_defterms:
+            defterm_llm_text = encountered_defterm.defterm_llm_text
+            defterm_href = self.site_generation_environment.prefix_base_url(
+                f"{htmlpage.path()}#defterm-{encountered_defterm.defterm_safe_target_id}"
+            )
+            self.refinfo_for_defterms[defterm_llm_text] = \
+                (defterm_llm_text, defterm_href)
+            logger.debug(f"registered defterm: {self.refinfo_for_defterms = }")
 
 
     def finished(self):

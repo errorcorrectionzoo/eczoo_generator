@@ -188,7 +188,6 @@ eczllm_scanner = eczllm.NodeScanner()
 
 
 ################################################################################
-
 #
 # Build the Code Collection --> create a `ecczoogen.zoo` object
 #
@@ -196,6 +195,19 @@ eczllm_scanner = eczllm.NodeScanner()
 zoo = zoo.Zoo(dirs=Dirs, schema_loader=schema_loader,
               eczllm_environment=eczllm_environment)
 
+
+
+################################################################################
+
+#
+# Scan codes' information for citations, references to graphics, and defterms
+#
+
+logger.info("Scanning LLM code for external resources ...")
+
+for code_id, code in zoo.all_codes().items():
+    
+    eczllm_scanner.scan_schemadatalike_obj(code, what=f"<code {code.code_id}>")
 
 
 ################################################################################
@@ -233,6 +245,7 @@ site_gen_env.copy_tree(
 htmlpgcoll = htmlpagecollectiongen.HtmlPageCollection(
     site_generation_environment=site_gen_env,
     eczllm_environment=eczllm_environment,
+    eczllm_scanner=eczllm_scanner,
     zoo=zoo
 )
 
@@ -281,6 +294,7 @@ for code_id, code in zoo.all_codes().items():
     # page for this specific code
     page = htmlpagecollectiongen.HtmlPage(
         name=f'c/{code_id}',
+        resource_info=code.llm_resource_info,
         info={
             'page_title': code.name,
             'page_title_text': code.name.render_standalone(TextFragmentRenderer()),
@@ -366,6 +380,7 @@ for domain in eczoo_domainshierarchy['domains']:
                 'domain': domain,
             },
             template_name='dyn_pages/kingdom_page.html',
+            resource_info=False,
         )
 
         kingdom['htmlpage'] = kingdom_page
@@ -386,6 +401,7 @@ for domain in eczoo_domainshierarchy['domains']:
             'domain': domain,
         },
         template_name='dyn_pages/domain_page.html',
+        resource_info=False,
     )
 
     domain['htmlpage'] = domain_page
@@ -525,6 +541,7 @@ for (dirpath, dirnames, filenames) in os.walk(codelistpages_dir, followlinks=Tru
                 for code in list_of_codes
             ],
             template_name=templatename,
+            resource_info=codelistpage_sd.llm_resource_info,
         )
         htmlpgcoll.create_page( htmlpage )
 
@@ -689,19 +706,6 @@ for fn in os.listdir(Dirs.pages_dir):
             fn_output=fn,
             context=global_context
         )
-
-
-################################################################################
-
-#
-# Scan codes' information for citations, and build the bibliography.
-#
-
-logger.info("Scanning LLM code for external resources ...")
-
-for code_id, code in zoo.all_codes().items():
-    
-    eczllm_scanner.scan_schemadatalike_obj(code, what=f"<code {code.code_id}>")
 
 
 ################################################################################

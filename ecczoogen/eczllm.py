@@ -107,6 +107,22 @@ class EczLLMResourceInfo:
         self.resource_type = resource_type
         self.resource_id = resource_id
 
+    def __repr__(self):
+        return f"{self.__class__.__name__}({self.resource_type!r}, {self.resource_id!r})"
+
+    def __eq__(self, other):
+        if not isinstance(other, EczLLMResourceInfo):
+            return False
+        return (
+            self.resource_type == other.resource_type
+            and self.resource_id == other.resource_id
+        )
+
+    def __hash__(self):
+        # Define hash so we can use EczLLMResourceInfo types as dict keys.  We
+        # need to define hash manually because we redefined __eq__.
+        return hash( (self.resource_type, self.resource_id) )
+
 
 
 heading_section_commands_by_level = {
@@ -311,45 +327,33 @@ class EncounteredDefTerm:
 
 
 
-class NodeDefTermScanner(LatexNodesVisitor):
-    def __init__(self):
-        super().__init__()
-        self.encountered_defterms = []
-
-    def get_encountered_defterms(self):
-        return self.encountered_defterms
-
-    def visit_environment_node(self, node):
-        if hasattr(node, 'llmarg_term_llm_ref_label_verbatim'):
-            defterm_llm_text = node.llmarg_term_llm_ref_label_verbatim
-            defterm_safe_target_id = node.llmarg_term_safe_target_id
-
-            self.encountered_defterms.append(
-                EncounteredDefTerm(
-                    defterm_llm_text=defterm_llm_text,
-                    defterm_safe_target_id=defterm_safe_target_id,
-                    encountered_resource_info=node.latex_walker.resource_info,
-                    encountered_where=node.latex_walker.what,
-                )
-            )
-        super().visit_environment_node(node)
-
-    def scan_schemadatalike_obj(self, obj, what=None):
-        visitor_scan_schemadatalike_obj(self, obj, what=what)
-
-
-
 class NodeScanner(LatexNodesVisitor):
     def __init__(self):
         super().__init__()
-        self.encountered_citations = []
-        self.encountered_image_filenames = []
+        self.encountered = {
+            'citations': [],
+            'image_filenames': [],
+            'defterms': []
+        }
 
-    def get_encountered_citations(self):
-        return self.encountered_citations
+    def get_encountered_citations(self, *, resource_info=None):
+        return self._get_encountered('citations', resource_info)
 
-    def get_encountered_image_filenames(self):
-        return self.encountered_image_filenames
+    def get_encountered_image_filenames(self, *, resource_info=None):
+        return self._get_encountered('image_filenames', resource_info)
+
+    def get_encountered_defterms(self, *, resource_info=None):
+        return self._get_encountered('defterms', resource_info)
+
+    def _get_encountered(self, object_type, resource_info=None):
+        if resource_info is None:
+            return self.encountered[object_type]
+        return (
+            x
+            for x in self.encountered[object_type]
+            if x.encountered_resource_info == resource_info
+        )
+
 
     def visit_macro_node(self, node):
         #logger.debug("scanner -- visiting node %r", node)
@@ -359,7 +363,7 @@ class NodeScanner(LatexNodesVisitor):
             graphics_options_value = node.llmarg_graphics_options_value
             graphics_path = node.llmarg_graphics_path
 
-            self.encountered_image_filenames.append(
+            self.encountered['image_filenames'].append(
                 EncounteredImageFilename(
                     image_filename=graphics_path,
                     encountered_resource_info=node.latex_walker.resource_info,
@@ -371,7 +375,7 @@ class NodeScanner(LatexNodesVisitor):
             # it's a citation node with citations to track
             for cite_item in node.llmarg_cite_items:
                 citation_key_prefix, citation_key = cite_item
-                self.encountered_citations.append(
+                self.encountered['citations'].append(
                     EncounteredCitation(
                         citation_key_prefix=citation_key_prefix,
                         citation_key=citation_key,
@@ -381,6 +385,26 @@ class NodeScanner(LatexNodesVisitor):
                 )
 
         super().visit_macro_node(node)
+
+    def visit_environment_node(self, node):
+        if hasattr(node, 'llmarg_term_llm_ref_label_verbatim'):
+            defterm_llm_text = node.llmarg_term_llm_ref_label_verbatim
+            defterm_safe_target_id = node.llmarg_term_safe_target_id
+
+            logger.debug(
+                f"registering defterm for {node.latex_walker.resource_info=}: "
+                f"{defterm_llm_text=!r}"
+            )
+
+            self.encountered['defterms'].append(
+                EncounteredDefTerm(
+                    defterm_llm_text=defterm_llm_text,
+                    defterm_safe_target_id=defterm_safe_target_id,
+                    encountered_resource_info=node.latex_walker.resource_info,
+                    encountered_where=node.latex_walker.what,
+                )
+            )
+        super().visit_environment_node(node)
 
     def scan_schemadatalike_obj(self, obj, what=None):
         visitor_scan_schemadatalike_obj(self, obj, what=what)
