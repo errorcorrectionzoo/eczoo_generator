@@ -136,3 +136,56 @@ class SiteGenerationEnvironment:
 
         with open(output_fname, 'w', encoding='utf-8') as fw:
             fw.write(contents)
+
+
+    def compile_template_with_llm_context(
+            self, *,
+            fn_template,
+            page_output_fname,
+            eczllm_environment,
+            page_context,
+    ):
+
+        pg_template = self.jinja2env.get_template(fn_template)
+
+        def render_this_html_page(render_context):
+
+            context = dict(page_context)
+            context.update(
+                rc=render_context,
+            )
+
+            try:
+                rendered_output = pg_template.render(context)
+            except Exception as e:
+                logger.error(f"Error compiling template: {e}", exc_info=True)
+                raise
+
+            logger.debug("Rendering page done.")
+
+            return rendered_output
+
+        llm_doc = eczllm_environment.make_document(render_this_html_page)
+
+        htmlfragmentrenderer = eczllm_environment.make_html_fragment_renderer()
+
+        full_rendered_output, render_context = llm_doc.render( htmlfragmentrenderer )
+
+        # render the endnotes
+        if '<RENDER_ENDNOTES/>' in full_rendered_output:
+            endnotes_mgr = render_context.feature_render_manager('endnotes')
+            full_rendered_output = full_rendered_output.replace(
+                '<RENDER_ENDNOTES/>',
+                endnotes_mgr.render_endnotes(
+                    target_id='endnotes',
+                    annotations=['sectioncontent'],
+                    #include_headings_at_level=2,
+                    endnotes_heading_title='References',
+                    endnotes_heading_level=2,
+                )
+            )
+
+        self.create_file_with_contents(
+            full_rendered_output,
+            fn_output=page_output_fname
+        )

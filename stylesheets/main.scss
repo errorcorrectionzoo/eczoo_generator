@@ -562,7 +562,7 @@ a.code-self-edit {
 
 
 
-.codelistpage_style_cards #endnotes {
+.page_style_cards #endnotes {
 
     @include card-item;
 
@@ -601,6 +601,34 @@ a.code-self-edit {
 }
 
 
+
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// defterm glossary terms page
+//
+////////////////////////////////////////////////////////////////////////////////
+
+.glossary-defterm-list {
+
+    grid-template-columns: 1fr;
+
+
+    .glossary-defterm-term-name {
+        font-style: normal;
+        font-weight: bold;
+        display: block;
+        margin-bottom: $parskip-half-length;
+    }
+
+    .glossary-defterm-body {
+        grid-column-start: 1;
+        display: block;
+        font-style: italic;
+        //margin-left: 3em;
+        margin-bottom: 2*$parskip-half-length;
+    }
+}
 
 
 

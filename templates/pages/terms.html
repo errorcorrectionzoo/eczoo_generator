@@ -1,0 +1,33 @@
+{% extends 'layout/static_page.html' %}
+
+{% block div_bodycontents_class -%}
+  page_style_cards
+{%- endblock %}
+
+{% block block_page_title %}Error Correction Zoo — Glossary of terms{% endblock %}
+
+{% block contents %}
+
+<h1>Glossary of terms</h1>
+
+<dl class="glossary-defterm-list">{#- -#}
+{% for encountered_defterm in eczllm_scanner.get_encountered_defterms() %}
+  <dt class="glossary-defterm-term-name">{#- -#}
+    <a href="{{ encountered_defterm.defterm_llm_text | defterm_href }}">
+      {{- encountered_defterm.defterm_llm_text | llmcompile | llmrender -}}
+    </a>{#- -#}
+  </dt>{#- -#}
+  <dd class="glossary-defterm-body">
+    {{- encountered_defterm.defterm_body_llm | llmrender(rc) -}}
+    <a href="{{ encountered_defterm.defterm_llm_text | defterm_href }}"
+       > —&nbsp;view in context&nbsp;→</a>
+  </dd>{#- -#}
+{% endfor %}
+</dl>
+
+
+<!-- endnotes -->
+<RENDER_ENDNOTES/>
+
+
+{% endblock contents %}

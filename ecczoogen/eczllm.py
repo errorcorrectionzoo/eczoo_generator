@@ -308,10 +308,12 @@ class EncounteredImageFilename:
 
 class EncounteredDefTerm:
     def __init__(self, defterm_llm_text, defterm_safe_target_id,
+                 defterm_body_llm,
                  encountered_resource_info, encountered_where):
         super().__init__()
         self.defterm_llm_text = defterm_llm_text
         self.defterm_safe_target_id = defterm_safe_target_id
+        self.defterm_body_llm = defterm_body_llm
         self.encountered_resource_info = encountered_resource_info
         self.encountered_where = encountered_where
 
@@ -320,6 +322,7 @@ class EncounteredDefTerm:
             f"{self.__class__.__name__}("
             f"defterm_llm_text={self.defterm_llm_text!r}, "
             f"defterm_safe_target_id={self.defterm_safe_target_id!r}, "
+            f"defterm_body_llm={self.defterm_body_llm}, "
             f"encountered_resource_info={self.encountered_resource_info!r}, "
             f"encountered_where={self.encountered_where!r})"
         )
@@ -390,6 +393,12 @@ class NodeScanner(LatexNodesVisitor):
         if hasattr(node, 'llmarg_term_llm_ref_label_verbatim'):
             defterm_llm_text = node.llmarg_term_llm_ref_label_verbatim
             defterm_safe_target_id = node.llmarg_term_safe_target_id
+            defterm_body_llm = node.latex_walker.llm_environment.make_fragment(
+                node.nodelist,
+                is_block_level=True,
+                resource_info=None,
+                what=f'defterm ‘{defterm_llm_text}’ body',
+            )
 
             logger.debug(
                 f"registering defterm for {node.latex_walker.resource_info=}: "
@@ -400,6 +409,7 @@ class NodeScanner(LatexNodesVisitor):
                 EncounteredDefTerm(
                     defterm_llm_text=defterm_llm_text,
                     defterm_safe_target_id=defterm_safe_target_id,
+                    defterm_body_llm=defterm_body_llm,
                     encountered_resource_info=node.latex_walker.resource_info,
                     encountered_where=node.latex_walker.what,
                 )

@@ -580,6 +580,7 @@ global_context = {
     'zoo': zoo,
     'codelistpage_list': codelistpage_list,
     'zoo_contributors_info': zoo_contributors_info,
+    'eczllm_scanner': eczllm_scanner,
 }
 
 
@@ -689,24 +690,6 @@ site_gen_env.compile_tree(
     target_dir=output_schemas_prefix,
     compile_function=compile_yml_to_json
 )
-
-
-################################################################################
-
-logger.info("Compiling global pages ...")
-
-#
-# Compile any global pages, like the index.html or contributions.html page
-#
-for fn in os.listdir(Dirs.pages_dir):
-    if fn.endswith(".html"):
-        fn_template = os.path.relpath(os.path.join(Dirs.pages_dir, fn), Dirs.templates_dir)
-        site_gen_env.compile_template(
-            fn_template=fn_template,
-            fn_output=fn,
-            context=global_context
-        )
-
 
 ################################################################################
 
@@ -889,6 +872,27 @@ htmlpgcoll.generate(
     output_dir=Dirs.output_dir,
     additional_context=global_context,
 )
+
+
+
+################################################################################
+
+logger.info("Compiling global pages ...")
+
+#
+# Compile any global pages, like the index.html or contributions.html page
+#
+for fn in os.listdir(Dirs.pages_dir):
+    if fn.endswith(".html"):
+        fn_template = os.path.relpath(os.path.join(Dirs.pages_dir, fn), Dirs.templates_dir)
+        site_gen_env.compile_template_with_llm_context(
+            fn_template=fn_template,
+            page_output_fname=fn,
+            eczllm_environment=eczllm_environment,
+            page_context=global_context
+        )
+
+
 
 ################################################################################
 

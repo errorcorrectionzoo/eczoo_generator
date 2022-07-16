@@ -101,10 +101,14 @@ class HtmlPageCollection:
         self.jinja2env.filters['format_citation_label_html'] = \
             lambda cite_no: markupsafe.Markup( self.format_citation_label_html(cite_no) )
 
+        self.jinja2env.filters['defterm_href'] = self._jfilter_defterm_href
+
+        self.jinja2env.filters['llmcompile'] = self._jfilter_llmcompile
         self.jinja2env.filters['llmrender'] = self._jfilter_llmrender
         self.jinja2env.filters['llmrendertext'] = self._jfilter_llmrendertext
 
         self.jinja2env.filters['to_json'] = self._jfilter_to_json
+        self.jinja2env.filters['to_repr'] = self._jfilter_to_repr
 
         self.jinja2env.filters['llm_text'] = \
             lambda llm: llm.llm_text
@@ -112,6 +116,13 @@ class HtmlPageCollection:
 
     def _jfilter_llmrendertext(self, obj, rendercontext=None):
         return eczllm.render_as_text(obj, self.eczllm_environment)
+
+    def _jfilter_llmcompile(self, llm_text, is_block_level=False):
+        return self.eczllm_environment.make_fragment(
+            llm_text,
+            standalone_mode=True,
+            is_block_level=is_block_level
+        )
 
     def _jfilter_llmrender(self, obj, rendercontext=None):
         if isinstance(obj, list):
@@ -269,8 +280,15 @@ class HtmlPageCollection:
             f'''<a href="{page_url_html}">{code_short_name_html}</a>'''
         )
 
+    def _jfilter_defterm_href(self, defterm_llm_text):
+        _, defterm_href = self.get_defterm_href(str(defterm_llm_text))
+        return defterm_href
+
     def _jfilter_to_json(self, obj):
         return json.dumps(obj)
+
+    def _jfilter_to_repr(self, obj):
+        return repr(obj)
 
     def update_global_context(self, d):
         self.global_context.update(d)
@@ -281,58 +299,27 @@ class HtmlPageCollection:
         # generate all the family pages
         for page_name, htmlpage in self.pages.items():
 
-            output_page_fname = htmlpage.pathext()
-            logger.info(f"Generating page ‘{output_page_fname}’")
+            page_output_fname = htmlpage.pathext()
+            logger.info(f"Generating page ‘{page_output_fname}’")
 
-            def render_html_page(render_context):
-                #logger.debug(f"Rendering page ‘{page_name}’ ...")
+            page_context = dict(
+                code_list=[
+                    zoo.get_code(code_id)
+                    for code_id in htmlpage.code_id_list
+                ],
+                pages=self.pages,
+                **self.global_context,
+                **htmlpage.info,
+                **{k: v
+                   for (k, v) in (htmlpage.context.items() if htmlpage.context else {})},
+                **additional_context
+            )
 
-                context = dict(
-                    code_list=[
-                        zoo.get_code(code_id)
-                        for code_id in htmlpage.code_id_list
-                    ],
-                    pages=self.pages,
-                    rc=render_context,
-                    **self.global_context,
-                    **htmlpage.info,
-                    **{k: v
-                       for (k, v) in (htmlpage.context.items() if htmlpage.context else {})},
-                    **additional_context
-                )
+            page_template_name = htmlpage.template_name
 
-                try:
-                    pg_template = self.jinja2env.get_template(htmlpage.template_name)
-                    rendered_output = pg_template.render(context)
-                except Exception as e:
-                    logger.error(f"Error compiling template: {e}", exc_info=True)
-                    raise
-
-                logger.debug("Rendering page done.")
-
-                return rendered_output
-
-            llm_doc = self.eczllm_environment.make_document(render_html_page)
-
-            htmlfragmentrenderer = self.eczllm_environment.make_html_fragment_renderer()
-
-            full_rendered_output, render_context = llm_doc.render( htmlfragmentrenderer )
-
-            # render the endnotes
-            if '<RENDER_ENDNOTES/>' in full_rendered_output:
-                endnotes_mgr = render_context.feature_render_manager('endnotes')
-                full_rendered_output = full_rendered_output.replace(
-                    '<RENDER_ENDNOTES/>',
-                    endnotes_mgr.render_endnotes(
-                        target_id='endnotes',
-                        annotations=['sectioncontent'],
-                        #include_headings_at_level=2,
-                        endnotes_heading_title='References',
-                        endnotes_heading_level=2,
-                    )
-                )
-
-            self.site_generation_environment.create_file_with_contents(
-                full_rendered_output,
-                fn_output=output_page_fname
+            self.site_generation_environment.compile_template_with_llm_context(
+                fn_template=page_template_name,
+                page_output_fname=page_output_fname,
+                eczllm_environment=self.eczllm_environment,
+                page_context=page_context,
             )
