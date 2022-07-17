@@ -19,10 +19,11 @@
       {{- encountered_defterm.defterm_llm_text | llmcompile | llmrender -}}
     </a>{#- -#}
   </dt>{#- -#}
+    <a href="{{ encountered_defterm.defterm_llm_text | defterm_href }}"
+       class="glossary-a-view-in-context"
+       >view in context&nbsp;→</a>
   <dd class="glossary-defterm-body">
     {{- encountered_defterm.defterm_body_llm | llmrender(rc) -}}
-    <a href="{{ encountered_defterm.defterm_llm_text | defterm_href }}"
-       > —&nbsp;view in context&nbsp;→</a>
   </dd>{#- -#}
 {% endfor %}
 </dl>

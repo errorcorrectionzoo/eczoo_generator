@@ -611,22 +611,29 @@ a.code-self-edit {
 
 .glossary-defterm-list {
 
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr max-content;
 
 
     .glossary-defterm-term-name {
+        grid-column: 1;
         font-style: normal;
         font-weight: bold;
         display: block;
         margin-bottom: $parskip-half-length;
     }
 
+    .glossary-a-view-in-context {
+        grid-column: 2;
+    }
+
     .glossary-defterm-body {
-        grid-column-start: 1;
+        grid-column: 1 / 3;
         display: block;
         font-style: italic;
         //margin-left: 3em;
         margin-bottom: 2*$parskip-half-length;
+
+        
     }
 }
 
