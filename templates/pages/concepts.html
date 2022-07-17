@@ -1,16 +1,16 @@
 {% extends 'layout/static_page.html' %}
 
+{% set page_title_text = 'Glossary of concepts' %}
+
 {% block div_bodycontents_class -%}
   page_style_cards
 {%- endblock %}
-
-{% block block_page_title %}Error Correction Zoo — Glossary of concepts{% endblock %}
 
 {% block contents %}
 
 <h1>Glossary of concepts</h1>
 
-{% set all_terms = eczllm_scanner.get_encountered_defterms() | sort(attribute='defterm_llm_text') %}
+{% set all_defterms = eczllm_scanner.get_encountered_defterms() | sort(attribute='defterm_llm_text') %}
 
 <dl class="glossary-defterm-list">{#- -#}
 {% for encountered_defterm in all_defterms %}
