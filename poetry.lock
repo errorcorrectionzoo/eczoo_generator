@@ -176,7 +176,7 @@ six = "*"
 
 [[package]]
 name = "llm"
-version = "0.1.0beta0"
+version = "0.1.0beta1"
 description = "Latex-Like Markup"
 category = "main"
 optional = false
@@ -186,11 +186,14 @@ develop = false
 [package.dependencies]
 pylatexenc = {git = "https://github.com/phfaist/pylatexenc.git", branch = "devel"}
 
+[package.extras]
+buildjslib = ["Transcrypt (>=3.9.0,<4.0.0)", "PyYAML (>=6.0,<7.0)"]
+
 [package.source]
 type = "git"
 url = "https://github.com/phfaist/llm.git"
 reference = "main"
-resolved_reference = "f65ec5cc17eb08370dc12775a275ed924751a419"
+resolved_reference = "b7f2bf17be20db6617cfa1e0a4824efb97082323"
 
 [[package]]
 name = "lxml"

@@ -182,6 +182,7 @@ class EczLLMEnvironment(llmstd.LLMStandardEnvironment):
         self.feature_floats = FeatureFloatsIncludeGraphicsOnly(float_types=float_types)
 
         self.feature_defterm = FeatureDefTerm()
+        #self.feature_defterm.render_defterm_with_term = False
 
         self.graphics_resource_provider = FeatureEczGraphicsResourceProvider()
 

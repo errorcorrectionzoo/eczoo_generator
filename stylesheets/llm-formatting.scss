@@ -73,6 +73,16 @@ figure.float {
 }
 
 
+.defterm {
+    font-style: italic;
+
+    .defterm-term {
+        font-style: italic;
+        font-weight: bold;
+    }
+}
+
+
 
 .display-math {
     width: 100%;

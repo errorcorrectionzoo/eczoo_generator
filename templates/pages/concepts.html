@@ -4,14 +4,16 @@
   page_style_cards
 {%- endblock %}
 
-{% block block_page_title %}Error Correction Zoo — Glossary of terms{% endblock %}
+{% block block_page_title %}Error Correction Zoo — Glossary of concepts{% endblock %}
 
 {% block contents %}
 
-<h1>Glossary of terms</h1>
+<h1>Glossary of concepts</h1>
+
+{% set all_terms = eczllm_scanner.get_encountered_defterms() | sort(attribute='defterm_llm_text') %}
 
 <dl class="glossary-defterm-list">{#- -#}
-{% for encountered_defterm in eczllm_scanner.get_encountered_defterms() %}
+{% for encountered_defterm in all_defterms %}
   <dt class="glossary-defterm-term-name">{#- -#}
     <a href="{{ encountered_defterm.defterm_llm_text | defterm_href }}">
       {{- encountered_defterm.defterm_llm_text | llmcompile | llmrender -}}
