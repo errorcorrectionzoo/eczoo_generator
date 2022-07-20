@@ -9,3 +9,15 @@ out
 # folder is in the other branch, in this branch it only contains backup ~ files
 # etc.
 jscomponents/eczpytranscrypt
+
+
+
+eczpdfgen/ecznote.log
+eczpdfgen/ecznote.aux
+eczpdfgen/ecznote.toc
+eczpdfgen/ecznote.pdf
+eczpdfgen/ecznote.synctex.gz
+
+_tmppdf
+
+

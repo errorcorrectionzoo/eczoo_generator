@@ -35,6 +35,7 @@ class Zoo:
         super().__init__()
 
         codes_dir = dirs.codes_dir
+        self.codes_dir = codes_dir
 
         # make into a tuple; remove empty suffix if present
         fig_exts = eczllm_environment.get_figure_filename_extensions()
