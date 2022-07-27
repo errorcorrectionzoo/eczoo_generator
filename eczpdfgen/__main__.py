@@ -116,6 +116,9 @@ def run_main(argv=None):
 
     if args.verbose:
         logging.basicConfig(level=logging.DEBUG)
+        # otherwise this is just uselessly way too verbose:
+        logging.getLogger('pylatexenc').setLevel(level=logging.INFO)
+        logging.getLogger('llm').setLevel(level=logging.INFO)
     else:
         logging.basicConfig(level=logging.INFO)
 
