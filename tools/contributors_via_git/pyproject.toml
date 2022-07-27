@@ -1,0 +1,29 @@
+[tool.poetry]
+name = "eczoo_contributors_from_git_commits"
+version = "0.0.1"
+description = ""
+authors = ["Philippe Faist"]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+#Jinja2 = "^3.0.2"
+jsonschema = "^4.1.2"
+PyYAML = "^6.0"
+colorlog = "^6.5.0"
+#pylatexenc = "^2.10"
+pylatexenc = {'git' = "https://github.com/phfaist/pylatexenc.git", branch = "devel" }
+llm = {'git' = "https://github.com/phfaist/llm.git", branch = "main"}
+#libsass = "^0.21.0"
+jsonref = "^0.2"
+#arxiv = "^1.4.2"
+#requests = "^2.26.0"
+#backoff = "^1.11.1"
+#citeproc-py = {'git' = "https://github.com/phfaist/citeproc-py.git"}
+#Pillow = "^9.0.1"
+GitPython = "^3.1.27"
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
