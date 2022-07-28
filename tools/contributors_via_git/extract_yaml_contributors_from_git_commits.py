@@ -157,35 +157,12 @@ class ExtractFromTree:
             'deleted': [],
         }
 
-        # in the case of merge commits, we still register file name changes and
-        # code_id changes, but we don't register apparent contributions (because
-        # the changes that appear in diffs are caused by the merge of other edit
-        # commits that will be picked up separately, not by edit contributions)
-
-        skip_contributions = False
-
-        if len(commit.parents) != 1:
-            
-            skip_contributions = True
-
-            if commit.author.name in ('Victor V. Albert', 'Philippe Faist'):
-                logger.debug(
-                    "Skipping merge commit {commit.hexsha} by {commit.author.name}"
-                )
-                return
-
-            logger.warning(
-                f"Skipping merge commit {commit.hexsha} by {commit.author.name} "
-                f"Please have a look manually if you think I might be missing contributions.")
-
-
         for commit_parent in commit.parents:
 
             for diff in commit_parent.diff(commit, paths='codes'):
 
                 d = self._process_diff(
                     diff, commit, commit_parent, contributor,
-                    skip_contributions=skip_contributions,
                     store_file_delete_new_info=store_file_delete_new_info
                 )
 
@@ -210,7 +187,7 @@ class ExtractFromTree:
 
 
     def _process_diff(self, diff, commit, commit_parent, contributor, *,
-                      skip_contributors=False, store_file_delete_new_info):
+                      store_file_delete_new_info):
 
         logger = logging.getLogger(__name__)
         logger.debug(f"Got diff for {diff.b_path}")
@@ -268,14 +245,14 @@ class ExtractFromTree:
 
         #code_id = self.code_id_renames.apply_renames(commit_timestamp, code_id)
 
-        # get precise word diff etc.
-        if not skip_contributors:
+        # get precise word diff etc.  has_significant_diff will check all commit
+        # parents so should be able to handle merges correctly.
 
-            if has_significant_diff(self.repo, commit, diff.a_path, diff.b_path):
+        if has_significant_diff(self.repo, commit, diff.a_path, diff.b_path):
 
-                self.collected_contribution_events.append(
-                    (commit_timestamp, code_id, file_path, contributor)
-                )
+            self.collected_contribution_events.append(
+                (commit_timestamp, code_id, file_path, contributor)
+            )
 
 
     def get_code_contributors(self):
@@ -287,7 +264,7 @@ class ExtractFromTree:
         for ts, code_id, file_path, contributor in reversed(self.collected_contribution_events):
             
             code_id = self.code_id_renames.apply_renames(ts, code_id)
-            file_path = self.file_renames.apply_renamees(ts, file_path)
+            file_path = self.file_renames.apply_renames(ts, file_path)
 
             key = (code_id, file_path)
 
