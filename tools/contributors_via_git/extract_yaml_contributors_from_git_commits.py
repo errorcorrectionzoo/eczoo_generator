@@ -48,7 +48,7 @@ def runmain():
     #
     #branch = '200b9c8' # DEBUG 0 - pretty long
     #branch = 'bcb27c6' # DEBUG 0.5 - medium-long
-    #branch = '97b6405a1573507dc1b025b55eca19e3d27e9242' # DEBUG 1 - short-ish
+    branch = '97b6405a1573507dc1b025b55eca19e3d27e9242' # DEBUG 1 - short-ish
     #branch = '09937ec' # DEBUG 2 - really short
     #
 
@@ -77,7 +77,7 @@ def runmain():
 
     jsonfname = f'out/extracted_code_contributions{usebranchname}-{datetime.datetime.now().strftime("%Y%m%dT%H%M%S")}.json'
     with open(jsonfname, 'w', encoding='utf-8') as fw:
-        json.dump(code_contributors, fw, indent=4)
+        json.dump(code_contributions, fw, indent=4)
 
 
 
@@ -123,6 +123,9 @@ class Contributor:
         self.email = email
 
         self._fields = ('name', 'email')
+
+    def as_dict(self):
+        return {k: getattr(self, k) for k in self._fields }
 
     def __repr__(self):
         return (
@@ -437,11 +440,11 @@ class ExtractFromTree:
                     'contributions': [],
                 }
 
-            commit_datetime = datetime.datetime.fromtimestamp(commit_timestamp,
+            commit_datetime = datetime.datetime.fromtimestamp(commit.committed_date,
                                                               tz=datetime.timezone.utc)
 
             code_contributions[key]['contributions'].append(
-                { 'contributor': contributor,
+                { 'contributor': contributor.as_dict(),
                   'commithash': commit.hexsha,
                   'date': commit_datetime.isoformat() }
             )
