@@ -1,0 +1,6 @@
+
+file_renames:
+  - hashdiff: [755c4a4b78d87b38736373fca17d2b6109563380, bb15c648c28bb3bbb29366dd4d55cfe647471414]
+    old: codes/groups/groups_into_groups.yml
+    new: codes/groups/groups.yml
+
