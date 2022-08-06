@@ -48,7 +48,7 @@ def runmain():
     #
     #branch = '200b9c8' # DEBUG 0 - pretty long
     #branch = 'bcb27c6' # DEBUG 0.5 - medium-long
-    branch = '97b6405a1573507dc1b025b55eca19e3d27e9242' # DEBUG 1 - short-ish
+    #branch = '97b6405a1573507dc1b025b55eca19e3d27e9242' # DEBUG 1 - short-ish
     #branch = '09937ec' # DEBUG 2 - really short
     #
 
