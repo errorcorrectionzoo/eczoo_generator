@@ -4,3 +4,66 @@ file_renames:
     old: codes/groups/groups_into_groups.yml
     new: codes/groups/groups.yml
 
+  - hashdiff: [ce912603ca6750d051886f35c77b8de9a58aebe1, 78b1f8145f640d7e2fbe1cfd25a81b77c15f89b6]
+    old: codes/quantum/qudits/holographic.yml
+    new: codes/quantum/properties/holographic.yml
+
+  - hashdiff: [2cc9154065e3984c0e7b01625d76e2528dc5b39c, 9cf4bb057c098f3edbbd1915ab113b72d55e8b51]
+    old: codes/quantum/qubits/freedman_meyer_lou.yml
+    new: codes/quantum/qubits/surface/freedman_meyer_luo.yml
+
+  - hashdiff: [25c6a077f1f8d31f6a199a5c8f4eeed3555f3b5e, a2cb7ca053b46d8451fb6f39a664cd9419d5f805]
+    old: codes/classical/bits/BCH.yml
+    new: codes/classical/bits/bch.yml
+
+  - hashdiff: [188ffa2b6f8c1e162c2d07da7b3bb0dfd53c7c52, 453f028fe7866cc9a13530dd64788cec878950c9]
+    old: codes/quantum/qubits/fiber_bundle2.yml
+    new: codes/quantum/qubits/fiber_bundle.yml
+
+  - hashdiff: [b9d920957092a2d23179fc3e4167785dafd22708, 1938625aabc0613c69a43f4206d64aa6c154b257]
+    old: codes/quantum/qudits/quantum_reed_muller.yml
+    new: codes/quantum/qubits/quantum_reed_muller.yml
+
+  - hashdiff: [2bfba971fd1a1b8374951f77baae4824d792f004, 58245016b28fca42f6cfdf135e9e8e5c74338d02]
+    old: codes/quantum/qubits/422.yml
+    new: codes/quantum/qubits/stab_4_2_2.yml
+
+  - hashdiff: [3155b5c2ec61756d0ee226fd3d9377d0e2ee814d, 25f3853cc648163897206bb4fff0b1dd23dad809]
+    old: codes/quantum/qubits/quantum_reed_solomon.yml
+    new: codes/quantum/qudits/polynomial.yml
+
+  - hashdiff: [3155b5c2ec61756d0ee226fd3d9377d0e2ee814d, 25f3853cc648163897206bb4fff0b1dd23dad809]
+    old: codes/quantum/qubits/approximate_quantum.yml
+    new: codes/quantum/properties/approximate_qecc.yml
+
+  - hashdiff: [a2cb7ca053b46d8451fb6f39a664cd9419d5f805, db0d36fc955e8857e6e71115cda6c62394146707]
+    old: codes/quantum/qubits/quantum_cyclic.yml
+    new: codes/quantum/properties/quantum_cyclic.yml
+
+  - hashdiff: [3d0f78d0daa43db300317d6c528f65e5846f856c, f5acc0be2a0d199ed3487751f50b8015b706b65b]
+    old: codes/quantum/qudits/skew_cyclic_CSS.yml
+    new: codes/quantum/qudits_galois/skew-cyclic_galois_css.yml
+
+  - hashdiff: [045853243c1488cd865c2cd01e6ba8e117e7a3f5, 0443d727372d4567d8a69607f7b92f5f2799950c]
+    old: codes/qubits/thermodynamic.yml
+    new: codes/qubits/eth.yml
+
+  - hashdiff: [0f8cd2df0849e12f48601c11e66cde44d64cf431, 6bb86d8611562a114bdee78c7c7538e76291b2e6]
+    old: codes/quantum/qubits/five_qubit.yml
+    new: codes/quantum/qubits/513.yml
+
+
+
+# VICTOR PLEASE DOUBLE-CHECK THESE:
+
+# Cf: https://github.com/errorcorrectionzoo/eczoo_data/compare/587d92f...88f0632
+  - hashdiff: [587d92f0f07c236f70451044b99ba87e4fae1beb, 88f0632d7e786fc6fa7bba1d996abbbed59afe40]
+    old: codes/classical/groups/classical_abelian_group.yml
+    new: codes/classical/q-ary_digits/group.yml
+
+
+
+
+## What happened to these?
+
+# codes/quantum/qubits/five_qubit.yml -> https://github.com/errorcorrectionzoo/eczoo_data/compare/0f8cd2d...6bb86d8

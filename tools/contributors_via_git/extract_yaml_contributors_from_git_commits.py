@@ -1,7 +1,7 @@
 import re
 import os.path
 import datetime
-import collections
+import json
 
 import logging
 
@@ -44,9 +44,12 @@ def runmain():
         citation_extras = os.path.join(_root_dir, eczoo_site_setup['dirs']['citation_extras'])
 
     # 
-    #branch = None
-    branch = '97b6405a1573507dc1b025b55eca19e3d27e9242' # DEBUG 1
-    #branch = '09937ec' # DEBUG 2
+    branch = None # FULL HISTORY
+    #
+    #branch = '200b9c8' # DEBUG 0 - pretty long
+    #branch = 'bcb27c6' # DEBUG 0.5 - medium-long
+    #branch = '97b6405a1573507dc1b025b55eca19e3d27e9242' # DEBUG 1 - short-ish
+    #branch = '09937ec' # DEBUG 2 - really short
     #
 
     eft = ExtractFromTree(Dirs.data_dir,
@@ -65,6 +68,16 @@ def runmain():
     # print()
     # print("Code ID renames:")
     # print(eft.code_id_renames.dumps())
+
+    usebranchname = ''
+    if branch is not None:
+        usebranchname = f'-{branch}'
+
+    os.makedirs('extracted', exist_ok=True)
+
+    jsonfname = f'extracted/extracted_code_contributors{usebranchname}-{datetime.datetime.now().strftime("%Y%m%dT%H%M%S")}.json'
+    with open(jsonfname, 'w', encoding='utf-8') as fw:
+        json.dump(code_contributors, fw, indent=4)
 
 
 
@@ -103,7 +116,30 @@ _rx_code_id = re.compile(
 )
 
 
-Contributor = collections.namedtuple('Contributor', ('name', 'email'))
+class Contributor:
+    def __init__(self, name, email):
+        super().__init__()
+        self.name = name
+        self.email = email
+
+        self._fields = ('name', 'email')
+
+    def __repr__(self):
+        return (
+            f"{self.__class__.__name__}("
+            + ", ".join( f"{k}={getattr(self, k)!r}" for k in self._fields )
+            + ")"
+        )
+
+
+
+class MyFieldsJSONEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if hasattr(obj, '_fields'):
+            return { k: getattr(obj, k)
+                     for k in obj._fields }
+        return super().default(obj)
+
 
 
 class ExtractFromTree:
@@ -346,34 +382,79 @@ class ExtractFromTree:
             try:
                 blob = start_commit.tree[file_path]
             except KeyError:
+                # Ignore if it's Victor, this happens for many files
+                if contributor.email == f"{'valbert4'}@{'mg'[::-1]}{'lia'[::-1]+'.'+'com'}":
+                    logger.debug(
+                        f"Code file {file_path} no longer exists and could not be traced.  A "
+                        f"contribution in commit {commit} on {orig_file_path} was authored by our own Victor."
+                    )
+                    continue
                 logger.warning(
                     f"Code file {file_path} no longer exists and could not be traced.  A "
                     f"contribution in commit {commit} was authored by {contributor} on {orig_file_path}."
                 )
+
+                def diffwherefmt(dx):
+                    return f"{dx.parent.hexsha[:7]} → {dx.commit.hexsha[:7]} https://github.com/errorcorrectionzoo/eczoo_data/compare/{dx.parent.hexsha[:7]}...{dx.commit.hexsha[:7]}"
+
                 # DEBUG:
-                logger.debug("Attempted to trace renames:")
+                infomsg = ["Traced rename events:",
+                           f"    Contribution @ {diffwherefmt(diffx)}"]
                 dx = diffx
                 fn = orig_file_path
                 while dx is not None:
-                    logger.debug(f"  @ {dx.commit.hexsha[:7]}")
+                    #logger.debug(f"  @ {dx.commit.hexsha[:7]}")
                     if fn in dx.renames['files']:
-                        logger.debug(f"  @ {dx.commit.hexsha[:7]}:  {fn} → {dx.renames['files'][fn]}")
-                        fn = dx.renames['files'][fn]
-                        if fn.startswith('DELETED-'):
-                            logger.debug(f"      DELETED [{dx.parent.hexsha}, {dx.commit.hexsha}]")
+                        fnnew = dx.renames['files'][fn]
+                        if fnnew is None:
+                            # specifically silenced the warning
+                            infomsg.append( f"DELETED in {diffwherefmt(dx)}\n" )
+                            logger.debug("\n".join(infomsg)) # display in debug
+                            infomsg = []
                             break
+                        if fnnew.startswith('DELETED-'):
+                            infomsg.append(
+                                f"    Deleted {diffwherefmt(dx)}\n"
+                                f"    To create a manual code rename, use:\n"
+                                f"--------\n"
+                                f"  - hashdiff: [{dx.parent.hexsha}, {dx.commit.hexsha}]\n"
+                                f"    old: {fn}\n"
+                                f"    new: ???\n"
+                                f"--------\n"
+                                f"    Use the keyword ‘null’ for the ‘new:’ value to silently ignore this contribution.\n"
+                            )
+                            break
+
+                        infomsg.append(
+                            f"    Renamed {diffwherefmt(dx)}\n"
+                            f"        {fn} → {fnnew}"
+                        )
+                        fn = fnnew
                     dx = dx.child
+                if infomsg:
+                    logger.info("\n".join(infomsg))
                 continue
 
-            key = (code_id, file_path)
+            key = f"{code_id}|{file_path}"
 
             if key not in code_contributors:
-                code_contributors[key] = []
+                code_contributors[key] = {
+                    'code_id': code_id,
+                    'file_path': file_path,
+                    'contributors': [],
+                }
 
-            if contributor not in code_contributors[key]:
-                code_contributors[key].append(contributor)
+            if contributor not in code_contributors[key]['contributors']:
+                code_contributors[key]['contributors'].append( self.get_contributor_dict(contributor) )
 
         return code_contributors
+
+    def get_contributor_dict(self, contributor):
+        # TODO: Do cached requests to github's API to get the github user id
+        return {
+            'name': contributor.name,
+            'email': contributor.email,
+        }
 
 
 # ------
@@ -383,12 +464,17 @@ def get_code_id_from_yml_data(commit, path):
     logger = logging.getLogger(__name__)
 
     try:
-        # parse the YML file at this revision
+        # get the YML data at this revision
         ymlblob = commit.tree[path]
     except KeyError:
         # could be the file was deleted.
         logger.debug(f"Could not get YAML data for {path} in commit {commit.hexsha}")
         return None
+
+    # NOTE: We don't use yaml.safe_load() because the file might have syntax
+    # errors (yet we still would like to track contributions).  So we read out
+    # the code_id by matching a single line that starts with "code_id: ...", see
+    # the regular expression object `_rx_code_id`
 
     try:
         ymldata = ymlblob.data_stream.read().decode('utf-8')
@@ -504,6 +590,11 @@ def has_significant_diff(repo, commit, file_path_old, file_path_new):
 # ------------------------------------------------------------------------------
 
 if __name__ == '__main__':
-    logging.basicConfig(level=logging.DEBUG)
+    logging.basicConfig(level=logging.INFO)
+
+    # For DEBUG MESSAGES:
+    #logging.getLogger().setLevel(logging.DEBUG)
+
     logging.getLogger('git.cmd').setLevel(logging.INFO)
+
     runmain()
