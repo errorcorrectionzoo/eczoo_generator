@@ -58,10 +58,10 @@ def runmain():
 
     eft.extract()
 
-    code_contributors = eft.get_code_contributors()
+    code_contributions = eft.get_code_contributions()
 
-    import pprint
-    pprint.pprint(code_contributors)
+    # import pprint
+    # pprint.pprint(code_contributions)
 
     # print("File renames:")
     # print(eft.file_renames.dumps())
@@ -73,9 +73,9 @@ def runmain():
     if branch is not None:
         usebranchname = f'-{branch}'
 
-    os.makedirs('extracted', exist_ok=True)
+    os.makedirs('out', exist_ok=True)
 
-    jsonfname = f'extracted/extracted_code_contributors{usebranchname}-{datetime.datetime.now().strftime("%Y%m%dT%H%M%S")}.json'
+    jsonfname = f'out/extracted_code_contributions{usebranchname}-{datetime.datetime.now().strftime("%Y%m%dT%H%M%S")}.json'
     with open(jsonfname, 'w', encoding='utf-8') as fw:
         json.dump(code_contributors, fw, indent=4)
 
@@ -133,14 +133,7 @@ class Contributor:
 
 
 
-class MyFieldsJSONEncoder(json.JSONEncoder):
-    def default(self, obj):
-        if hasattr(obj, '_fields'):
-            return { k: getattr(obj, k)
-                     for k in obj._fields }
-        return super().default(obj)
-
-
+ 
 
 class ExtractFromTree:
     def __init__(self, repo_dir, branch=None, *, manual_file_renames=None):
@@ -359,16 +352,16 @@ class ExtractFromTree:
             )
 
 
-    def get_code_contributors(self):
-        # process all code_id's and file_path's to apply any renames, and reduce
-        # the contributors list.
+    def get_code_contributions(self):
+        # process all code_id's and file_path's to apply any renames, and
+        # compile a list of contribution events for each code.
 
         logger = logging.getLogger(__name__)
 
         start_commit = self.start_commit
         logger.debug(f"start_commit's commit is {start_commit}")
 
-        code_contributors = {}
+        code_contributions = {}
 
         for commit, diffx, code_id, file_path, contributor in \
             reversed(self.collected_contribution_events):
@@ -435,26 +428,26 @@ class ExtractFromTree:
                     logger.info("\n".join(infomsg))
                 continue
 
-            key = f"{code_id}|{file_path}"
+            key = f"{code_id}:{file_path}"
 
-            if key not in code_contributors:
-                code_contributors[key] = {
+            if key not in code_contributions:
+                code_contributions[key] = {
                     'code_id': code_id,
                     'file_path': file_path,
-                    'contributors': [],
+                    'contributions': [],
                 }
 
-            if contributor not in code_contributors[key]['contributors']:
-                code_contributors[key]['contributors'].append( self.get_contributor_dict(contributor) )
+            commit_datetime = datetime.datetime.fromtimestamp(commit_timestamp,
+                                                              tz=datetime.timezone.utc)
 
-        return code_contributors
+            code_contributions[key]['contributions'].append(
+                { 'contributor': contributor,
+                  'commithash': commit.hexsha,
+                  'date': commit_datetime.isoformat() }
+            )
 
-    def get_contributor_dict(self, contributor):
-        # TODO: Do cached requests to github's API to get the github user id
-        return {
-            'name': contributor.name,
-            'email': contributor.email,
-        }
+        return code_contributions
+
 
 
 # ------
