@@ -21,6 +21,8 @@ jsonref = "^0.2"
 #citeproc-py = {'git' = "https://github.com/phfaist/citeproc-py.git"}
 #Pillow = "^9.0.1"
 GitPython = "^3.1.27"
+"ruamel.yaml.cmd" = "^0.5.10"
+PyGithub = "^1.55"
 
 [tool.poetry.dev-dependencies]
 
