@@ -4,10 +4,14 @@ import os.path
 import logging
 logger = logging.getLogger(__name__)
 
-import yaml
 
 import jsonschema
 import jsonref
+
+from . import rtyamltools
+
+
+yaml = rtyamltools.EczYAML()
 
 
 class SchemaLoader:
@@ -30,7 +34,7 @@ class SchemaLoader:
                     logger.debug(f"Loading schema data ‘/schemas/{schema_rel_path}’ ...")
 
                     with open(schema_fs_path, encoding='utf-8') as f:
-                        d = yaml.safe_load(f)
+                        d = yaml.load(f)
         
                     schema_uri_data[schema_uri] = d
             

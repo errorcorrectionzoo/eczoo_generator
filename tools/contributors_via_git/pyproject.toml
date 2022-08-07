@@ -23,6 +23,7 @@ jsonref = "^0.2"
 GitPython = "^3.1.27"
 "ruamel.yaml.cmd" = "^0.5.10"
 PyGithub = "^1.55"
+ipython = "^8.4.0"
 
 [tool.poetry.dev-dependencies]
 

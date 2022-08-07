@@ -1,13 +1,15 @@
 import os
 import os.path
 
-import yaml
 
 import logging
 logger = logging.getLogger(__name__)
 
 
 from . import code, code_collection, schemaloader
+
+from . import rtyamltools
+yaml = rtyamltools.EczYAML()
 
 
 
@@ -78,7 +80,7 @@ class Zoo:
                     logger.debug(f"Loading code file ‘{filename}’ ...")
                     with open(os.path.join(codes_dir, fullfname), 'r', encoding='utf-8') as f:
                         try:
-                            code_info = yaml.safe_load(f)
+                            code_info = yaml.load(f)
                         except Exception as e:
                             logger.error(f"Failed to parse YAML file ‘{filename}’:\n{e}\n\n")
                             raise
@@ -102,8 +104,8 @@ class Zoo:
 
 
                 msg = (
-                    f"All files in the code data tree must have the suffix '.yml' to "
-                    f"indicate that they are YaML files. "
+                    f"All YAML files in the code data tree must have the suffix '.yml' to "
+                    f"indicate that they are YAML files. "
                     f"Offending file: ‘{show_dirpath}/{filename}’."
                 )
                 logger.error(msg)
