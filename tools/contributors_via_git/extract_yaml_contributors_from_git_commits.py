@@ -79,6 +79,8 @@ def runmain():
     with open(jsonfname, 'w', encoding='utf-8') as fw:
         json.dump(code_contributions, fw, indent=4)
 
+    logger.info(f"Wrote extracted code contributions to ‘{jsonfname}’")
+
 
 
 # ------------------------------------------------------------------------------

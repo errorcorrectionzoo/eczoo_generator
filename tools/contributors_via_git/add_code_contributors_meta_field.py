@@ -66,6 +66,10 @@ def runmain(argv=None):
 
     os.makedirs('out', exist_ok=True)
     
+
+    with open('fix_names.yml', encoding='utf-8') as f:
+        fix_names_dict = yaml.load(f)['fix_names']
+
     # collect contributor information for each code-id/code-file
 
     with CachedGithubUsernameResolver() as ghusernameresolver:
@@ -89,7 +93,13 @@ def runmain(argv=None):
             for contrib in code_contributions:
                 cgh = ghusernameresolver.get_githubusername(contrib['commithash'], contrib['contributor']['email'])
 
-                this_contributor = { 'name': yaml.SqStr(contrib['contributor']['name']) }
+                this_name = contrib['contributor']['name']
+                # fix name, if necessary
+                this_name = fix_names_dict.get(this_name, this_name)
+
+                this_contributor = {
+                    'name': yaml.SqStr(this_name),
+                }
                 if cgh:
                     this_contributor['githubusername'] = cgh
 
@@ -192,5 +202,8 @@ class GithubUsernameResolver:
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
+
+    for modname in ('github.Requester', 'urllib3.connectionpool'):
+        logging.getLogger(modname).setLevel(level=logging.INFO)
 
     runmain()
