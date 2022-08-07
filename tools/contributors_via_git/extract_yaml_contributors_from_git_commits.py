@@ -281,9 +281,11 @@ class ExtractFromTree:
         if file_path is None:
             file_path = diff.a_path # for a deleted file
 
-        if not file_path.endswith('.yml'):
+        if '.' in file_path and not file_path.endswith('.yml'):
             logger.debug(f"Skipping diff for non-YAML file {file_path}")
             return
+        # we still attempt to parse extension-less files as YAML files, because
+        # some people often forgot the .yml extension...
 
         if diff.new_file:
             logger.debug(f"File {diff.b_path!r} was created")

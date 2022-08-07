@@ -50,7 +50,129 @@ file_renames:
 
   - hashdiff: [0f8cd2df0849e12f48601c11e66cde44d64cf431, 6bb86d8611562a114bdee78c7c7538e76291b2e6]
     old: codes/quantum/qubits/five_qubit.yml
-    new: codes/quantum/qubits/513.yml
+    new: codes/quantum/qubits/stab_5_1_3.yml
+
+  - hashdiff: [bf32c0eb1b4ffa5148b9c0a72feb82febe1772af, ecc3b0018a2adcc806a80713cfc31ae69cf3b621]
+    old: codes/classical/q-ary_digits/two_weight.yml
+    new: codes/classical/properties/weight/constant_weight.yml
+
+  - hashdiff: [efa0ee8fdc630798f724a68bff3cd3257bfe229b, 28f4eca9f6141c59ca3df031a8142f62dc90f30f]
+    old: codes/quantum/properties/lego.yml
+    new: codes/quantum/properties/quantum_lego.yml
+
+  - hashdiff: [deddf5180c6e28ba01ccfecb08064ef7689e5af2, 58dfa23967fbede6593f411c11aea6221f8db7db]
+    old: codes/quantum/properties/symmetry_protected.yml
+    new: codes/quantum/properties/symmetry_protected_self_correct.yml
+
+  - hashdiff: [31b5c0d5254aef75f87bd2f016cfcbd14e309c23, 6ad31a508239aec9c48abea510dd629fc9db9eb6]
+    old: codes/classical/bits/duadic.yml
+    new: codes/classical/bits/binary_duadic.yml
+
+  - hashdiff: [6ad31a508239aec9c48abea510dd629fc9db9eb6, 63fdd8ac0df13a1733ee0576bcd2cdecdc3bb857]
+    old: codes/classical/bits/quadratic_residue.yml
+    new: codes/classical/bits/binary_quad_residue.yml
+
+  - hashdiff: [deddf5180c6e28ba01ccfecb08064ef7689e5af2, 58dfa23967fbede6593f411c11aea6221f8db7db]
+    old: codes/quantum/qubits/subsystem/symmetry_protected_color.yml
+    new: codes/quantum/qubits/subsystem/subsystem_color.yml
+
+  - hashdiff: [9ac52dde4b928bdc0a70f06155dcef562b62b3e9, 207b4ee17ec1bdcb82d6c70a4d0a65d9c7e7e6e9]
+    old: codes/classical/q-ary_digits/q-bch.yml
+    new: codes/classical/q-ary_digits/q-ary_bch.yml
+
+  - hashdiff: [3516771933165b0d778e4c3cddf4e692bfea13fd, 616a9115256d7db1340b5d0b4eedaa9969ab38c1]
+    old: codes/classical/bits/lt.yml
+    new: codes/classical/bits/luby_transform.yml
+
+  - hashdiff: [798f566fc1da134ce90152fc25937c829df4fbaa, da5242a969bb27666519181273130a5518dbeb7c]
+    old: codes/quantum/groups/g-covariant.yml
+    new: codes/quantum/properties/covariant.yml
+
+  - hashdiff: [d9e4389321589b2acd8ef642410c6af68cbb231a, abe133142ccc623239129e23f3d05f2878039a6e]
+    old: codes/classical/properties/distributed_storage/locally_recoverable.yml
+    new: codes/classical/properties/distributed_storage/locally_recoverable.yml
+
+  - hashdiff: [95e94dd204565b07b24d5795d2b66b27203d7df8, 433b056d9afa7343e0452daaf3457311ac4b20a6]
+    old: codes/classical/q-ary_digits/reed_solomon.yml
+    new: codes/classical/q-ary_digits/reed_solomon.yml
+
+  - hashdiff: [e91304a0fee185bcf5bd54520c9fe22f15c8dde6, f9bd587ffbbea566f7c7ffeaf0d2fc76a43af298]
+    old: codes/quantum/groups/g-covariant-erasure.yml
+    new: codes/quantum/groups/g-covariant-erasure.yml
+
+  - hashdiff: [a7cd36a162f4404d79024da3e251a9f8dba86da9, 54f243b864518563d1f9fbf9b4aa4cc3ecb3c7f7]
+    old: codes/quantum/groups/g-covariant.yml
+    new: codes/quantum/groups/g-covariant.yml
+
+  - hashdiff: [531a78b5e70b458268afc387aa2a5c2ac495f20d, bdc7bdd01edce337c2c7b80100b1519456f0f71f]
+    old: codes/classical/bits/random_code.yml
+    new: codes/classical/properties/random.yml
+
+  - hashdiff: [3ea28cc9584e37e46763ca161a76eaa430313dbf, 88eaa633ec5c28c8b9275760138b163e69ebeaf8]
+    old: codes/bits/tanner.yml
+    new: codes/classical/bits/tanner.yml
+
+  - hashdiff: [62c8e4ed542c82b9f6c93307d4b62f0b69cb59f1, c2fd48b8b410099febeb8b7ee295b0a2a7004363]
+    old: codes/quantum/qubits/translationally_invariant_stabilizer.yml
+    new: codes/quantum/properties/qldpc/translationally_invariant_stabilizer.yml
+
+  - hashdiff: [62c8e4ed542c82b9f6c93307d4b62f0b69cb59f1, c2fd48b8b410099febeb8b7ee295b0a2a7004363]
+    old: codes/quantum/qudits_galois/translationally_invariant_prime_qudit_stabilizer.yml
+    new: codes/quantum/properties/qldpc/translationally_invariant_stabilizer.yml
+
+  - hashdiff: [3ea28cc9584e37e46763ca161a76eaa430313dbf, 88eaa633ec5c28c8b9275760138b163e69ebeaf8]
+    old: codes/bits/zetterberg.yml
+    new: codes/classical/bits/zetterberg
+
+  - hashdiff: [3af67f737e8ce8d0dc3f419b381ca61c0c14d769, 5db7f68e8ba5532e791662d6412aeb1e3290a986]
+    old: codes/quantum/qudits/quantum_mds.yml
+    new: codes/quantum/properties/quantum_mds.yml
+
+  - hashdiff: [ead148948ce69372ba5087dfd2bc13b687abae47, 3f5cfd255c417ea184f512c354fc4bad05c7418f]
+    old: codes/quantum/qudits/quantum_reed_solomon.yml
+    new: codes/quantum/qudits/polynomial.yml
+
+  - hashdiff: [9a208c04a35f4200571d610aea181ac92f5f4937, 8938630385d08b79f06c231ed78fbce2e781ab18]
+    old: 'codes/quantum/qubits/Haah Cubic.yml'
+    new: codes/quantum/qubits/haah_cubic.yml
+
+  - hashdiff: [7b044a8c7a9678cb0aa17a7bfb704b05d16d998a, 3f29b0cfb7256ac56f2e544bb1ae93b1b3560619]
+    old: 'codes/quantum/qubits/Homological CV.yml'
+    new: 'codes/quantum/oscillators/Homological CV.yml'
+
+  - hashdiff: [1d930cdec41fea0a1b402f6118c315f80096354b, beafd806334f839f44442720b1c14780914e2aeb]
+    old: 'codes/quantum/Homological CV.yml'
+    new: 'codes/quantum/oscillators/Homological CV.yml'
+
+  - hashdiff: [beafd806334f839f44442720b1c14780914e2aeb, 28cfcb4ea08d6607bc25a5a3a6c30d44a6dc1c1a]
+    old: codes/quantum/Niset-Andersen-Cerf.yml
+    new: codes/quantum/oscillators/Niset-Andersen-Cerf.yml
+
+  - hashdiff: [2610762c44052aeaa1952b52bb3ef0e97370a591, fff7e32e60545ff0a70d728f11468e6cc23c7a09]
+    old: codes/classical/bits/single_parity_check.yml
+    new: codes/classical/bits/parity_check.yml
+
+  - hashdiff: [4359e6df023f809d726f4f8c998aacd0ae73e587, 4ac7acea932e4454d67563d0b983bcd526c6e195]
+    old: codes/classical/q-ary_digits/mds
+    new: codes/classical/q-ary_digits/mds.yml
+
+  - hashdiff: [ae7a79c41e1df2d063f5d0379b5cb974c1f2f89c, 9d9fdefcbc5b5e8eb08be6cab2e4074209f2d35f]
+    old: codes/quantum/qubits/real_projective_plane
+    new: codes/quantum/qubits/real_projective_plane.yml
+
+  - hashdiff: [17815fc7465f8691173b2753fd5f8f2eb145c592, e62ba79b2ad808c7697d292db11e56153661bd09]
+    old: codes/quantum/qubits/movassagh_ouyang
+    new: codes/quantum/qubits/movassagh_ouyang.yml
+
+  - hashdiff: [daa966df6c3d43e99891d22f7d7946514c80aedc, 776acfadfc8eba932973ba9cda2bcfa49a4c2903]
+    old: codes/quantum/qubits/cws
+    new: codes/quantum/qubits/cws.yml
+
+  - hashdiff: [21298eee233ab6fe9d216c5587c604abbaf206ac, 130f862ba4047c057c7df6722b369fbb1c8d3d19]
+    old: codes/quantum/gauge_stabilizer
+    new: codes/quantum/qubits/gauge_stabilizer.yml
+
+
 
 
 
@@ -61,9 +183,10 @@ file_renames:
     old: codes/classical/groups/classical_abelian_group.yml
     new: codes/classical/q-ary_digits/group.yml
 
+  - hashdiff: [31b5c0d5254aef75f87bd2f016cfcbd14e309c23, 6ad31a508239aec9c48abea510dd629fc9db9eb6]
+    old: codes/quantum/oscillators/multimode_cat.yml
+    new: codes/quantum/oscillators/fock_state/paircat.yml
 
 
 
-## What happened to these?
 
-# codes/quantum/qubits/five_qubit.yml -> https://github.com/errorcorrectionzoo/eczoo_data/compare/0f8cd2d...6bb86d8
