@@ -162,10 +162,11 @@ Expected context variables:
 <RENDER_ENDNOTES/>
 
 
+{#
 {% set contributors = code.source_info.get('_meta', {}).get('contributors', []) %}
 
 <div class="sectioncontent code-contributors">
-Contributors to this page: {# space -#}
+Contributors to this page: { # space -# }
 {%- for contributor in contributors -%}
   {%- if contributor.githubusername -%}
     <a href="https://github.com/{{ contributor.githubusername|urlencode }}" target="_blank">{{contributor.name}}</a>
@@ -173,10 +174,11 @@ Contributors to this page: {# space -#}
     {{contributor.name}}
   {%- endif -%}
   {%- if not loop.last -%}
-    , {# space -#}
+    , { # space -# }
   {%- endif -%}
 {%- endfor -%}
 </div>
+#}
 
 
 
