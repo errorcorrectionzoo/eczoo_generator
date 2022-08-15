@@ -7,7 +7,7 @@ $id: "https://errorcorrectionzoo.org/schemas/ecc"
 #
 type: object
 additionalProperties: false
-required: ['code_id', 'name', 'description']
+required: ['code_id', 'name', 'description', '_meta']
 properties:
 
   # every code must have a code_id.
