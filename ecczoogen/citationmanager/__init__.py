@@ -293,8 +293,8 @@ class CitationTextManager:
                 else:
                     self._fetched_info['arxiv'][f"{arxivid}v{versionnum}"] = result_d
                     if arxivid not in self._fetched_info['arxiv'] \
-                       or self._fetched_info['arxiv'][arxivid].arxivver is None \
-                       or self._fetched_info['arxiv'][arxivid].arxivver < arxivver:
+                       or self._fetched_info['arxiv'][arxivid]['arxivver'] is None \
+                       or self._fetched_info['arxiv'][arxivid]['arxivver'] < arxivver:
                         self._fetched_info['arxiv'][arxivid] = result_d
 
                 if doi is not None:
@@ -352,7 +352,10 @@ class CitationTextManager:
 
             if arxividstr not in self._fetched_info['arxiv']:
                 logger.warning(f"No arXiv info retreived for ‘{arxividstr}’")
-                continue
+                raise ValueError(
+                    f"Could not retreive citation information for ‘{arxividstr}’  (note "
+                    f"that you should write ‘math/0123456’ and not ‘math.CO/0005266’)"
+                )
 
             d = self._fetched_info['arxiv'][arxividstr]
 

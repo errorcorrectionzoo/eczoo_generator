@@ -24,6 +24,10 @@ class CitationsProvider:
 
     def get_citation_full_text_llm(self, cite_prefix, cite_key, *, resource_info=None):
         citeobj = self.citationsmanager.get_citation(**dict([(cite_prefix, cite_key)]))
+        if citeobj.full_citation_text_llm is None:
+            raise ValueError(
+                f"The citation manager was unable to resolve citation ‘{cite_prefix}:{cite_key}’"
+            )
         return citeobj.full_citation_text_llm.llm_text
 
 
