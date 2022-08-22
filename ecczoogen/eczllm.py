@@ -22,7 +22,7 @@ class CitationsProvider:
     def __init__(self, citationsmanager):
         self.citationsmanager = citationsmanager
 
-    def get_citation_full_text_llm(self, cite_prefix, cite_key, *, resource_info=None):
+    def get_citation_full_text_llm(self, cite_prefix, cite_key, resource_info=None):
         citeobj = self.citationsmanager.get_citation(**dict([(cite_prefix, cite_key)]))
         if citeobj.full_citation_text_llm is None:
             raise ValueError(
@@ -36,40 +36,40 @@ class ExternalRefResolver:
         self.htmlpgcollection = htmlpgcollection
         self.zoo = zoo
     
-    def get_ref(self, ref_prefix, ref_target, *, resource_info=None):
-        if ref_prefix == 'code':
+    def get_ref(self, ref_type, ref_label, resource_info=None):
+        if ref_type == 'code':
             # refers to another code, find it & return link to it
-            code = self.zoo.get_code(ref_target) # okay to raise exception
+            code = self.zoo.get_code(ref_label) # okay to raise exception
 
             target_href = self.htmlpgcollection.get_code_href(code.code_id)
 
             return RefInstance(
-                ref_type=ref_prefix,
-                ref_target=ref_target,
+                ref_type=ref_type,
+                ref_label=ref_label,
                 formatted_ref_llm_text=code.name,
                 target_href=target_href,
             )
 
-        if ref_prefix == 'defterm':
+        if ref_type == 'defterm':
             # refers to a \begin{defterm}...\end{defterm} in another code page
             defterm_term_llm_text, defterm_href = \
-                self.htmlpgcollection.get_defterm_href(ref_target)
+                self.htmlpgcollection.get_defterm_href(ref_label)
 
             return RefInstance(
-                ref_type=ref_prefix,
-                ref_target=ref_target,
+                ref_type=ref_type,
+                ref_label=ref_label,
                 formatted_ref_llm_text=defterm_term_llm_text,
                 target_href=defterm_href,
             )
 
-        if ref_prefix == 'topic':
+        if ref_type == 'topic':
             # refer to a referenceable topic, a section or a defterm (or ???)
             formatted_ref_llm_text, target_href = \
-                self.htmlpgcollection.get_topic_href(ref_target)
+                self.htmlpgcollection.get_topic_href(ref_label)
 
             return RefInstance(
-                ref_type=ref_prefix,
-                ref_target=ref_target,
+                ref_type=ref_type,
+                ref_label=ref_label,
                 formatted_ref_llm_text=formatted_ref_llm_text,
                 target_href=target_href,
             )

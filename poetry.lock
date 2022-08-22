@@ -176,7 +176,7 @@ six = "*"
 
 [[package]]
 name = "llm"
-version = "0.1.0beta6"
+version = "0.1.0beta7"
 description = "Latex-Like Markup"
 category = "main"
 optional = false
@@ -193,7 +193,7 @@ buildjslib = ["Transcrypt (>=3.9.0,<4.0.0)", "PyYAML (>=6.0,<7.0)"]
 type = "git"
 url = "https://github.com/phfaist/llm.git"
 reference = "main"
-resolved_reference = "626907e1f5471ff60ef920699950a1420b773432"
+resolved_reference = "abd55e9171726ea814f22d81d18045c2036254a7"
 
 [[package]]
 name = "lxml"
