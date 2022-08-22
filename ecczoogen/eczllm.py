@@ -184,7 +184,7 @@ class EczLLMEnvironment(llmstd.LLMStandardEnvironment):
             section_commands_by_level=heading_section_commands_by_level,
         )
         self.feature_refs = FeatureRefs(
-            external_ref_resolver=None,
+            external_ref_resolvers=None,
         )
 
         self.feature_endnotes = FeatureEndnotes(categories=endnote_categories)
@@ -222,7 +222,7 @@ class EczLLMEnvironment(llmstd.LLMStandardEnvironment):
         self.graphics_resource_provider.set_htmlpgcollection(htmlpgcollection)
 
         self.external_ref_resolver = ExternalRefResolver(self.htmlpgcollection, self.zoo)
-        self.feature_refs.set_external_ref_resolver(self.external_ref_resolver)
+        self.feature_refs.set_external_ref_resolvers([self.external_ref_resolver])
 
     def set_citationsmanager(self, citationsmanager):
         self.citationsmanager = citationsmanager
