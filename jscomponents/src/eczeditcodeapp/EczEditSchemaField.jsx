@@ -23,7 +23,15 @@ class EczEditSchemaFieldObjectType extends React.Component
             throw new Error("additionalProperties not supported!");
         }
         let props_components_list = 
-            Object.keys(schema.properties).map( (prop_key) => {
+            Object.keys(schema.properties)
+            .filter( (prop_key) => {
+                if (schema.properties[prop_key]._auto_populated
+                    || schema.properties[prop_key]._hide_in_editor) {
+                    return false;
+                }
+                return true;
+            })
+            .map( (prop_key) => {
                 let prop_schema = schema.properties[prop_key];
                 const prop_value = value[prop_key];
                 if ( ! (schema.required || []).includes(prop_key) ) {

@@ -22,3 +22,8 @@ items:
     detail:
       _llm: full
       type: string
+
+    # automatically populated fields, don't specify manually
+    code:
+      _auto_populated: true
+      

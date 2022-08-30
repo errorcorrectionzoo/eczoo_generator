@@ -124,6 +124,16 @@ properties:
       cousins:
         $ref: '/schemas/ecc_relation_list'
 
+      # automatically populated fields, don't specify manually
+      parent_of:
+        _auto_populated: true
+        type: array
+        items: {}
+      cousin_of:
+        _auto_populated: true
+        type: array
+        items: {}
+        
 
   #
   # Store meta-information about this entry. Authors, etc.

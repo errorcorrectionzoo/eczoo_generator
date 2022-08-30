@@ -7,7 +7,7 @@ code_id: testcode
 physical: qubits
 logical: qubits
 
-name: 'My Test Code'
+name: 'My Test \(x:y\)-Code'
 introduced: '\cite{arXiv:1911.00099}'
 
 description: |
@@ -153,3 +153,5 @@ relations:
     - code_id: stabilizer
       detail: 'Description of how this code relates to stabilizer codes.\cite{arXiv:1111.0011}'
   
+_meta:
+  contributors: []
