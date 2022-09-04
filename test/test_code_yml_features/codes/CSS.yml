@@ -8,7 +8,7 @@ physical: qubits
 logical: qubits
 
 name: 'Calderbank-Shor-Steane (CSS) stabilizer code'
-introduced: '\cite{arXiv:quant-ph/9512032,doi:10.1103/PhysRevLett.77.793,arXiv:quant-ph/9601029}'
+introduced: '\cite[hello]{arXiv:quant-ph/9512032}\cite{doi:10.1103/PhysRevLett.77.793,arXiv:quant-ph/9601029}'
 
 description: |
   An \([[n,k,d]]\) stabilizer code admitting a set of stabilizer generators that are either \(Z\)-type or \(X\)-type Pauli strings. The stabilizer generator matrix is of the form
@@ -39,7 +39,7 @@ description: |
   \begin{defterm}{CSS-to-homology correspondence}
   \label{topic:CSS-to-homology-correspondence}
   CSS codes and their properties can be formulated in terms of homology theory, yielding a powerful correspondence between codes and chain complexes, the primary homological structures.
-  There exists a many-to-one mapping from size three chain complexes to CSS codes \cite{doi:10.1070/RM1997v052n06ABEH002155,arXiv:quant-ph/0605094,arXiv:1311.0885,arXiv:1802.01520} that allows one to extract code properties from topological features of the complexes. Codes constructed in this manner are sometimes called \textit{homological CSS codes}, but they are equivalent to CSS codes. This mapping of codes to manifolds allows the application of structures from topology to error correction, yielding \hyperref[code:generalized_homological_product]{various QLDPC codes} with favorable properties.
+  There exists a many-to-one mapping from size three chain complexes to CSS codes \cite{doi:10.1070/RM1997v052n06ABEH002155,arXiv:quant-ph/0605094,arXiv:1311.0885,arXiv:1802.01520} that allows one to extract code properties from topological features of the complexes. Codes constructed in this manner are sometimes called \textit{homological CSS codes}, but they are equivalent to CSS codes. This mapping of codes to manifolds allows the application of structures from topology to error correction, yielding various QLDPC codes with favorable properties.
   \end{defterm}
 
   A \textit{chain complex} of size three is given by binary vector spaces \(A_2\), \(A_1\), \(A_0\) and binary matrices \(\partial_{i=1,2}\) (called \textit{boundary operators}) \(A_i\) to \(A_{i-1}\) that satisfy \(\partial_1 \partial_2 = 0\). Such a complex is typically denoted as
