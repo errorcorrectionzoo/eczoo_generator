@@ -52,7 +52,7 @@ unicode_backport = ["unicodedata2"]
 
 [[package]]
 name = "citeproc-py"
-version = "0.6.0-5-g3748be5"
+version = "0.6.0"
 description = "Citations and bibliography formatter"
 category = "main"
 optional = false
