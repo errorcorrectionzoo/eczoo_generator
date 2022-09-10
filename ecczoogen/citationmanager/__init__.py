@@ -245,60 +245,73 @@ class CitationTextManager:
                 delay_seconds=4,
                 num_retries=5
             )
-            searchobj = arxiv.Search(
-                id_list=arxivid_list,
-            )
-            for result in big_slow_client.results(searchobj):
-                #
-                # build citation from the arxiv meta-information
-                #
 
-                m = _rx_arxiv_id_from_entryid.match(result.entry_id)
-                if m is None:
-                    logger.warning(f"Unable to parse arXiv ID from {result.entry_id!r}")
-                    continue
+            remaining_arxivid_list = list(arxivid_list)
+            while remaining_arxivid_list:
 
-                arxivid = m.group('arxivid').lower()
-                versionnum = m.group('versionnum')
-                arxivver = int(versionnum) if versionnum else None
+                # take a chunk of the arxiv ids list, max size 256 items
+                chunk_arxivid_list = remaining_arxivid_list[:256]
+                del remaining_arxivid_list[:256]
 
-                logger.debug(
-                    f"Processing received information for ‘{arxivid}’ (got v{arxivver})")
+                logger.debug(f"Fetching a chunk of {len(chunk_arxivid_list)} citations "
+                             f"by arXiv IDs ...")
 
-                doi = None
-                if result.doi is not None and result.doi:
-                    doi = str(result.doi)
-
-                # override the given DOI in exceptional cases where it might be
-                # missing, incomplete, or incorrect:
-                if arxivid in self._arxiv_to_doi_override:
-                    override_doi = self._arxiv_to_doi_override[arxivid]
-                    logger.debug(f"Overriding reported DOI (‘{doi}’) for arXiv "
-                                 f"item ‘{arxivid}’ with manually specified DOI "
-                                 f"‘{override_doi}’ given in citation hints")
-                    doi = override_doi
-
-                result_d = dict(
-                    entry_id=result.entry_id,
-                    title=result.title,
-                    authors=[a.name for a in result.authors],
-                    #journal_ref=result.journal_ref,
-                    doi=doi,
-                    arxivid=arxivid,
-                    arxivver=arxivver,
+                searchobj = arxiv.Search(
+                    id_list=chunk_arxivid_list,
                 )
+                for result in big_slow_client.results(searchobj):
+                    #
+                    # build citation from the arxiv meta-information
+                    #
 
-                if not versionnum:
-                    self._fetched_info['arxiv'][arxivid] = result_d
-                else:
-                    self._fetched_info['arxiv'][f"{arxivid}v{versionnum}"] = result_d
-                    if arxivid not in self._fetched_info['arxiv'] \
-                       or self._fetched_info['arxiv'][arxivid]['arxivver'] is None \
-                       or self._fetched_info['arxiv'][arxivid]['arxivver'] < arxivver:
+                    m = _rx_arxiv_id_from_entryid.match(result.entry_id)
+                    if m is None:
+                        logger.warning(f"Unable to parse arXiv ID from {result.entry_id!r}")
+                        continue
+
+                    arxivid = m.group('arxivid').lower()
+                    versionnum = m.group('versionnum')
+                    arxivver = int(versionnum) if versionnum else None
+
+                    logger.debug(
+                        f"Processing received information for ‘{arxivid}’ (got v{arxivver})")
+
+                    doi = None
+                    if result.doi is not None and result.doi:
+                        doi = str(result.doi)
+
+                    # override the given DOI in exceptional cases where it might be
+                    # missing, incomplete, or incorrect:
+                    if arxivid in self._arxiv_to_doi_override:
+                        override_doi = self._arxiv_to_doi_override[arxivid]
+                        logger.debug(f"Overriding reported DOI (‘{doi}’) for arXiv "
+                                     f"item ‘{arxivid}’ with manually specified DOI "
+                                     f"‘{override_doi}’ given in citation hints")
+                        doi = override_doi
+
+                    result_d = dict(
+                        entry_id=result.entry_id,
+                        title=result.title,
+                        authors=[a.name for a in result.authors],
+                        #journal_ref=result.journal_ref,
+                        doi=doi,
+                        arxivid=arxivid,
+                        arxivver=arxivver,
+                    )
+
+                    if not versionnum:
                         self._fetched_info['arxiv'][arxivid] = result_d
+                    else:
+                        self._fetched_info['arxiv'][f"{arxivid}v{versionnum}"] = result_d
+                        if arxivid not in self._fetched_info['arxiv'] \
+                           or self._fetched_info['arxiv'][arxivid]['arxivver'] is None \
+                           or self._fetched_info['arxiv'][arxivid]['arxivver'] < arxivver:
+                            self._fetched_info['arxiv'][arxivid] = result_d
 
-                if doi is not None:
-                    doi_list.add(doi)
+                    if doi is not None:
+                        doi_list.add(doi)
+
+
 
 
         #
@@ -315,6 +328,8 @@ class CitationTextManager:
         #
         
         if doi_list:
+
+            logger.debug("Fetching citations by DOIs ...")
 
             req_session = requests.Session()
 
