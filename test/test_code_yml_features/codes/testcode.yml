@@ -44,13 +44,20 @@ protection: |
   \end{table}
 
   \begin{figure}
-    \includegraphics{testfigure2.png}
+    \includegraphics{./testfigure2.png}
     \caption{Another \emph{test} for a figure.  Let's see what happens when 
       we have a really long caption that can span multiple lines like this,
       without it being necessarily informative.  After all, this article is
       really only a dummy example meant to test different features of the
       generator of our pretty site \url{https://errorcorrectionzoo.org/}.}
     \label{figure:test2}
+  \end{figure}
+
+  And another figure, this time in jpeg format!
+  \begin{figure}
+    \includegraphics{./scenery}
+    \caption{Isn't southern Italy simply stunning?}
+    \label{figure:scenery}
   \end{figure}
 
 # An error should be reported for ref{invalid-references} (ok), as well as for
