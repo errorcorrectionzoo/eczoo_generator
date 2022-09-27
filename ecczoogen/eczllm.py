@@ -10,7 +10,7 @@ from llm.feature.headings import FeatureHeadings
 from llm.feature.endnotes import FeatureEndnotes, EndnoteCategory
 from llm.feature.refs import FeatureRefs, RefInstance
 from llm.feature.cite import FeatureExternalPrefixedCitations
-from llm.feature.floats import FeatureFloatsIncludeGraphicsOnly, FloatType
+from llm.feature.floats import FeatureFloats, FloatType
 from llm.feature.defterm import FeatureDefTerm
 from llm.feature.graphics import GraphicsResource
 
@@ -36,7 +36,7 @@ class ExternalRefResolver:
         self.htmlpgcollection = htmlpgcollection
         self.zoo = zoo
     
-    def get_ref(self, ref_type, ref_label, resource_info=None):
+    def get_ref(self, ref_type, ref_label, resource_info=None, render_context=None):
         if ref_type == 'code':
             # refers to another code, find it & return link to it
             code = self.zoo.get_code(ref_label) # okay to raise exception
@@ -161,8 +161,10 @@ citation_delimiters = ('[', ']')
 
 
 float_types = [
-    FloatType('figure', 'Figure', counter_formatter='Roman'),
-    FloatType('table', 'Table', counter_formatter='Roman'),
+    FloatType('figure', 'Figure', counter_formatter='Roman',
+              content_handlers=['includegraphics']),
+    FloatType('table', 'Table', counter_formatter='Roman',
+              content_handlers=['cells', 'includegraphics']),
 ]
 
 
@@ -195,7 +197,7 @@ class EczLLMEnvironment(llmstd.LLMStandardEnvironment):
             citation_delimiters=citation_delimiters,
         )
 
-        self.feature_floats = FeatureFloatsIncludeGraphicsOnly(float_types=float_types)
+        self.feature_floats = FeatureFloats(float_types=float_types)
 
         self.feature_defterm = FeatureDefTerm()
         #self.feature_defterm.render_defterm_with_term = False

@@ -176,7 +176,7 @@ six = "*"
 
 [[package]]
 name = "llm"
-version = "0.1.0beta7"
+version = "0.2.0alpha000006"
 description = "Latex-Like Markup"
 category = "main"
 optional = false
@@ -185,6 +185,7 @@ develop = false
 
 [package.dependencies]
 pylatexenc = {git = "https://github.com/phfaist/pylatexenc.git", branch = "devel"}
+python-frontmatter = "^1.0.0"
 
 [package.extras]
 buildjslib = ["Transcrypt (>=3.9.0,<4.0.0)", "PyYAML (>=6.0,<7.0)"]
@@ -193,7 +194,7 @@ buildjslib = ["Transcrypt (>=3.9.0,<4.0.0)", "PyYAML (>=6.0,<7.0)"]
 type = "git"
 url = "https://github.com/phfaist/llm.git"
 reference = "main"
-resolved_reference = "abd55e9171726ea814f22d81d18045c2036254a7"
+resolved_reference = "76784ea3d436a6249ca1da89dc01f94ee8dae64d"
 
 [[package]]
 name = "lxml"
@@ -227,7 +228,7 @@ python-versions = ">=3.7"
 
 [[package]]
 name = "pylatexenc"
-version = "3.0alpha000005"
+version = "3.0alpha000011"
 description = "Simple LaTeX parser providing latex-to-unicode and unicode-to-latex conversion"
 category = "main"
 optional = false
@@ -241,7 +242,7 @@ buildjslib = ["Transcrypt (>=3.9.0,<4.0.0)", "PyYAML (>=6.0,<7.0)"]
 type = "git"
 url = "https://github.com/phfaist/pylatexenc.git"
 reference = "devel"
-resolved_reference = "2493eee830b15505bd63aff9a42d9a0cb2437957"
+resolved_reference = "67ff3864b77f71bf4dce3586e5f143dcdbe8ccdd"
 
 [[package]]
 name = "pyrsistent"
@@ -250,6 +251,21 @@ description = "Persistent/Functional/Immutable data structures"
 category = "main"
 optional = false
 python-versions = ">=3.7"
+
+[[package]]
+name = "python-frontmatter"
+version = "1.0.0"
+description = "Parse and manage posts with YAML (or other) frontmatter"
+category = "main"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+PyYAML = "*"
+
+[package.extras]
+test = ["pyaml", "toml", "pytest"]
+docs = ["sphinx"]
 
 [[package]]
 name = "pyyaml"
@@ -368,6 +384,7 @@ markupsafe = []
 pillow = []
 pylatexenc = []
 pyrsistent = []
+python-frontmatter = []
 pyyaml = []
 requests = []
 "ruamel.yaml" = []
