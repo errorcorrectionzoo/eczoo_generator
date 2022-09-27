@@ -99,6 +99,14 @@ notes:
       A bug can occur if a paper on the arXiv has a ‘\%’ sign in its
       title:\cite{arXiv:1907.02554}
 
+      Also let's make sure that pure arXiv citations
+      work:~\cite{arXiv:quant-ph/0004088} (which also tests citations to
+      old-style arxiv ID's).
+
+  - |
+      Here's a reference to the \ref{topic:CSS-to-homology-correspondence}, by
+      the way.
+
   - |
       A second note goes here.  This one contains a display equation:
       \begin{align}
