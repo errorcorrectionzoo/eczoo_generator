@@ -33,6 +33,8 @@ table.cells {
   border-collapse: collapse;
   border-top: solid 1pt;
   border-bottom: solid 1pt;
+
+  box-sizing: border-box;
   max-width: 100%;
   max-width: calc(100% - 3em);
 
@@ -41,8 +43,12 @@ table.cells {
   }
 
   th {
-      padding: 0.3em 0.6em;
+      padding: 0.3em 0.5em;
+  }
+  th.cellstyle-H {
       border-bottom: solid .5pt;
+  }
+  th.cellstyle-rH {
   }
 
   .cellstyle-l {
@@ -75,6 +81,7 @@ table.cells {
 
 figure.float {
     /*min-width: 200pt;*/
+    box-sizing: border-box;
     width: 100%;
     //text-align: center;
 
@@ -83,15 +90,18 @@ figure.float {
     border-color: $discreet-border-color;
     // background-color: rgba($home-box-panel-background-color, 0.5);
 
-    &.float-table {
-        // suppress borders for tables
-        border-style: none none none none;
-    }
-
     margin: 0.5rem 0px;
     padding: 0.5rem 0px;
 
+    &.float-table {
+        // suppress borders for tables
+        border-style: none none none none;
+        // and separate the table a bit more from its surroundings
+        margin: 1rem 0px 1rem;
+    }
+
     .float-contents {
+        box-sizing: border-box;
         width: 100%;
         max-width: 100%;
         overflow-x: auto;
@@ -102,6 +112,11 @@ figure.float {
             padding: 0pt;
             border: 0pt;
             margin: 0px auto;
+        }
+
+        table.cells {
+            margin-top: 0px;
+            margin-bottom: 0px;
         }
     }
 
@@ -122,13 +137,6 @@ figure.float {
     }
 }
 
-figure.float .float-contents {
-    table.cells {
-        margin-top: 0px;
-        margin-bottom: 0px;
-    }
-}
-
 
 
 
@@ -144,6 +152,7 @@ figure.float .float-contents {
 
 
 .display-math {
+    box-sizing: border-box;
     width: 100%;
     max-width: 100%;
 
