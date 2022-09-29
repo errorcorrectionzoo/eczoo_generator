@@ -16,6 +16,8 @@ import sys
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
 
 from ecczoogen import schemaloader
+
+import ruamel.yaml
 from ecczoogen.rtyamltools import EczYAML
 
 
@@ -146,8 +148,8 @@ def runmain(argv=None):
                 this_user_id = _get_user_id(cgh, this_name)
 
                 this_contributor = {
+                    'user_id': this_user_id,
                     'name': yaml.SqStr(this_name),
-                    'user_id': yaml.SqStr(this_user_id),
                 }
                 if cgh:
                     this_contributor['githubusername'] = cgh
@@ -229,20 +231,23 @@ def runmain(argv=None):
                 yaml.dump(disk_code_info, fw)
 
     with open(os.path.join(Dirs.data_dir, 'users/users_db.yml'), 'w', encoding='utf-8') as fw:
-        ydb = yaml.load('''
-users_db:
-  # dummy user
-  - dummy: true
+        yaml2 = ruamel.yaml.YAML()
+        yaml2.indent(mapping=2,sequence=2,offset=0)
+
+        ydb = yaml2.load('''
+# dummy user
+- dummy: true
 ''')
-        del ydb['users_db'][0]
+        del ydb[0]
         for j, user in enumerate(users_db.values()):
-            ydb['users_db'].append(user)
-            ydb['users_db'].yaml_set_comment_before_after_key(
+            ydb.append(user)
+            ydb.yaml_set_comment_before_after_key(
                 j, 
                 before='\n\n',
             )
             
-        yaml.dump( ydb, fw )
+        #ruamel.yaml.dump( ydb, fw, Dumper=ruamel.yaml.RoundTripDumper )
+        yaml2.dump(ydb, fw)
 
 
 def update_assert_equal(a, b):

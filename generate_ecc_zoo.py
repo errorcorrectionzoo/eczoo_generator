@@ -90,7 +90,7 @@ class Dirs:
 
     code_tree_info = os.path.join(_root_dir, eczoo_site_setup['dirs']['code_tree_info'])
 
-    contributors = os.path.join(_root_dir, eczoo_site_setup['dirs']['contributors'])
+    users = os.path.join(_root_dir, eczoo_site_setup['dirs']['users'])
 
     #
     # Where to output the website files:
@@ -569,10 +569,31 @@ codelistpage_list.sort(
 #
 
 
+zoo_contributors_info = {
+    'core': [],
+    'veterinarians': [],
+    'code_contributors': [],
+}
+all_users_db = {}
+
 # Load the list of site contributors
-contributors_yml_fname = os.path.join(Dirs.contributors, 'contributors.yml')
+contributors_yml_fname = os.path.join(Dirs.users, 'users_db.yml')
 with open(contributors_yml_fname, encoding='utf-8') as f:
-    zoo_contributors_info = yaml.safe_load(f)
+    loaded_zoo_contributors_info = yaml.safe_load(f)
+    for user in loaded_zoo_contributors_info:
+        zooteam = user.get('zooteam', 'code_contributors')
+        # make sure user_id is unique
+        user_id = user['user_id']
+        if user_id in all_users_db:
+            logger.error(f"User ID {user_id} was assigned twice!\n%r\n%r",
+                         all_users_db[user_id], user)
+            raise ValueError(f"User ID {user_id} was assigned twice!")
+        all_users_db[user_id] = user
+        # sort into the correct team
+        zoo_contributors_info[zooteam].append(user)
+
+
+#
 
 
 global_context = {
