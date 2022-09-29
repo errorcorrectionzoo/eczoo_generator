@@ -574,7 +574,7 @@ zoo_contributors_info = {
     'veterinarians': [],
     'code_contributors': [],
 }
-all_users_db = {}
+zoo_users_db = {}
 
 # Load the list of site contributors
 contributors_yml_fname = os.path.join(Dirs.users, 'users_db.yml')
@@ -584,11 +584,11 @@ with open(contributors_yml_fname, encoding='utf-8') as f:
         zooteam = user.get('zooteam', 'code_contributors')
         # make sure user_id is unique
         user_id = user['user_id']
-        if user_id in all_users_db:
+        if user_id in zoo_users_db:
             logger.error(f"User ID {user_id} was assigned twice!\n%r\n%r",
-                         all_users_db[user_id], user)
+                         zoo_users_db[user_id], user)
             raise ValueError(f"User ID {user_id} was assigned twice!")
-        all_users_db[user_id] = user
+        zoo_users_db[user_id] = user
         # sort into the correct team
         zoo_contributors_info[zooteam].append(user)
 
@@ -601,6 +601,7 @@ global_context = {
     'zoo': zoo,
     'codelistpage_list': codelistpage_list,
     'zoo_contributors_info': zoo_contributors_info,
+    'zoo_users_db': zoo_users_db,
     'eczllm_scanner': eczllm_scanner,
 }
 
@@ -978,6 +979,9 @@ search_index_data = search_index_generator.generate_search_index(
 with open(os.path.join(Dirs.output_dir, 'dat', 'search_index_store.json'), 'w',
           encoding='utf-8') as fw:
     json.dump(search_index_data, fw)
+
+
+
 
 
 ################################################################################

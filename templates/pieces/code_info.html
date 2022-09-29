@@ -162,23 +162,25 @@ Expected context variables:
 <RENDER_ENDNOTES/>
 
 
-{#
-{% set contributors = code.source_info.get('_meta', {}).get('contributors', []) %}
 
-<div class="sectioncontent code-contributors">
-Contributors to this page: { # space -# }
-{%- for contributor in contributors -%}
-  {%- if contributor.githubusername -%}
-    <a href="https://github.com/{{ contributor.githubusername|urlencode }}" target="_blank">{{contributor.name}}</a>
-  {%- else -%}
-    {{contributor.name}}
-  {%- endif -%}
-  {%- if not loop.last -%}
-    , { # space -# }
-  {%- endif -%}
+{% set changelog = code.source_info.get('_meta', {}).get('changelog', []) %}
+
+{# {% if changelog %}
+<details class="sectioncontent code-contributors">
+<summary><span>Page edit history</span></summary>
+<ul>
+{%- for chg in changelog -%}
+  <li><a href="{{ ('team#user-'+chg.user_id) | prebaseurl }}">{{zoo_users_db[chg.user_id].name}}</a>
+    ({{ chg.date }})
+    {%- if loop.first %}
+      — most recent
+    {%- endif -%}
+  </li>
 {%- endfor -%}
-</div>
-#}
+</ul>
+</details>
+{% endif %} #}
+
 
 
 

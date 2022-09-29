@@ -90,6 +90,11 @@ dd {
 
 
 
+details > summary > span {
+    cursor: pointer;
+}
+
+
 ////////////////////////////////////////////////////////////////////////////////
 //
 // main heading style
@@ -697,6 +702,10 @@ a.code-self-edit {
         >span:not(:first-child)::before {
             content: ' • ';
         }
+    }
+
+    &.tile-person-highlight {
+        box-shadow: rgba(0,50,180,0.4) 2px 2px 15px;
     }
 }
 

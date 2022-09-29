@@ -47,7 +47,8 @@ properties:
           type: string
           _single_line_string: true
           _description: >-
-            (Approximate) date of the modification, in the format YYYY-MM-DD
+            (Approximate) date of the modification, in the format YYYY-MM-DD or
+            YYYY-MM
 
         notes:
           type: string
