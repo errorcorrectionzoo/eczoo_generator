@@ -165,9 +165,9 @@ Expected context variables:
 
 {% set changelog = code.source_info.get('_meta', {}).get('changelog', []) %}
 
-{# {% if changelog %}
+{% if changelog %}
 <details class="sectioncontent code-contributors">
-<summary><span>Page edit history</span></summary>
+<summary><span>Page edit log</span></summary>
 <ul>
 {%- for chg in changelog -%}
   <li><a href="{{ ('team#user-'+chg.user_id) | prebaseurl }}">{{zoo_users_db[chg.user_id].name}}</a>
@@ -179,7 +179,7 @@ Expected context variables:
 {%- endfor -%}
 </ul>
 </details>
-{% endif %} #}
+{% endif %}
 
 
 
