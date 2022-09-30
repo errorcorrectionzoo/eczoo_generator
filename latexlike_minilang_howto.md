@@ -183,19 +183,23 @@ axis markers, or use a different font if it's necessary, or etc.; use
 your good judgment and common sense.  We'll come back at you in case
 we'd prefer some changes.)
     
-Be sure also to set the page dimensions of your SVG document correctly
-to match the size of your graphic.  If you use Inkscape, you can
+Be sure also to **set the page dimensions of your SVG document
+correctly** to match the size of your graphic, with the correct
+scale for rendering on our web page.  If you use Inkscape, you can
 select “File” → “Document Properties” → “Resize page to drawing or
-selection.”
+selection” and make sure you have reasonable figure dimensions.
+Please keep your figure width to *at most 12cm (5.5in)*
+to obtain a good page layout without the user having to scroll the
+figure horizontally.
 
 If you set the SVG image's dimensions in units of pixels ("px"), we'll
-assume a resolution of 96 DPI (as per web standards).  *[If you're
+assume a resolution of 96 DPI (as per web standards).  [If you're
 using Affinity Designer, set the document resolution to 96 dpi, and
-uncheck ‘Set viewBox’ in the SVG export options.]*
+uncheck ‘Set viewBox’ in the SVG export options.]
     
 You can also use PNG or JPG/JPEG files.  **Please make sure you set
 the physical resolution (DPI) correctly**, as this information is
-honored to determine the figure size.  Good graphics software will
+honored to determine the figure size.  Most graphics software will
 allow you to adjust this setting (look for "physical dimensions",
 "dots-per-inch", "pixels-per-inch", or "DPI").  In
 [GIMP](https://www.gimp.org/), you can set the resolution with "Image"
