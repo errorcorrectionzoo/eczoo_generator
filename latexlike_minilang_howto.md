@@ -210,45 +210,6 @@ the user having to scroll the figure horizontally.
 
 
 
-  - Tables function in exactly the same way as figures, and
-    furthermore, the table content must be provided as an external
-    image file.  The only practical difference between a `figure`
-    environment and a `table` environment is the legend *Figure X* or
-    *Table X* with separate sequential numbering.
-    
-    We don't support the `tabular` environment.  There are simply too
-    many different options and ways in which tabular features can be
-    generated in LaTeX that we cannot hope to offer and maintain a
-    useful inline tabular solution.
-    
-    You can design your table whichever way you like, either by
-    creating a graphic using drawing software like Inkscape, or by
-    running LaTeX on a separate file to generate the table graphic.
-
-    You can generate your table using LaTeX as follows.  Download the file
-    [`table_template.tex`](https://github.com/errorcorrectionzoo/eczoo_data/blob/main/table_template.tex)
-    and edit it to your liking to display the desired table (search for "TABLE
-    STARTS HERE").  This template needs to be compiled **using LuaLaTeX**
-    instead of standard LaTeX in order to use the ‘Source Sans Pro’ font.
-    
-        > lualatex my_table.tex
-
-    Then convert the generated PDF file into SVG, for instance using
-    the `dvisvgm` utility:
-
-        > dvisvgm --pdf my_table.pdf
-        
-    If you're running on Mac OS, you might need to install ghostscript (with
-    [*homebrew*](https://brew.sh/), you can do ``brew install ghostscript``) and
-    replace the *dvisvgm* call by ``dvisvgm
-    --libgs=/usr/local/opt/ghostscript/lib/libgs.dylib --pdf my_table.pdf``
-    
-    If you generate your table using LaTeX, it is recommented to keep
-    the source `.tex` file next to the generated `.svg` file in the
-    code YAML tree, in case the table needs to be modified or
-    regenerated at a later point in time.
-    
-
 
 ### Table Contents — Cells
 
