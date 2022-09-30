@@ -10,6 +10,8 @@ import jinja2
 
 import logging
 
+import dateutil.parser
+
 sys.path.insert(0, '.')
 import ecczoogen
 ecczoogen.setup_logging(level=logging.INFO)
@@ -581,16 +583,58 @@ contributors_yml_fname = os.path.join(Dirs.users, 'users_db.yml')
 with open(contributors_yml_fname, encoding='utf-8') as f:
     loaded_zoo_contributors_info = yaml.safe_load(f)
     for user in loaded_zoo_contributors_info:
-        zooteam = user.get('zooteam', 'code_contributors')
+        zooteam = user.get('zooteam', None) #'code_contributors')
         # make sure user_id is unique
         user_id = user['user_id']
         if user_id in zoo_users_db:
             logger.error(f"User ID {user_id} was assigned twice!\n%r\n%r",
                          zoo_users_db[user_id], user)
             raise ValueError(f"User ID {user_id} was assigned twice!")
+
+        # will store the user's contributions in this array
+        user['_code_contributions'] = []
+
         zoo_users_db[user_id] = user
-        # sort into the correct team
-        zoo_contributors_info[zooteam].append(user)
+
+        if zooteam is not None:
+            # sort into the correct team (code contributors will automatically
+            # be added later)
+            zoo_contributors_info[zooteam].append(user)
+
+
+# collect contributions for each user
+for code_id, code in zoo.all_codes().items():
+    if '_meta' in code.source_info:
+        if 'changelog' in code.source_info['_meta']:
+            for chg in code.source_info['_meta']['changelog']:
+                user = zoo_users_db[chg['user_id']]
+                user['_code_contributions'].append({
+                    'changelog_item': chg,
+                    'code': code,
+                })
+                if 'zooteam' not in user:
+                    user['zooteam'] = 'code_contributors'
+                    zoo_contributors_info['code_contributors'].append(user)
+
+#
+# Now, sort the code contributors by chronological order of contributions
+#
+def get_user_earliest_contribution_dt(user):
+    earliest_dt = None
+    earliest_contrib = None
+    for contrib in user['_code_contributions']:
+        chgdt = dateutil.parser.parse(contrib['changelog_item']['date'])
+        if earliest_dt is None or chgdt < earliest_dt:
+            earliest_dt = chgdt
+            earliest_contrib = contrib
+    if earliest_contrib is None:
+        raise RuntimeError(f"?? user {user!r} has no contributions despite being "
+                           f"in the code_contributors team")
+    return earliest_dt
+
+zoo_contributors_info['code_contributors'].sort(
+    key=get_user_earliest_contribution_dt
+)
 
 
 #

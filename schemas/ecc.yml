@@ -30,6 +30,13 @@ _zoo_relations:
       #relation_primary_key_field: 'code_id'
       #relation_object_field: 'code'
 
+  - object_field: '_meta.changelog'
+    to_object_type: 'user'
+    relation_primary_key_field: 'user_id'
+    relation_add_object_field: 'user'
+    backreference:
+      field: 'zoo_contributions.code'
+
 
 properties:
 

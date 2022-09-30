@@ -25,6 +25,13 @@ description: |
   \end{align}
   The above condition guarantees that the \(X\)-stabilizer generators, defined in the symplectic representation as rows of \(H_X\), commute with the \(Z\)-stabilizer generators associated with \(H_Z\).
 
+  \begin{table}
+    \begin{cells}
+      \celldata<rH>{One\\ Two\\ Three}
+      \celldata[1-;2]{1\\ 2\\ 3}
+    \end{cells}
+  \end{table}
+
   Encoding is based on two related \hyperref[code:binary_linear]{binary linear codes}, an \([n,k_X,d^\prime_X]\) code \(C_X\) and \([n,k_Z,d^\prime_Z]\) code \(C_Z\), satisfying \(C_X^\perp \subseteq C_Z\). The resulting CSS code has \(k=k_X+k_Z-n\) logical qubits and distance \(d\geq\min\{d^\prime_X,d^\prime_Z\}\). The \(H_X\) (\(H_Z\)) block of \(H\) \eqref{eq:parity} is the parity-check matrix of the code \(C_X\) (\(C_Z\)). The requirement \(C_X^\perp \subseteq C_Z\) guarantees \eqref{eq:comm}.
   Basis states for the code are, for \(\gamma \in C_X\),
   \begin{align}
@@ -96,4 +103,15 @@ relations:
 
 
 _meta:
-  contributors: []
+  changelog:
+    - user_id: PhF
+      date: '2022-03-05'
+      notes: 'These logs are completely fictitious!'
+    - user_id: PhF
+      date: '2021-01-01'
+
+
+
+
+
+

@@ -169,4 +169,9 @@ relations:
       detail: 'Description of how this code relates to stabilizer codes.\cite{arXiv:1111.0011}'
   
 _meta:
-  contributors: []
+  changelog:
+    - user_id: PhF
+      date: '2022-03-05'
+      notes: 'These logs are completely fictitious'
+    - user_id: VVA
+      date: '2021-01-01'

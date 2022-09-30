@@ -21,6 +21,7 @@ backoff = "^1.11.1"
 citeproc-py = {'git' = "https://github.com/phfaist/citeproc-py.git"}
 Pillow = "^9.0.1"
 "ruamel.yaml" = "^0.17.21"
+python-dateutil = "^2.8.2"
 
 [tool.poetry.dev-dependencies]
 
