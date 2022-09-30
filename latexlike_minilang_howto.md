@@ -101,11 +101,45 @@ Refer to equations with \eqref{eq:stabilizers}, etc. ...
   - You can insert footnotes with `\footnote{...}`.  Footnotes should
     be avoided in general.
 
+## Sections, paragraphs, and definition terms
+
+  - *Sectioning*: Use ``\subsection{Title}`` and ``\paragraph{Title}`` to generate
+    sub-headings and to split a long field (such as description) into
+    logical sub-parts.  You can pin labels with
+    ``\label{sec:label-name}`` (use ``sec:`` for both subsections and
+    paragraphs; although see also ``topic:`` labels below).  Then
+    ``\ref{sec:...}`` will expand to a link with the section/paragraph
+    title, also from other pages in the zoo.  **The section label must
+    be unique across the zoo!**
+    
+  - *Definition of technical terms*: Use ``\begin{defterm}{<term>}
+    ... \end{defterm}`` to define a technical term (e.g.,
+    *Knill-Laflamme conditions*).  You can then later refer to that
+    term using the syntax ``\term{<term>}`` from anywhere else in the
+    zoo.  You must provide the term with the exact same spelling
+    (including character case).  If the term needs to be altered for
+    integration in a sentence, use ``\term[<original term>]{display
+    term}``.
+    
+  - *Topic labels*: You can pin down labels of the form
+    ``\label{topic:<label-name>}``, with the prefix ``topic:``, to
+    designate a location that discusses or explains a particular topic
+    that you might want to refer to from somewhere else.  These labels
+    can be pinned to sections, paragraphs, and ``defterm``
+    environments.  Using `topic:` labels has the advantage of later
+    changing the label target from, say, a `defterm` environment to a
+    section heading, without having to change the label.  For
+    instance, you can use
+    ``\label{topic:CSS-to-homology-correspondence}`` in a `defterm`
+    environment and then later decide to change the `defterm` into a
+    section instead.
+
+
 ## Figures and tables
 
-  - You can use the float environments ``\begin{figure} ... \end{figure}`` and
-    ``\begin{table} ... \end{table}``.  The syntax of these environments is as
-    follows:
+  - You can use the float environments ``\begin{figure}
+    ... \end{figure}`` and ``\begin{table} ... \end{table}``.  The
+    syntax of these environments is as follows:
 
     ```latex
     \begin{figure}
