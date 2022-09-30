@@ -359,6 +359,14 @@ cells to the table.  The macros have the following syntax:
     “``One``”, and two centered (``c``) header (``H``) cells with
     respective content “``Two``” and “``Three``”.
 
+  You can also override the style and/or location for individual cells
+  in the tabular data by wrapping that cell's content in an explicit
+  ``\cell`` call.  Styles are merged with any styles specified in the
+  ``\celldata`` call.  For instance, ``\celldata<H>{A & B &
+  \cell<green>[\merge{+2}]{C}}`` will generate a row with a header
+  cell ``A`` in the first column, a header cell ``B`` in the second
+  column, and a green-background header cell ``C`` spanning the third
+  and fouth columns.
 
 
 *Cell styles:*
