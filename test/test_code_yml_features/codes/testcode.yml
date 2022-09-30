@@ -60,6 +60,13 @@ protection: |
     \label{figure:scenery}
   \end{figure}
 
+  Another flashy figure:
+  \begin{figure}
+    \includegraphics{flashyfigure}
+    \caption{Pretty flashy.}
+    \label{figure:flashy}
+  \end{figure}
+
 # An error should be reported for ref{invalid-references} (ok), as well as for
 # \eqref{invalid-eqn-keys} (doesn't work yet).
 
