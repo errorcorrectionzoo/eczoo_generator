@@ -230,7 +230,9 @@ def run_main(argv=None):
         latexmk_exe = os.path.join(args.latex_bin, latexmk_exe)
 
     # remove existing .cls file, if existent
-    os.remove( os.path.join(work_dir, 'ecznote.cls') )
+    ecznotecls = os.path.join(work_dir, 'ecznote.cls')
+    if os.path.exists(ecznotecls):
+        os.remove( ecznotecls )
 
     run_process([
         latex_exe,
