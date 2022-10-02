@@ -176,7 +176,7 @@ six = "*"
 
 [[package]]
 name = "llm"
-version = "0.2.0alpha000007"
+version = "0.2.0alpha000008"
 description = "Latex-Like Markup"
 category = "main"
 optional = false
@@ -194,7 +194,7 @@ buildjslib = ["Transcrypt (>=3.9.0,<4.0.0)", "PyYAML (>=6.0,<7.0)"]
 type = "git"
 url = "https://github.com/phfaist/llm.git"
 reference = "main"
-resolved_reference = "dedbf9316e8b197fdaad7d7ec760b3f59ca74bc3"
+resolved_reference = "1f8161c47313ffacb77f87c872835cb422498d36"
 
 [[package]]
 name = "lxml"
@@ -242,7 +242,7 @@ buildjslib = ["Transcrypt (>=3.9.0,<4.0.0)", "PyYAML (>=6.0,<7.0)"]
 type = "git"
 url = "https://github.com/phfaist/pylatexenc.git"
 reference = "devel"
-resolved_reference = "67ff3864b77f71bf4dce3586e5f143dcdbe8ccdd"
+resolved_reference = "ebd71f32c36174a1618faea095b253b6aaff9e2a"
 
 [[package]]
 name = "pyrsistent"
