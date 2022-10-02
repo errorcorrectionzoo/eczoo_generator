@@ -268,6 +268,10 @@ def run_main(argv=None):
         latex_exe = os.path.join(args.latex_bin, latex_exe)
         latexmk_exe = os.path.join(args.latex_bin, latexmk_exe)
 
+    if not os.path.exists(latex_exe) and os.path.exists(latex_exe + '.exe'):
+        latex_exe = latex_exe + '.exe'
+        latexmk_exe = latexmk_exe + '.exe'
+
     # remove existing .cls file, if existent
     ecznotecls = os.path.join(work_dir, 'ecznote.cls')
     if os.path.exists(ecznotecls):
