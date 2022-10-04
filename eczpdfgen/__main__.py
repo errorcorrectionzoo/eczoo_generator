@@ -32,7 +32,7 @@ class MockHtmlPgCollection:
 
     def get_defterm_href(self, ref_target):
         # let user find the term on the concepts page on their own ...
-        return r"https://errorcorrectionzoo.org/concepts"
+        return f"(Term ‘{ref_target}’)", r"https://errorcorrectionzoo.org/concepts"
 
     def get_topic_href(self, topic_ref_label):
         # sorry, I don't know where to find topics, just link to the home page ...
