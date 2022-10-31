@@ -1,0 +1,15 @@
+{% extends 'layout/static_page.html' %}
+
+{% set page_title_text = '404 Not Found' %}
+
+
+{% block contents %}
+
+<h1>404 Not Found</h1>
+
+<p>Sorry, the requested page does not exist.  You can try <a href="{{ 'search' |
+prebaseurl }}">searching the zoo</a> or <a href="{{ '' | prebaseurl
+}}">returning to the zoo's home page</a>.</p>
+
+
+{% endblock contents %}
