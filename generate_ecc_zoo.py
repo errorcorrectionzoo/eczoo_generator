@@ -2,6 +2,7 @@ import os
 import os.path
 import re
 import sys
+import datetime
 import hashlib
 
 import yaml
@@ -647,6 +648,7 @@ global_context = {
     'zoo_contributors_info': zoo_contributors_info,
     'zoo_users_db': zoo_users_db,
     'eczllm_scanner': eczllm_scanner,
+    'eczoo_cite_year': datetime.datetime.now().year,
 }
 
 
