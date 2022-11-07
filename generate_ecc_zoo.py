@@ -2,6 +2,7 @@ import os
 import os.path
 import re
 import sys
+import datetime
 import hashlib
 
 import yaml
@@ -9,6 +10,8 @@ import json
 import jinja2
 
 import logging
+
+import dateutil.parser
 
 sys.path.insert(0, '.')
 import ecczoogen
@@ -90,7 +93,7 @@ class Dirs:
 
     code_tree_info = os.path.join(_root_dir, eczoo_site_setup['dirs']['code_tree_info'])
 
-    contributors = os.path.join(_root_dir, eczoo_site_setup['dirs']['contributors'])
+    users = os.path.join(_root_dir, eczoo_site_setup['dirs']['users'])
 
     #
     # Where to output the website files:
@@ -569,10 +572,73 @@ codelistpage_list.sort(
 #
 
 
+zoo_contributors_info = {
+    'core': [],
+    'veterinarians': [],
+    'code_contributors': [],
+}
+zoo_users_db = {}
+
 # Load the list of site contributors
-contributors_yml_fname = os.path.join(Dirs.contributors, 'contributors.yml')
+contributors_yml_fname = os.path.join(Dirs.users, 'users_db.yml')
 with open(contributors_yml_fname, encoding='utf-8') as f:
-    zoo_contributors_info = yaml.safe_load(f)
+    loaded_zoo_contributors_info = yaml.safe_load(f)
+    for user in loaded_zoo_contributors_info:
+        zooteam = user.get('zooteam', None) #'code_contributors')
+        # make sure user_id is unique
+        user_id = user['user_id']
+        if user_id in zoo_users_db:
+            logger.error(f"User ID {user_id} was assigned twice!\n%r\n%r",
+                         zoo_users_db[user_id], user)
+            raise ValueError(f"User ID {user_id} was assigned twice!")
+
+        # will store the user's contributions in this array
+        user['_code_contributions'] = []
+
+        zoo_users_db[user_id] = user
+
+        if zooteam is not None:
+            # sort into the correct team (code contributors will automatically
+            # be added later)
+            zoo_contributors_info[zooteam].append(user)
+
+
+# collect contributions for each user
+for code_id, code in zoo.all_codes().items():
+    if '_meta' in code.source_info:
+        if 'changelog' in code.source_info['_meta']:
+            for chg in code.source_info['_meta']['changelog']:
+                user = zoo_users_db[chg['user_id']]
+                user['_code_contributions'].append({
+                    'changelog_item': chg,
+                    'code': code,
+                })
+                if 'zooteam' not in user:
+                    user['zooteam'] = 'code_contributors'
+                    zoo_contributors_info['code_contributors'].append(user)
+
+#
+# Now, sort the code contributors by chronological order of contributions
+#
+def get_user_earliest_contribution_dt(user):
+    earliest_dt = None
+    earliest_contrib = None
+    for contrib in user['_code_contributions']:
+        chgdt = dateutil.parser.parse(contrib['changelog_item']['date'])
+        if earliest_dt is None or chgdt < earliest_dt:
+            earliest_dt = chgdt
+            earliest_contrib = contrib
+    if earliest_contrib is None:
+        raise RuntimeError(f"?? user {user!r} has no contributions despite being "
+                           f"in the code_contributors team")
+    return earliest_dt
+
+zoo_contributors_info['code_contributors'].sort(
+    key=get_user_earliest_contribution_dt
+)
+
+
+#
 
 
 global_context = {
@@ -580,7 +646,9 @@ global_context = {
     'zoo': zoo,
     'codelistpage_list': codelistpage_list,
     'zoo_contributors_info': zoo_contributors_info,
+    'zoo_users_db': zoo_users_db,
     'eczllm_scanner': eczllm_scanner,
+    'eczoo_cite_year': datetime.datetime.now().year,
 }
 
 
@@ -957,6 +1025,9 @@ search_index_data = search_index_generator.generate_search_index(
 with open(os.path.join(Dirs.output_dir, 'dat', 'search_index_store.json'), 'w',
           encoding='utf-8') as fw:
     json.dump(search_index_data, fw)
+
+
+
 
 
 ################################################################################

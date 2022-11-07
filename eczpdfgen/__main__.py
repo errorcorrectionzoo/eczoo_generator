@@ -32,7 +32,12 @@ class MockHtmlPgCollection:
 
     def get_defterm_href(self, ref_target):
         # let user find the term on the concepts page on their own ...
-        return r"https://errorcorrectionzoo.org/concepts"
+        return f"(Term ‘{ref_target}’)", r"https://errorcorrectionzoo.org/concepts"
+
+    def get_topic_href(self, topic_ref_label):
+        # sorry, I don't know where to find topics, just link to the home page ...
+        return f"(Topic ‘{topic_ref_label}’)", r"https://errorcorrectionzoo.org/"
+
 
     def get_image_filename_path_info(self, image_filename, resource_info):
         logger = logging.getLogger(__name__)
@@ -107,6 +112,9 @@ def run_main(argv=None):
 
     argparser.add_argument("--verbose", action='store_true', default=False,
                            help="Print out more information")
+
+    argparser.add_argument('--recursive-descendants', action='store_true', default=False,
+                           help="Include all descendants of the specified code(s)")
 
     argparser.add_argument('code_id', action='store', nargs='+',
                            help="code ID(s) for which to generate PDF")
@@ -187,14 +195,45 @@ def run_main(argv=None):
     if args.magick_exe:
         magick_exe = args.magick_exe
 
-    # needed to "resolve" refs to codes and defterms
+    # needed to "resolve" refs to codes, defterms, and topics
     eczllm_environment.set_htmlpgcollection_zoo(
         MockHtmlPgCollection(zoo, magick_exe, work_dir,
                              eczoo_site_setup['image_filename_extensions']),
         zoo
     )
 
-    code_ids = list(args.code_id)
+    given_code_ids = args.code_id
+
+    if args.recursive_descendants:
+        # include all descendants
+        code_ids_to_visit = set(args.code_id)
+        # the set helps for finding out which ones we already have more
+        # efficiently; the list is there to keep the order in which we find the
+        # codes.
+        collected_code_ids_set = set()
+        collected_code_ids_list = []
+        code_id = None
+        while len(code_ids_to_visit):
+            # pick one that we haven't included yet
+            code_id = code_ids_to_visit.pop()
+            if code_id in collected_code_ids_set:
+                continue
+            # register this code to be included.
+            collected_code_ids_set.add(code_id)
+            collected_code_ids_list.append(code_id)
+            # find all its children and include them, too.
+            code = zoo.get_code(code_id)
+            for child_rel in code.relations.parent_of:
+                child_code_id = child_rel.code.code_id
+                if child_code_id in collected_code_ids_set:
+                    # already visited this one, skip
+                    continue
+                # take note of this one to be visited
+                code_ids_to_visit.add(child_code_id)
+        #
+        code_ids = collected_code_ids_list
+    else:
+        code_ids = list(args.code_id)
 
     latex_content = generate_codes_latex_document(zoo, code_ids, eczllm_environment)
 
@@ -229,8 +268,14 @@ def run_main(argv=None):
         latex_exe = os.path.join(args.latex_bin, latex_exe)
         latexmk_exe = os.path.join(args.latex_bin, latexmk_exe)
 
+    if not os.path.exists(latex_exe) and os.path.exists(latex_exe + '.exe'):
+        latex_exe = latex_exe + '.exe'
+        latexmk_exe = latexmk_exe + '.exe'
+
     # remove existing .cls file, if existent
-    os.remove( os.path.join(work_dir, 'ecznote.cls') )
+    ecznotecls = os.path.join(work_dir, 'ecznote.cls')
+    if os.path.exists(ecznotecls):
+        os.remove( ecznotecls )
 
     run_process([
         latex_exe,

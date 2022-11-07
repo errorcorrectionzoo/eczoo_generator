@@ -94,8 +94,16 @@
   secfmt=false,
 }{phfnote}
 \RequirePackage{phfnote}
+\RequirePackage{phfqit} % \ket, \bra
+
+\def\Ket{\ket*}
+\def\Bra{\bra*}
 
 \usepackage[utf8]{inputenc}
+
+%% Some additional unicode characters to support ---
+\DeclareUnicodeCharacter{2212}{\textendash}
+
 
 \RequirePackage{xcolor}
 
@@ -105,6 +113,8 @@
 
 
 \RequirePackage{enumitem}
+
+\RequirePackage{booktabs} % better tables
 
 \newlist{eczparagraphslist}{itemize}{1}
 \setlist[eczparagraphslist]{
@@ -185,6 +195,7 @@
 
 \long\def\eczshowverbatim{}
 
+\def\defterm{\itshape}
 \long\def\ecztermdef#1{\textbf{#1}}
 
 

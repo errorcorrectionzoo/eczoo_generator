@@ -30,7 +30,7 @@ dirs:
 
   code_tree_info: test/test_code_yml_features/cti
 
-  contributors: test/test_code_yml_features
+  users: test/test_code_yml_features/users
 
   #
   # Where to OUTPUT THE EC ZOO WEBSITE FILES.  Given as an absolute path or as a

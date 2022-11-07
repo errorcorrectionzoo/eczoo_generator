@@ -86,6 +86,8 @@ class HtmlPageCollection:
 
         # remember on which page we defined terms with \begin{defterm}{XYZ}...\end{defterm}
         self.refinfo_for_defterms = {}
+        # same, for topic labels \label{topic:xyz}
+        self.refinfo_for_topics = {}
 
         self.global_context = {}
 
@@ -102,6 +104,7 @@ class HtmlPageCollection:
             lambda cite_no: markupsafe.Markup( self.format_citation_label_html(cite_no) )
 
         self.jinja2env.filters['defterm_href'] = self._jfilter_defterm_href
+        self.jinja2env.filters['topic_href'] = self._jfilter_topic_href
 
         self.jinja2env.filters['llmcompile'] = self._jfilter_llmcompile
         self.jinja2env.filters['llmrender'] = self._jfilter_llmrender
@@ -174,16 +177,6 @@ class HtmlPageCollection:
                         f"‘{self.page_for_code_ids[code_id]}’ and ‘{htmlpage.name}’"
                     )
                 self.page_for_code_ids[code_id] = htmlpage.name
-        
-            # # scan for any defterms in the content of the code, so that we can link
-            # # it here.
-            # scanner = eczllm.NodeDefTermScanner()
-            # for code_id in htmlpage.code_id_list:
-            #     code = zoo.get_code(code_id)
-            #     scanner.scan_schemadatalike_obj(
-            #         code,
-            #         what=repr(code)
-            #     )
 
         encountered_defterms = self.eczllm_scanner.get_encountered_defterms(
             resource_info=htmlpage.resource_info
@@ -196,11 +189,47 @@ class HtmlPageCollection:
         for encountered_defterm in encountered_defterms:
             defterm_llm_text = encountered_defterm.defterm_llm_text
             defterm_href = self.site_generation_environment.prefix_base_url(
-                f"{htmlpage.path()}#defterm-{encountered_defterm.defterm_safe_target_id}"
+                f"{htmlpage.path()}#{encountered_defterm.defterm_safe_target_id}"
             )
+            if defterm_llm_text in self.refinfo_for_defterms:
+                raise ValueError(
+                    f"Cannot define term ‘{defterm_llm_text}’ in page "
+                    f"‘{htmlpage.path()}’ because the same term was already defined "
+                    f"in page ‘{self.refinfo_for_defterms[defterm_llm_text]}"
+                )
             self.refinfo_for_defterms[defterm_llm_text] = \
                 (defterm_llm_text, defterm_href)
             logger.debug(f"registered defterm: {self.refinfo_for_defterms = }")
+
+        encountered_referenceable_infos = \
+            self.eczllm_scanner.get_encountered_referenceable_infos(
+                resource_info=htmlpage.resource_info
+            )
+
+        for encountered_referenceable_info in encountered_referenceable_infos:
+            referenceable_info = encountered_referenceable_info.referenceable_info
+
+            if referenceable_info.labels:
+
+                target_href = self.site_generation_environment.prefix_base_url(
+                    f"{htmlpage.path()}#{referenceable_info.get_target_id()}"
+                )
+
+                for ref_type, ref_label in referenceable_info.labels:
+
+                    if ref_type == 'topic':
+
+                        topic_ref_label = ref_label
+                        if topic_ref_label in self.refinfo_for_topics:
+                            raise ValueError(
+                                f"Cannot define topic ‘topic:{topic_ref_label}’ in page "
+                                f"‘{htmlpage.path()}’ because the same topic label was "
+                                f"already used "
+                                f"in page ‘{self.refinfo_for_topics[topic_ref_label]}"
+                            )
+                        self.refinfo_for_topics[topic_ref_label] = \
+                            (referenceable_info, target_href)
+                        logger.debug(f"registered topic: {self.refinfo_for_topics = }")
 
 
     def finished(self):
@@ -256,6 +285,14 @@ class HtmlPageCollection:
         except KeyError as e:
             raise ValueError(f"Unknown defterm reference: ‘{defterm}’")
 
+    def get_topic_href(self, topic_ref_label):
+        try:
+            #logger.debug(f"{self.refinfo_for_topics = }")
+            referenceable_info, topic_href = self.refinfo_for_topics[topic_ref_label]
+            return referenceable_info.formatted_ref_llm_text, topic_href
+        except KeyError as e:
+            raise ValueError(f"Unknown topic reference: ‘topic:{topic_ref_label}’")
+
 
     def _jfilter_code_ref(self, code):
         code_href = self.get_code_href( code.code_id )
@@ -283,6 +320,10 @@ class HtmlPageCollection:
     def _jfilter_defterm_href(self, defterm_llm_text):
         _, defterm_href = self.get_defterm_href(str(defterm_llm_text))
         return defterm_href
+
+    def _jfilter_topic_href(self, topic_ref_label):
+        _, topic_href = self.get_topic_href(topic_ref_label)
+        return topic_href
 
     def _jfilter_to_json(self, obj):
         return json.dumps(obj)

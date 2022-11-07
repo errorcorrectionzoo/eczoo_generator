@@ -32,3 +32,12 @@ relations:
   # cousins:
   #   - code_id: hamiltonian
   #     detail: 'Codespace is the ground-state space of the \textit{code Hamiltonian}, consisting of an equal linear combination of stabilizer generators.'
+
+
+_meta:
+  changelog:
+    - user_id: PhF
+      date: '2022-03-05'
+      notes: 'These logs are completely fictitious'
+    - user_id: VVA
+      date: '2021-01-01'

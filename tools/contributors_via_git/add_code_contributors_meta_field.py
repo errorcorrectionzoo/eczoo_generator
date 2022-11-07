@@ -16,6 +16,8 @@ import sys
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
 
 from ecczoogen import schemaloader
+
+import ruamel.yaml
 from ecczoogen.rtyamltools import EczYAML
 
 
@@ -23,6 +25,8 @@ this_root_dir = os.path.join(os.path.dirname(__file__), '..', '..')
 
 eczoo_site_setup_yml = os.path.join(this_root_dir, 'eczoo_site_setup.yml')
 
+
+compress_contributions_fuzziness_timedelta = datetime.timedelta(days=90)
 
 
 # Your profile settings -> "Developer Settings" -> "Personal Access Tokens" -> "Generate new token"
@@ -72,6 +76,34 @@ def runmain(argv=None):
 
     # collect contributor information for each code-id/code-file
 
+    users_db = {}
+
+
+    _user_id_by_githubusername = {}
+    def _get_user_id(githubusername, user_name):
+        # let's hope names are unique enough (for now)
+        if githubusername and githubusername in _user_id_by_githubusername:
+            return _user_id_by_githubusername[githubusername]
+        user_id = re.sub('[^a-zA-Z0-9_+-]+', '', user_name)
+        if githubusername:
+            _user_id_by_githubusername[githubusername] = user_id
+        return user_id
+        
+    def _update_from_meta_contributors(meta_contributors, contributor, del_from_meta):
+        for j in range(len(meta_contributors)):
+            c = meta_contributors[j]
+            #if ('githubusername' in c and 'githubusername' in contributor
+            #    and c['githubusername'] == contributor['githubusername']) \
+            #   or c['name'] == contributor['name']:
+            if c['name'] == contributor['name']:
+                # found them
+                logger.debug('Found contributor=%r in _meta: %r', contributor, c)
+                # update
+                update_assert_equal(contributor, c)
+                # mark for deletion
+                del_from_meta.add(j)
+                return
+
     with CachedGithubUsernameResolver() as ghusernameresolver:
 
         for code_id_fname_key, ccinfo in code_contributions.items():
@@ -85,31 +117,148 @@ def runmain(argv=None):
                 disk_code_info = yaml.load(f)
 
             if '_meta' not in disk_code_info:
-                disk_code_info['_meta'] = { 'contributors': [] }
-                disk_code_info.yaml_set_comment_before_after_key('_meta', before='\n\nBegin Entry Meta Information')
+                disk_code_info['_meta'] = { 'changelog': [] }
+                disk_code_info.yaml_set_comment_before_after_key(
+                    '_meta', before='\n\nBegin Entry Meta Information'
+                )
 
-            meta_contributors = disk_code_info['_meta']['contributors']
+            meta_contributors = {}
+            del_from_meta = []
+            if 'contributors' in disk_code_info['_meta']:
+                # we'll convert contributors to changelog
+                meta_contributors = disk_code_info['_meta']['contributors']
+
+            if 'changelog' in disk_code_info['_meta']:
+                raise ValueError(
+                    f"Can't handle existing _meta: changelog: in YAML data file!  {code_fpath}"
+                )
+
+            meta_changelog = []
+            del_from_meta = set()
 
             for contrib in code_contributions:
-                cgh = ghusernameresolver.get_githubusername(contrib['commithash'], contrib['contributor']['email'])
+                cgh = ghusernameresolver.get_githubusername(
+                    contrib['commithash'], contrib['contributor']['email']
+                )
 
                 this_name = contrib['contributor']['name']
                 # fix name, if necessary
                 this_name = fix_names_dict.get(this_name, this_name)
 
+                this_user_id = _get_user_id(cgh, this_name)
+
                 this_contributor = {
+                    'user_id': this_user_id,
                     'name': yaml.SqStr(this_name),
                 }
                 if cgh:
                     this_contributor['githubusername'] = cgh
 
-                if this_contributor not in meta_contributors:
-                    meta_contributors.append(this_contributor)
+                _update_from_meta_contributors(meta_contributors, this_contributor, del_from_meta)
+
+                existing_user = users_db.get(this_user_id, None)
+                if existing_user is None:
+                    # add them
+                    users_db[this_user_id] = this_contributor
+                else:
+                    # make sure info is up to date
+                    update_assert_equal(users_db[this_user_id], this_contributor)
+
+                #if this_contributor not in meta_contributors:
+                #    meta_contributors.append(this_contributor)
+
+                logger.debug('adding contribution, contrib=%r', contrib)
+
+                this_change_event = {
+                    'user_id': this_user_id,
+                    'date': str(contrib['date'])
+                }
+
+                meta_changelog.insert(0, this_change_event)
+                    
+            # delete detected contributors from meta_contributions.  Remember to
+            # remove last indices first so that indices are always valid and are
+            # not shifted!!
+            logger.debug("Removing indices %r from meta_contributors=%r",
+                         del_from_meta, meta_contributors)
+            for del_idx in sorted(del_from_meta, reverse=True):
+                del meta_contributors[del_idx]
+
+            # make sure contributions are sorted by date, most recent first
+            meta_changelog.sort(
+                key=lambda d: datetime.datetime.fromisoformat(d['date']),
+                reverse=True,
+            )
+
+            # Clean up the change log (compress nearby contributions)
+            j = 0
+            while j < len(meta_changelog):
+
+                chgevent = meta_changelog[j]
+
+                # is there an existing change event by the same user with a
+                # timestamp that is within the given tolerance? if so, skip
+                skip_this_event = False
+                for c in meta_changelog[:j]:
+                    if c['user_id'] == chgevent['user_id']:
+                        d1 = datetime.datetime.fromisoformat(c['date'])
+                        d2 = datetime.datetime.fromisoformat(chgevent['date'])
+                        if (d1 - d2) < compress_contributions_fuzziness_timedelta:
+                            # skip
+                            skip_this_event = True
+                            break
+                if skip_this_event:
+                    del meta_changelog[j]
+                    continue
+
+                j += 1
+
+            # make dates less crazy precise, no need for millisecond precision
+            for chgevent in meta_changelog:
+                chgevent['date'] = \
+                    datetime.datetime.fromisoformat(chgevent['date']).strftime('%Y-%m-%d')
+
+            disk_code_info['_meta']['changelog'] = meta_changelog
+            disk_code_info['_meta'].yaml_set_comment_before_after_key(
+                'changelog', before='Change log - most recent first', indent=2,
+            )
+
+            if not list(meta_contributors):
+                del disk_code_info['_meta']['contributors']
 
             # dump back to output
             with open( os.path.join(Dirs.data_dir, code_fpath), 'w', encoding='utf-8') as fw:
                 yaml.dump(disk_code_info, fw)
 
+    with open(os.path.join(Dirs.data_dir, 'users/users_db.yml'), 'w', encoding='utf-8') as fw:
+        yaml2 = ruamel.yaml.YAML()
+        yaml2.indent(mapping=2,sequence=2,offset=0)
+
+        ydb = yaml2.load('''
+# dummy user
+- dummy: true
+''')
+        del ydb[0]
+        for j, user in enumerate(users_db.values()):
+            ydb.append(user)
+            ydb.yaml_set_comment_before_after_key(
+                j, 
+                before='\n\n',
+            )
+            
+        #ruamel.yaml.dump( ydb, fw, Dumper=ruamel.yaml.RoundTripDumper )
+        yaml2.dump(ydb, fw)
+
+
+def update_assert_equal(a, b):
+    for k, v in b.items():
+        if k in a:
+            if not (a[k] == b[k]):
+                raise ValueError(
+                    f"update_assert_equal({a=!r}, {b=!r}) failed for {k=}  ({a[k]=}  !=  {b[k]=}"
+                )
+        else:
+            a[k] = b[k]
 
 
 _github_usernames_by_email_cache_file = 'out/_cache_github_usernames_by_email.json'

@@ -7,7 +7,7 @@ code_id: testcode
 physical: qubits
 logical: qubits
 
-name: 'My Test Code'
+name: 'My Test \(x:y\)-Code'
 introduced: '\cite{arXiv:1911.00099}'
 
 description: |
@@ -44,13 +44,27 @@ protection: |
   \end{table}
 
   \begin{figure}
-    \includegraphics{testfigure2.png}
+    \includegraphics{./testfigure2.png}
     \caption{Another \emph{test} for a figure.  Let's see what happens when 
       we have a really long caption that can span multiple lines like this,
       without it being necessarily informative.  After all, this article is
       really only a dummy example meant to test different features of the
       generator of our pretty site \url{https://errorcorrectionzoo.org/}.}
     \label{figure:test2}
+  \end{figure}
+
+  And another figure, this time in jpeg format!
+  \begin{figure}
+    \includegraphics{./scenery}
+    \caption{Isn't southern Italy simply stunning?}
+    \label{figure:scenery}
+  \end{figure}
+
+  Another flashy figure:
+  \begin{figure}
+    \includegraphics{flashyfigure}
+    \caption{Pretty flashy.}
+    \label{figure:flashy}
   \end{figure}
 
 # An error should be reported for ref{invalid-references} (ok), as well as for
@@ -91,6 +105,14 @@ notes:
 
       A bug can occur if a paper on the arXiv has a ‘\%’ sign in its
       title:\cite{arXiv:1907.02554}
+
+      Also let's make sure that pure arXiv citations
+      work:~\cite{arXiv:quant-ph/0004088} (which also tests citations to
+      old-style arxiv ID's).
+
+  - |
+      Here's a reference to the \ref{topic:CSS-to-homology-correspondence}, by
+      the way.
 
   - |
       A second note goes here.  This one contains a display equation:
@@ -153,3 +175,10 @@ relations:
     - code_id: stabilizer
       detail: 'Description of how this code relates to stabilizer codes.\cite{arXiv:1111.0011}'
   
+_meta:
+  changelog:
+    - user_id: PhF
+      date: '2022-03-05'
+      notes: 'These logs are completely fictitious'
+    - user_id: VVA
+      date: '2021-01-01'

@@ -175,6 +175,16 @@ file_renames:
 
 
 
+  - hashdiff: [7f1cdd69c0bdbbf2662c2fb41e11b4bc0403a763, 8421e9bf61238ec0d1d307b3b2c4013a991fc6a5]
+    old: codes/classical/q-ary_digits/tensor.yml
+    new: codes/classical/matrices/tensor.yml
+
+  - hashdiff: [7f1cdd69c0bdbbf2662c2fb41e11b4bc0403a763, 8421e9bf61238ec0d1d307b3b2c4013a991fc6a5]
+    old: codes/classical/q-ary_digits/hermitian.yml
+    new: codes/classical/q-ary_digits/eval/ag/evaluationAG/hermitian.yml
+
+
+
 
 # VICTOR PLEASE DOUBLE-CHECK THESE:
 
@@ -186,7 +196,4 @@ file_renames:
   - hashdiff: [31b5c0d5254aef75f87bd2f016cfcbd14e309c23, 6ad31a508239aec9c48abea510dd629fc9db9eb6]
     old: codes/quantum/oscillators/multimode_cat.yml
     new: codes/quantum/oscillators/fock_state/paircat.yml
-
-
-
 

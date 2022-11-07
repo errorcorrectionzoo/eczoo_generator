@@ -7,7 +7,37 @@ $id: "https://errorcorrectionzoo.org/schemas/ecc"
 #
 type: object
 additionalProperties: false
-required: ['code_id', 'name', 'description']
+required: ['code_id', 'name', 'description', '_meta']
+
+_zoo_primarykey: 'code_id'
+
+_zoo_relations:
+  - object_field: 'relations.parents'
+    to_object_type: 'code'
+    relation_primary_key_field: 'code_id'
+    relation_add_object_field: 'code'
+    backreference:
+      field: 'relations.parent_of'
+      #relation_primary_key_field: 'code_id'
+      #relation_object_field: 'code'
+
+  - object_field: 'relations.cousins'
+    to_object_type: 'code'
+    relation_primary_key_field: 'code_id'
+    relation_add_object_field: 'code'
+    backreference:
+      field: 'relations.cousin_of'
+      #relation_primary_key_field: 'code_id'
+      #relation_object_field: 'code'
+
+  - object_field: '_meta.changelog'
+    to_object_type: 'user'
+    relation_primary_key_field: 'user_id'
+    relation_add_object_field: 'user'
+    backreference:
+      field: 'zoo_contributions.code'
+
+
 properties:
 
   # every code must have a code_id.
@@ -101,6 +131,16 @@ properties:
       cousins:
         $ref: '/schemas/ecc_relation_list'
 
+      # automatically populated fields, don't specify manually
+      parent_of:
+        _auto_populated: true
+        type: array
+        items: {}
+      cousin_of:
+        _auto_populated: true
+        type: array
+        items: {}
+        
 
   #
   # Store meta-information about this entry. Authors, etc.

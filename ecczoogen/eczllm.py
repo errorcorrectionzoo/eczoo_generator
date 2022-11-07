@@ -10,7 +10,7 @@ from llm.feature.headings import FeatureHeadings
 from llm.feature.endnotes import FeatureEndnotes, EndnoteCategory
 from llm.feature.refs import FeatureRefs, RefInstance
 from llm.feature.cite import FeatureExternalPrefixedCitations
-from llm.feature.floats import FeatureFloatsIncludeGraphicsOnly, FloatType
+from llm.feature.floats import FeatureFloats, FloatType
 from llm.feature.defterm import FeatureDefTerm
 from llm.feature.graphics import GraphicsResource
 
@@ -22,8 +22,12 @@ class CitationsProvider:
     def __init__(self, citationsmanager):
         self.citationsmanager = citationsmanager
 
-    def get_citation_full_text_llm(self, cite_prefix, cite_key, *, resource_info=None):
+    def get_citation_full_text_llm(self, cite_prefix, cite_key, resource_info=None):
         citeobj = self.citationsmanager.get_citation(**dict([(cite_prefix, cite_key)]))
+        if citeobj.full_citation_text_llm is None:
+            raise ValueError(
+                f"The citation manager was unable to resolve citation ‘{cite_prefix}:{cite_key}’"
+            )
         return citeobj.full_citation_text_llm.llm_text
 
 
@@ -32,30 +36,42 @@ class ExternalRefResolver:
         self.htmlpgcollection = htmlpgcollection
         self.zoo = zoo
     
-    def get_ref(self, ref_prefix, ref_target, *, resource_info=None):
-        if ref_prefix == 'code':
+    def get_ref(self, ref_type, ref_label, resource_info=None, render_context=None):
+        if ref_type == 'code':
             # refers to another code, find it & return link to it
-            code = self.zoo.get_code(ref_target) # okay to raise exception
+            code = self.zoo.get_code(ref_label) # okay to raise exception
 
             target_href = self.htmlpgcollection.get_code_href(code.code_id)
 
             return RefInstance(
-                ref_type=ref_prefix,
-                ref_target=ref_target,
+                ref_type=ref_type,
+                ref_label=ref_label,
                 formatted_ref_llm_text=code.name,
                 target_href=target_href,
             )
 
-        if ref_prefix == 'defterm':
+        if ref_type == 'defterm':
             # refers to a \begin{defterm}...\end{defterm} in another code page
             defterm_term_llm_text, defterm_href = \
-                self.htmlpgcollection.get_defterm_href(ref_target)
+                self.htmlpgcollection.get_defterm_href(ref_label)
 
             return RefInstance(
-                ref_type=ref_prefix,
-                ref_target=ref_target,
+                ref_type=ref_type,
+                ref_label=ref_label,
                 formatted_ref_llm_text=defterm_term_llm_text,
                 target_href=defterm_href,
+            )
+
+        if ref_type == 'topic':
+            # refer to a referenceable topic, a section or a defterm (or ???)
+            formatted_ref_llm_text, target_href = \
+                self.htmlpgcollection.get_topic_href(ref_label)
+
+            return RefInstance(
+                ref_type=ref_type,
+                ref_label=ref_label,
+                formatted_ref_llm_text=formatted_ref_llm_text,
+                target_href=target_href,
             )
 
         return None
@@ -145,8 +161,10 @@ citation_delimiters = ('[', ']')
 
 
 float_types = [
-    FloatType('figure', 'Figure', counter_formatter='Roman'),
-    FloatType('table', 'Table', counter_formatter='Roman'),
+    FloatType('figure', 'Figure', counter_formatter='Roman',
+              content_handlers=['includegraphics']),
+    FloatType('table', 'Table', counter_formatter='Roman',
+              content_handlers=['cells', 'includegraphics']),
 ]
 
 
@@ -168,7 +186,7 @@ class EczLLMEnvironment(llmstd.LLMStandardEnvironment):
             section_commands_by_level=heading_section_commands_by_level,
         )
         self.feature_refs = FeatureRefs(
-            external_ref_resolver=None,
+            external_ref_resolvers=None,
         )
 
         self.feature_endnotes = FeatureEndnotes(categories=endnote_categories)
@@ -179,7 +197,7 @@ class EczLLMEnvironment(llmstd.LLMStandardEnvironment):
             citation_delimiters=citation_delimiters,
         )
 
-        self.feature_floats = FeatureFloatsIncludeGraphicsOnly(float_types=float_types)
+        self.feature_floats = FeatureFloats(float_types=float_types)
 
         self.feature_defterm = FeatureDefTerm()
         #self.feature_defterm.render_defterm_with_term = False
@@ -206,7 +224,7 @@ class EczLLMEnvironment(llmstd.LLMStandardEnvironment):
         self.graphics_resource_provider.set_htmlpgcollection(htmlpgcollection)
 
         self.external_ref_resolver = ExternalRefResolver(self.htmlpgcollection, self.zoo)
-        self.feature_refs.set_external_ref_resolver(self.external_ref_resolver)
+        self.feature_refs.set_external_ref_resolvers([self.external_ref_resolver])
 
     def set_citationsmanager(self, citationsmanager):
         self.citationsmanager = citationsmanager
@@ -282,14 +300,16 @@ class EncounteredCitation:
         self.encountered_resource_info = encountered_resource_info
         self.encountered_where = encountered_where
 
+        self._fields = ('citation_key_prefix', 'citation_key',
+                        'encountered_resource_info', 'encountered_where',)
+
     def __repr__(self):
         return (
             f"{self.__class__.__name__}("
-            f"citation_key_prefix={self.citation_key_prefix!r}, "
-            f"citation_key={self.citation_key!r}, "
-            f"encountered_resource_info={self.encountered_resource_info!r}, "
-            f"encountered_where={self.encountered_where!r})"
+            + ", ".join(f"{k}={getattr(self,k)!r}" for k in self._fields)
+            + ")"
         )
+
 
 class EncounteredImageFilename:
     def __init__(self, image_filename, encountered_resource_info, encountered_where):
@@ -298,15 +318,20 @@ class EncounteredImageFilename:
         self.encountered_resource_info = encountered_resource_info
         self.encountered_where = encountered_where
 
+        self._fields = ('image_filename',
+                        'encountered_resource_info', 'encountered_where',)
+
     def __repr__(self):
         return (
             f"{self.__class__.__name__}("
-            f"image_filename={self.image_filename!r}, "
-            f"encountered_resource_info={self.encountered_resource_info!r}, "
-            f"encountered_where={self.encountered_where!r})"
+            + ", ".join(f"{k}={getattr(self,k)!r}" for k in self._fields)
+            + ")"
         )
 
 
+# ### I think EncounteredDefTerm is redundant now that we have the
+# ### EncounteredReferenceableInfo.  I'm not 100% sure and I'll leave it like
+# ### this, at least for now ...
 class EncounteredDefTerm:
     def __init__(self, defterm_llm_text, defterm_safe_target_id,
                  defterm_body_llm,
@@ -318,14 +343,32 @@ class EncounteredDefTerm:
         self.encountered_resource_info = encountered_resource_info
         self.encountered_where = encountered_where
 
+        self._fields = ('defterm_llm_text', 'defterm_safe_target_id', 'defterm_body_llm',
+                        'encountered_resource_info', 'encountered_where',)
+
     def __repr__(self):
         return (
             f"{self.__class__.__name__}("
-            f"defterm_llm_text={self.defterm_llm_text!r}, "
-            f"defterm_safe_target_id={self.defterm_safe_target_id!r}, "
-            f"defterm_body_llm={self.defterm_body_llm}, "
-            f"encountered_resource_info={self.encountered_resource_info!r}, "
-            f"encountered_where={self.encountered_where!r})"
+            + ", ".join(f"{k}={getattr(self,k)!r}" for k in self._fields)
+            + ")"
+        )
+
+
+class EncounteredReferenceableInfo:
+    def __init__(self, referenceable_info, encountered_resource_info, encountered_where):
+        super().__init__()
+        self.referenceable_info = referenceable_info
+        self.encountered_resource_info = encountered_resource_info
+        self.encountered_where = encountered_where
+
+        self._fields = ('referenceable_info',
+                        'encountered_resource_info', 'encountered_where',)
+
+    def __repr__(self):
+        return (
+            f"{self.__class__.__name__}("
+            + ", ".join(f"{k}={getattr(self,k)!r}" for k in self._fields)
+            + ")"
         )
 
 
@@ -337,7 +380,8 @@ class NodeScanner(LatexNodesVisitor):
         self.encountered = {
             'citations': [],
             'image_filenames': [],
-            'defterms': []
+            'defterms': [],
+            'referenceable_infos': [],
         }
 
     def get_encountered_citations(self, *, resource_info=None):
@@ -349,6 +393,9 @@ class NodeScanner(LatexNodesVisitor):
     def get_encountered_defterms(self, *, resource_info=None):
         return self._get_encountered('defterms', resource_info)
 
+    def get_encountered_referenceable_infos(self, *, resource_info=None):
+        return self._get_encountered('referenceable_infos', resource_info)
+
     def _get_encountered(self, object_type, resource_info=None):
         if resource_info is None:
             return self.encountered[object_type]
@@ -358,6 +405,30 @@ class NodeScanner(LatexNodesVisitor):
             if x.encountered_resource_info == resource_info
         )
 
+
+    def compile_referenceableinfo_list_by_reftype(self, ref_type, *, resource_info=None):
+        encountered_referenceable_infos = \
+            self._get_encountered('referenceable_infos', resource_info)
+
+        ref_list = []
+        for encountered_referenceable_info in encountered_referenceable_infos:
+            for label_ref_type, label_ref_label in \
+                encountered_referenceable_info.referenceable_info.labels:
+                #
+                if label_ref_type == ref_type:
+                    ref_list.append(
+                        {
+                            'ref_type': label_ref_type,
+                            'ref_label': label_ref_label,
+                            'referenceable_info':
+                                encountered_referenceable_info.referenceable_info
+                        }
+                    )
+
+        return ref_list
+                    
+
+    # ---
 
     def visit_macro_node(self, node):
         #logger.debug("scanner -- visiting node %r", node)
@@ -388,12 +459,21 @@ class NodeScanner(LatexNodesVisitor):
                     )
                 )
 
+        if hasattr(node, 'llm_referenceable_info'):
+            self.encountered['referenceable_infos'].append(
+                EncounteredReferenceableInfo(
+                    referenceable_info=node.llm_referenceable_info,
+                    encountered_resource_info=node.latex_walker.resource_info,
+                    encountered_where=node.latex_walker.what,
+                )
+            )
+
         super().visit_macro_node(node)
 
     def visit_environment_node(self, node):
         if hasattr(node, 'llmarg_term_llm_ref_label_verbatim'):
             defterm_llm_text = node.llmarg_term_llm_ref_label_verbatim
-            defterm_safe_target_id = node.llmarg_term_safe_target_id
+            defterm_safe_target_id = node.llm_referenceable_info.get_target_id()
             defterm_body_llm = node.latex_walker.llm_environment.make_fragment(
                 node.nodelist,
                 is_block_level=True,
@@ -415,6 +495,16 @@ class NodeScanner(LatexNodesVisitor):
                     encountered_where=node.latex_walker.what,
                 )
             )
+
+        if hasattr(node, 'llm_referenceable_info'):
+            self.encountered['referenceable_infos'].append(
+                EncounteredReferenceableInfo(
+                    referenceable_info=node.llm_referenceable_info,
+                    encountered_resource_info=node.latex_walker.resource_info,
+                    encountered_where=node.latex_walker.what,
+                )
+            )
+
         super().visit_environment_node(node)
 
     def scan_schemadatalike_obj(self, obj, what=None):

@@ -6,7 +6,7 @@
 {# Helper macro to display people #}
 
 {% macro person_tile(person) %}
-    <div class="tile tile-person"
+    <div class="tile tile-person" id="user-{{person.user_id}}"
        {% if person.avatarurl %}
          data-tile-image="{{person.avatarurl}}"
        {% elif person.githubusername %}
@@ -130,11 +130,15 @@ We thank:
 
 
 <script type="text/javascript">
-window.addEventListener('load', function() {
-  document.querySelectorAll('.tile[data-tile-image]').forEach( function(tile) {
+  window.addEventListener('load', function() {
+      document.querySelectorAll('.tile[data-tile-image]').forEach( function(tile) {
           tile.style.backgroundImage = "url('"+tile.dataset.tileImage+"')";
+      } );
+      var frag = window.location.hash;
+      if (frag.length && frag.startsWith('#user-')) {
+          document.getElementById(frag.slice(1)).classList.add('tile-person-highlight');
+      }
   } );
-} );
 </script>
 
 {% endblock contents %}

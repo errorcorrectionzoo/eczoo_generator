@@ -26,3 +26,10 @@ description: 'Encodes \(K\)-dimensional Hilbert space into a \(2^n\)-dimensional
   #  - code_id: code_id4
   #    detail: 'code_id4 are other codes of similar encoding but with different physical space structures (classical or quantum)'
  
+_meta:
+  changelog:
+    - user_id: PhF
+      date: '2022-03-05'
+      notes: 'These logs are completely fictitious'
+    - user_id: VVA
+      date: '2021-01-01'

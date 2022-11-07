@@ -69,3 +69,13 @@ relations:
     #   detail: 'Related by single-qubit Hadamard gates.'
     # - code_id: 'color'
     #   detail: 'Related by geometrically-local Clifford unitaries.'
+
+
+_meta:
+  changelog:
+    - user_id: VVA
+      date: '2022-03-05'
+      notes: 'These logs are completely fictitious'
+    - user_id: VVA
+      date: '2021-01-01'
+
