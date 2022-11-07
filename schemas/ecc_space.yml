@@ -7,22 +7,23 @@ $id: "https://errorcorrectionzoo.org/schemas/ecc_space"
 
 type: string
 enum:
-  - "bits" # classical
-  - "q-ary_digits"
-  - "matrices"
-  - "rings"
-  - "points"
-  - "lattices"
-  - "spheres"
-  - "qubits" # quantum
-  - "qudits"
-  - "galois"
-  - "fermions"
-  - "oscillators"
-  - "spins"
-  - "rigid_bodies"
-  - "categories"
-  - "groups" #classical and quantum
+# classical
+  - "bits"          # GF(2)
+  - "q-ary_digits"  # GF(q) or generic
+  - "matrices"      # Mat(GF(q))
+  - "rings"         # R
+  - "reals"         # \mathbb{R}
+# quantum
+  - "qubits"       # L^2(\mathbb{Z}_2)
+  - "qudits"       # L^2(\mathbb{Z}_q) or generic
+  - "galois"       # L^2(GF(q))
+  - "fermions"     # Fermionic Fock space
+  - "oscillators"  # S(\mathbb{R})
+  - "spins"        # irrep(SU(2))
+  - "rigid_bodies" # L^2(SO(3))
+  - "categories"   # C
+# classical and quantum
+  - "groups"       # G
 
 
 # type: string
