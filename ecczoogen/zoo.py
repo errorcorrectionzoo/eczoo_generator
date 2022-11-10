@@ -209,11 +209,22 @@ class _ZooStatsGenerator:
     
     def code_familyhead_ids_and_codetypes(self, *list_code_familyhead_ids_and_codetypes):
         thestats = []
-        for code_id, codetype in list_code_familyhead_ids_and_codetypes:
-            code = self.zoo.get_code_or_None(code_id)
-            if code is None:
-                continue
+        for code_id_list, codetype in list_code_familyhead_ids_and_codetypes:
+            family_head_codes = []
+            for code_id in code_id_list:
+                code = self.zoo.get_code_or_None(code_id)
+                if code is None:
+                    continue
+                family_head_codes.append(code)
+
+            collected_code_ids = set()
+            for family_head_code in family_head_codes:
+                child_code_list = self.zoo.get_code_family_tree(family_head_code.code_id)
+                for child_code in child_code_list:
+                    collected_code_ids.add(child_code.code_id)
+
             thestats.append(
-                ( len( self.zoo.get_code_family_tree(code_id) ) - 1, codetype )
+                (len(collected_code_ids) - len(family_head_codes) , codetype)
             )
+
         return thestats
