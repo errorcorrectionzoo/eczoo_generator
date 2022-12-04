@@ -13,17 +13,17 @@ enum:
   - "matrices"      # Mat(GF(q))
   - "rings"         # R
   - "reals"         # \mathbb{R}
+  - "spheres"       # S^n
 # quantum
-  - "qubits"       # L^2(\mathbb{Z}_2)
-  - "qudits"       # L^2(\mathbb{Z}_q) or generic
-  - "galois"       # L^2(GF(q))
-  - "fermions"     # Fermionic Fock space
-  - "oscillators"  # S(\mathbb{R})
-  - "spins"        # irrep(SU(2))
-  - "rigid_bodies" # L^2(SO(3))
-  - "categories"   # C
+  - "qubits"        # L^2(\mathbb{Z}_2)
+  - "qudits"        # L^2(\mathbb{Z}_q) or generic
+  - "galois"        # L^2(GF(q))
+  - "oscillators"   # S(\mathbb{R})
+  - "spins"         # irrep(SU(2))
+  - "rigid_bodies"  # L^2(SO(3))
+  - "categories"    # C
 # classical and quantum
-  - "groups"       # G
+  - "groups"        # G
 
 
 # type: string
