@@ -222,7 +222,7 @@ correctly** to match the size of your graphic, with the correct scale
 for rendering on our web page.  If you use Inkscape, you can select
 “File” → “Document Properties” → “Resize page to drawing or selection”
 and make sure you have reasonable figure dimensions.  Please keep your
-figure width to *at most 12cm (5.5in)* to ensure a good page layout
+figure width to *at most 12cm (4.7in)* to ensure a good page layout
 without the user having to scroll the figure horizontally.
 
 If you set the SVG image's dimensions in units of pixels ("px"), we'll
