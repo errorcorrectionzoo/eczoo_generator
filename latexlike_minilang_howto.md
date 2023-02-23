@@ -238,7 +238,7 @@ allow you to adjust this setting (look for "physical dimensions",
 [GIMP](https://www.gimp.org/), you can set the resolution with "Image"
 -> "Resize" and providing any two of physical dimensions (e.g.,
 mm,cm,in,pt), pixel dimensions, and DPI.  Please keep your figure
-width to *at most 12cm (5.5in)* to obtain a good page layout without
+width to *at most 12cm (4.7in)* to obtain a good page layout without
 the user having to scroll the figure horizontally.
 
 
