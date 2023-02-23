@@ -214,7 +214,7 @@ the surrounding article.  General text should be typeset preferably
 using the ‘Source Sans Pro’ at 10 point size, to match the typography
 of the surrounding article.  (You can place smaller or bigger text for
 axis markers, or use a different font if it's necessary, or etc.; use
-your good judgment and common sense.  We'll come back at you in case
+your good judgment and common sense.  We'll come back to you in case
 we'd prefer some changes.)
     
 Be sure also to **set the page dimensions of your SVG document
