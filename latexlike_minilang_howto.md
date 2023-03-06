@@ -211,7 +211,9 @@ The size at which you place elements in your SVG file is important.
 The stated physical dimensions that are present in the SVG file are
 used to place the image at the correct size and resolution to match
 the surrounding article.  General text should be typeset preferably
-using the ‘Source Sans Pro’ at 10 point size, to match the typography
+using the
+[‘Source Sans Pro’ font](https://fonts.google.com/specimen/Source+Sans+Pro)
+at 10 point size, to match the typography
 of the surrounding article.  (You can place smaller or bigger text for
 axis markers, or use a different font if it's necessary, or etc.; use
 your good judgment and common sense.  We'll come back to you in case
@@ -231,7 +233,8 @@ using Affinity Designer, set the document resolution to 96 dpi, and
 uncheck ‘Set viewBox’ in the SVG export options.]
     
 You can also use PNG or JPG/JPEG files.  **Please make sure you set
-the physical resolution (DPI) correctly**, as this information is
+the physical resolution (DPI) of the image correctly**,
+as this information is
 honored to determine the figure size.  Most graphics software will
 allow you to adjust this setting (look for "physical dimensions",
 "dots-per-inch", "pixels-per-inch", or "DPI").  In
